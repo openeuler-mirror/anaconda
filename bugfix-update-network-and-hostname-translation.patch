@@ -1,0 +1,21 @@
+diff -Nuar anaconda-21.48.22.134.bak/po/zh_CN.po anaconda-21.48.22.134/po/zh_CN.po
+--- anaconda-21.48.22.134.bak/po/zh_CN.po	2018-11-03 17:59:45.609576566 +0800
++++ anaconda-21.48.22.134/po/zh_CN.po	2018-11-03 18:00:47.868576566 +0800
+#@@ -788,7 +788,7 @@
+# #: pyanaconda/ui/gui/spokes/network.py:1536
+# msgctxt "GUI|Spoke"
+# msgid "_Network & Host Name"
+#-msgstr "网络和主机名(_N)"
+#+msgstr "网络和主机名"
+# 
+# #: pyanaconda/ui/gui/spokes/network.py:1640
+# #: pyanaconda/ui/gui/spokes/network.py:1658
+@@ -5585,7 +5585,7 @@
+ #: pyanaconda/ui/gui/spokes/network.glade:165
+ #: pyanaconda/ui/gui/spokes/network.glade:2277
+ msgid "NETWORK & HOST NAME"
+-msgstr "网络和主机名(_N)"
++msgstr "网络和主机名"
+ 
+ #: pyanaconda/ui/gui/spokes/network.glade:204
+ msgid ""

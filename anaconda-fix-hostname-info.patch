@@ -1,0 +1,30 @@
+diff -Nur anaconda-29.24.7.old/po/zh_CN.po anaconda-29.24.7/po/zh_CN.po
+--- anaconda-29.24.7.old/po/zh_CN.po    2019-01-31 04:13:38.275096820 -0500
++++ anaconda-29.24.7/po/zh_CN.po        2019-01-31 04:17:46.997096820 -0500
+@@ -3795,10 +3795,10 @@
+ #: pyanaconda/network.py:121
+ msgid ""
+ "Host names can only contain the characters 'a-z', 'A-Z', '0-9', '-', or '.',"
+-" parts between periods must contain something and cannot start or end with "
+-"'-'."
++" parts between periods must contain something being 63 or fewer "
++"characters and cannot start or end with '-'."
+ msgstr ""
+-"主机名只能包含 'a-z', 'A-Z', '0-9', '-'（英文减号）, 或者 '.'（英文点号），其中两个点号中不能为空且不能以'-'开头或结尾"
++"主机名只能包含 'a-z', 'A-Z', '0-9', '-'（英文减号）, 或者 '.'（英文点号），其中两个点号中不能为空，必须少于64个字符且不能以'-'开头或结尾"
+
+ #: pyanaconda/network.py:1664
+ msgid "Connecting..."
+diff -Nur anaconda-29.24.7.old/pyanaconda/network.py anaconda-29.24.7/pyanaconda/network.py
+--- anaconda-29.24.7.old/pyanaconda/network.py  2019-01-31 04:13:38.276096820 -0500
++++ anaconda-29.24.7/pyanaconda/network.py      2019-01-31 04:19:17.918096820 -0500
+@@ -120,8 +120,8 @@
+     if not (re.match('^' + HOSTNAME_PATTERN_WITHOUT_ANCHORS + '$', hostname)):
+         return (False, _("Host names can only contain the characters 'a-z', "
+                          "'A-Z', '0-9', '-', or '.', parts between periods "
+-                         "must contain something and cannot start or end with "
+-                         "'-'."))
++                          "must contain something being 63 or fewer "
++                          "characters and cannot start or end with '-'."))
+
+     return (True, "")

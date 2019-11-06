@@ -1,0 +1,63 @@
+diff -uNrp a/pyanaconda/installclasses/more_os_name.py b/pyanaconda/installclasses/more_os_name.py
+--- a/pyanaconda/installclasses/more_os_name.py	1970-01-01 08:00:00.000000000 +0800
++++ b/pyanaconda/installclasses/more_os_name.py	2019-08-23 16:42:14.208000000 +0800
+@@ -0,0 +1,59 @@
++#
++# more_os_name.py
++#
++# Copyright (C) 2019. Huawei Technologies Co., Ltd. All rights reserved.
++#
++# This program is free software; you can redistribute it and/or modify
++# it under the terms of the GNU General Public License version 2 and
++# only version 2 as published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it will be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
++# GNU General Public License for more details.
++#
++
++from pyanaconda.installclass import BaseInstallClass
++from pyanaconda.product import productName
++from pyanaconda import network
++from pyanaconda import nm
++
++__all__ = ["more_os_nameBaseInstallClass"]
++
++
++class more_os_nameBaseInstallClass(BaseInstallClass):
++    name = "more_os_name Linux"
++    sortPriority = 10000
++    if not productName.startswith("more_os_name"):          # pylint: disable=no-member
++        hidden = True
++    defaultFS = "ext4"
++
++    bootloaderTimeoutDefault = 5
++
++    ignoredPackages = ["ntfsprogs"]
++
++    installUpdates = False
++
++    _l10n_domain = "comps"
++
++    efi_dir = "more_os_name"
++
++    help_placeholder = ""
++    help_placeholder_with_links = ""
++
++    eula_path = "/usr/share/more_os_name-release/EULA"
++    
++    blivet_gui_supported = False
++
++    def setNetworkOnbootDefault(self, ksdata):
++        if any(nd.onboot for nd in ksdata.network.network if nd.device):
++            return
++        # choose the device used during installation
++        # (ie for majority of cases the one having the default route)
++        dev = network.default_route_device() or network.default_route_device(family="inet6")
++        if not dev:
++            return
++        # ignore wireless (its ifcfgs would need to be handled differently)
++        if nm.nm_device_type_is_wifi(dev):
++            return
++        network.update_onboot_value(dev, True, ksdata=ksdata)

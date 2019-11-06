@@ -1,0 +1,13 @@
+--- anaconda-29.24.7/pyanaconda/ui/gui/spokes/installation_source.py
++++ anaconda-29.24.7/pyanaconda/ui/gui/spokes/installation_source.py
+@@ -1134,6 +1134,9 @@
+                 else:
+                     return _("Remote directory is required")
+ 
++            if ":" not in url_string or len(url_string.split(":")) != 2:
++                return _("Server must be specified as SERVER:/PATH") 
++
+         return InputCheck.CHECK_OK
+ 
+     def _checkURLEntry(self, inputcheck):
+
