@@ -1,0 +1,27 @@
+From 463d8440f5e0bdf626be5b652fbe8826924e759b Mon Sep 17 00:00:00 2001
+Date: Mon, 16 Dec 2019 16:20:27 +0800
+Subject: [PATCH] anaconda: modify interface is extended in Chinese mode
+
+reason:modify interface is extended in Chinese mode
+
+Change-Id: I037a91028fc14792909efcc8c2946b0cacc78125
+---
+ anaconda-29.24.7/po/zh_CN.po | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/po/zh_CN.po b/po/zh_CN.po
+index 9b1da8c..c492042 100644
+--- a/po/zh_CN.po
++++ b/po/zh_CN.po
+@@ -6062,7 +6062,7 @@ msgstr "搜索方式(_B)："
+ 
+ #: pyanaconda/ui/gui/spokes/advanced_storage.glade:153
+ msgid "Port / Target / LUN #"
+-msgstr "端口 / 目标 / 逻辑单位数标示符 (LUN #) "
++msgstr "端口/目标/LUN# "
+ 
+ #: pyanaconda/ui/gui/spokes/advanced_storage.glade:154
+ msgid "Target WWID"
+-- 
+2.19.1
+

@@ -1,0 +1,12 @@
+diff -Nur anaconda-29.24.7.old/pyanaconda/ui/gui/spokes/lib/passphrase.py anaconda-29.24.7/pyanaconda/ui/gui/spokes/lib/passphrase.py
+--- anaconda-29.24.7.old/pyanaconda/ui/gui/spokes/lib/passphrase.py	2019-01-30 20:34:33.204096820 -0500
++++ anaconda-29.24.7/pyanaconda/ui/gui/spokes/lib/passphrase.py	2019-01-30 21:12:10.449096820 -0500
+@@ -167,7 +167,7 @@
+             self._passphrase_good_enough = True
+         elif len(self._checker.failed_checks) == 1 and self._validity_check in self._checker._failed_checks:
+             # only the password validity check failed
+-            if self._checker.policy.strict:
++            if self._checker.policy.strict or self._strength_bar.get_value() < 2:
+                 # this is not fine for the strict password policy
+                 self._passphrase_good_enough = False
+             else:

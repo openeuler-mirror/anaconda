@@ -1,0 +1,39 @@
+From 141c186c027a3a7b21321901bba024cd3a3dc3b7 Mon Sep 17 00:00:00 2001
+From: Jiri Konecny <jkonecny@redhat.com>
+Date: Mon, 12 Aug 2019 10:31:31 +0200
+Subject: [PATCH] Increase network timeout constant
+
+The original value (45) is not recommended for the use in as timeout for
+the requests connection because it's multiple of 3.
+
+See requests documentation:
+
+https://3.python-requests.org/user/advanced/#timeouts
+
+Increase to 46 to make the situation better.
+
+This unfortunately change also three timeouts in the network.py which
+is a side effect but I'm not convinced we want to create a new constant
+for just 1 second difference.
+---
+ pyanaconda/core/constants.py | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/pyanaconda/core/constants.py b/pyanaconda/core/constants.py
+index ebc803e6cb..68f7fcb1c0 100644
+--- a/pyanaconda/core/constants.py
++++ b/pyanaconda/core/constants.py
+@@ -103,7 +103,11 @@
+ GRAPHICAL_TARGET = 'graphical.target'
+ 
+ # Network
+-NETWORK_CONNECTION_TIMEOUT = 45  # in seconds
++
++# Requests package (where this constant is used) recommends to have timeout slightly
++# above multiple of 3 because of it is default packet re-transmission window.
++# See: https://3.python-requests.org/user/advanced/#timeouts
++NETWORK_CONNECTION_TIMEOUT = 46  # in seconds
+ NETWORK_CONNECTED_CHECK_INTERVAL = 0.1  # in seconds
+ 
+ # DBus
+
