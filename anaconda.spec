@@ -3,7 +3,7 @@
 
 Name:		anaconda
 Version:	29.24.7
-Release:	16
+Release:	17
 Summary:	Graphical system installer
 License:	GPLv2+ and MIT
 URL:		https://fedoraproject.org/wiki/Anaconda
@@ -211,6 +211,12 @@ update-desktop-database &> /dev/null || :
 %{_datadir}/gtk-doc
 
 %changelog
+* Mon Dec 30 2019 openEuler Buildteam <buildteam@openeuler.org> - 29.24.7-17
+- Type:bugfix
+- ID:NA
+- SUG:NA
+- DESC:bugfix in setup
+
 * Mon Dec 30 2019 openEuler Buildteam <buildteam@openeuler.org> - 29.24.7-16
 - Type:bugfix
 - ID:NA
