@@ -1,5 +1,5 @@
 From 234cfa065b655448f94e63ab1e80e0cb8cf3e94e Mon Sep 17 00:00:00 2001
-From: songnannan <songnannan2@huawei.com>
+From: fengtao <fengtao40@huawei.com>
 Date: Mon, 30 Dec 2019 14:38:08 +0800
 Subject: [PATCH] disable adding virtual device in network spokes
 
