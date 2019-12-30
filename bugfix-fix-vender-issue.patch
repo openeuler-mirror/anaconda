@@ -1,0 +1,13 @@
+diff -uNrp a/pyanaconda/ui/gui/spokes/network.py b/pyanaconda/ui/gui/spokes/network.py
+--- a/pyanaconda/ui/gui/spokes/network.py	2018-07-25 21:58:20.000000000 +0800
++++ b/pyanaconda/ui/gui/spokes/network.py	2019-12-30 11:17:45.001615749 +0800
+@@ -878,8 +878,7 @@ class NetworkControlBox(GObject.GObject)
+ 
+         if dev_cfg.device:
+             title += '\n<span size="small">%s %s</span>' % \
+-                    (escape_markup(dev_cfg.device.get_vendor() or ""),
+-                     escape_markup(dev_cfg.device.get_product() or ""))
++                    (escape_markup(dev_cfg.device.get_product() or ""))
+         return title
+ 
+     def dev_cfg(self, uuid=None, device=None, iface=None):

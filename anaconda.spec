@@ -3,7 +3,7 @@
 
 Name:		anaconda
 Version:	29.24.7
-Release:	14
+Release:	15
 Summary:	Graphical system installer
 License:	GPLv2+ and MIT
 URL:		https://fedoraproject.org/wiki/Anaconda
@@ -37,6 +37,7 @@ Patch9019:      anaconda-change-topbar-background-size.patch
 Patch9020:      anaconda-hide-help-button.patch
 Patch9021:      anaconda-add-quiet-cmdline-args-for-x86.patch
 Patch9022:	anaconda-modify-interface-is-extended-in-Chinese-mod.patch
+Patch9023:      bugfix-fix-vender-issue.patch 
 
 BuildRequires:	audit-libs-devel libtool gettext-devel >= 0.19.8 gtk3-devel >= 3.22.17
 BuildRequires:  gtk-doc gtk3-devel-docs >= 3.22.17 glib2-doc gobject-introspection-devel
@@ -209,6 +210,12 @@ update-desktop-database &> /dev/null || :
 %{_datadir}/gtk-doc
 
 %changelog
+* Mon Dec 30 2019 openEuler Buildteam <buildteam@openeuler.org> - 29.24.7-15
+- Type:bugfix
+- ID:NA
+- SUG:NA
+- DESC:fix bug
+
 * Mon Dec 23 2019 openEuler Buildteam <buildteam@openeuler.org> - 29.24.7-14
 - Type:bugfix
 - ID:NA
