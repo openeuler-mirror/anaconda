@@ -1,0 +1,119 @@
+From 234cfa065b655448f94e63ab1e80e0cb8cf3e94e Mon Sep 17 00:00:00 2001
+From: songnannan <songnannan2@huawei.com>
+Date: Mon, 30 Dec 2019 14:38:08 +0800
+Subject: [PATCH] disable adding virtual device in network spokes
+
+---
+ pyanaconda/ui/gui/spokes/network.glade | 45 ----------------------------------
+ pyanaconda/ui/gui/spokes/network.py    | 18 +++++++-------
+ 2 files changed, 9 insertions(+), 54 deletions(-)
+
+diff --git a/pyanaconda/ui/gui/spokes/network.glade b/pyanaconda/ui/gui/spokes/network.glade
+index c5d20ce..6624234 100644
+--- a/pyanaconda/ui/gui/spokes/network.glade
++++ b/pyanaconda/ui/gui/spokes/network.glade
+@@ -258,51 +258,6 @@
+                                     <property name="position">0</property>
+                                   </packing>
+                                 </child>
+-                                <child>
+-                                  <object class="GtkToolbar" id="devices_toolbar">
+-                                    <property name="visible">True</property>
+-                                    <property name="can_focus">False</property>
+-                                    <property name="toolbar_style">icons</property>
+-                                    <property name="show_arrow">False</property>
+-                                    <property name="icon_size">1</property>
+-                                    <child>
+-                                      <object class="GtkToolButton" id="add_toolbutton">
+-                                        <property name="width_request">42</property>
+-                                        <property name="height_request">36</property>
+-                                        <property name="visible">True</property>
+-                                        <property name="can_focus">False</property>
+-                                        <property name="use_underline">True</property>
+-                                        <property name="icon_name">list-add-symbolic</property>
+-                                      </object>
+-                                      <packing>
+-                                        <property name="expand">False</property>
+-                                        <property name="homogeneous">True</property>
+-                                      </packing>
+-                                    </child>
+-                                    <child>
+-                                      <object class="GtkToolButton" id="remove_toolbutton">
+-                                        <property name="width_request">42</property>
+-                                        <property name="height_request">36</property>
+-                                        <property name="visible">True</property>
+-                                        <property name="can_focus">False</property>
+-                                        <property name="use_underline">True</property>
+-                                        <property name="icon_name">list-remove-symbolic</property>
+-                                      </object>
+-                                      <packing>
+-                                        <property name="expand">False</property>
+-                                        <property name="homogeneous">True</property>
+-                                      </packing>
+-                                    </child>
+-                                    <style>
+-                                      <class name="inline-toolbar"/>
+-                                    </style>
+-                                  </object>
+-                                  <packing>
+-                                    <property name="expand">False</property>
+-                                    <property name="fill">True</property>
+-                                    <property name="position">1</property>
+-                                  </packing>
+-                                </child>
+                               </object>
+                               <packing>
+                                 <property name="expand">True</property>
+diff --git a/pyanaconda/ui/gui/spokes/network.py b/pyanaconda/ui/gui/spokes/network.py
+index 436e814..e84ac67 100644
+--- a/pyanaconda/ui/gui/spokes/network.py
++++ b/pyanaconda/ui/gui/spokes/network.py
+@@ -291,12 +291,12 @@ class NetworkControlBox(GObject.GObject):
+         self.client = client
+ 
+         # button for creating of virtual bond and vlan devices
+-        self.builder.get_object("add_toolbutton").set_sensitive(True)
+-        self.builder.get_object("add_toolbutton").connect("clicked",
+-                                                           self.on_add_device_clicked)
+-        self.builder.get_object("remove_toolbutton").set_sensitive(False)
+-        self.builder.get_object("remove_toolbutton").connect("clicked",
+-                                                           self.on_remove_device_clicked)
++        #self.builder.get_object("add_toolbutton").set_sensitive(True)
++        #self.builder.get_object("add_toolbutton").connect("clicked",
++        #                                                   self.on_add_device_clicked)
++        #self.builder.get_object("remove_toolbutton").set_sensitive(False)
++        #self.builder.get_object("remove_toolbutton").connect("clicked",
++        #                                                   self.on_remove_device_clicked)
+ 
+         not_supported = ["start_hotspot_button",
+                          "stop_hotspot_button",
+@@ -1069,7 +1069,7 @@ class NetworkControlBox(GObject.GObject):
+             self.builder.get_object("label_wired_vlanid").hide()
+             self.builder.get_object("heading_wired_parent").hide()
+             self.builder.get_object("label_wired_parent").hide()
+-            self.builder.get_object("remove_toolbutton").set_sensitive(False)
++            #self.builder.get_object("remove_toolbutton").set_sensitive(False)
+         elif dev_type in [NM.DeviceType.BOND,
+                           NM.DeviceType.TEAM,
+                           NM.DeviceType.BRIDGE]:
+@@ -1080,7 +1080,7 @@ class NetworkControlBox(GObject.GObject):
+             self.builder.get_object("label_wired_vlanid").hide()
+             self.builder.get_object("heading_wired_parent").hide()
+             self.builder.get_object("label_wired_parent").hide()
+-            self.builder.get_object("remove_toolbutton").set_sensitive(True)
++            #self.builder.get_object("remove_toolbutton").set_sensitive(True)
+         elif dev_type == NM.DeviceType.VLAN:
+             notebook.set_current_page(0)
+             self.builder.get_object("heading_wired_slaves").hide()
+@@ -1089,7 +1089,7 @@ class NetworkControlBox(GObject.GObject):
+             self.builder.get_object("label_wired_vlanid").show()
+             self.builder.get_object("heading_wired_parent").show()
+             self.builder.get_object("label_wired_parent").show()
+-            self.builder.get_object("remove_toolbutton").set_sensitive(True)
++            #self.builder.get_object("remove_toolbutton").set_sensitive(True)
+         elif dev_type == NM.DeviceType.WIFI:
+             notebook.set_current_page(1)
+             self.builder.get_object("button_wireless_options").set_sensitive(self.selected_ap is not None)
+-- 
+1.8.3.1
+
