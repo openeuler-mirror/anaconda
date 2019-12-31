@@ -1,0 +1,47 @@
+From 213e913ffd1fd9f7ba48315fcb6644b8486f65ba Mon Sep 17 00:00:00 2001
+From: fengtao <fengtao40@huawei.com>
+Date: Wed, 1 Jan 2020 04:26:27 +0800
+Subject: [PATCH] bugfix for encrypting partion
+
+---
+ pyanaconda/ui/gui/spokes/custom_storage.py | 2 +-
+ pyanaconda/ui/gui/spokes/storage.py        | 3 ++-
+ 2 files changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/pyanaconda/ui/gui/spokes/custom_storage.py b/pyanaconda/ui/gui/spokes/custom_storage.py
+index 2eb72e6..0e52d01 100644
+--- a/pyanaconda/ui/gui/spokes/custom_storage.py
++++ b/pyanaconda/ui/gui/spokes/custom_storage.py
+@@ -1611,7 +1611,7 @@ class CustomPartitioningSpoke(NormalSpoke, StorageCheckHandler):
+                             use_dev.exists and not use_dev.format_immutable)
+ 
+         self._encryptCheckbox.set_active(isinstance(device, LUKSDevice))
+-        fancy_set_sensitive(self._encryptCheckbox, self._reformatCheckbox.get_active())
++        fancy_set_sensitive(self._encryptCheckbox, False)
+ 
+         ancestors = use_dev.ancestors
+         ancestors.remove(use_dev)
+diff --git a/pyanaconda/ui/gui/spokes/storage.py b/pyanaconda/ui/gui/spokes/storage.py
+index b57c44d..b3b6fba 100644
+--- a/pyanaconda/ui/gui/spokes/storage.py
++++ b/pyanaconda/ui/gui/spokes/storage.py
+@@ -311,6 +311,7 @@ class StorageSpoke(NormalSpoke, StorageCheckHandler):
+         self._cur_clicked_overview = None
+ 
+         self._grabObjects()
++        self._encryption_revealer.set_reveal_child(False)
+ 
+         self._autoPart.connect("toggled", self._method_radio_button_toggled)
+         self._customPart.connect("toggled", self._method_radio_button_toggled)
+@@ -369,7 +370,7 @@ class StorageSpoke(NormalSpoke, StorageCheckHandler):
+             self._encryption_revealer.set_reveal_child(False)
+             self._encrypted.set_active(False)
+         else:
+-            self._encryption_revealer.set_reveal_child(True)
++            self._encryption_revealer.set_reveal_child(False)
+ 
+         # Hide the reclaim space checkbox if automatic storage configuration is not used.
+         if self._get_selected_partitioning_method() == PartitioningMethod.AUTO:
+-- 
+1.8.3.1
+
