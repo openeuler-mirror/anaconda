@@ -1,0 +1,25 @@
+From 638d318636727fd20c48d354f21ff67c3cf28238 Mon Sep 17 00:00:00 2001
+From: fengtao <fengtao40@huawei.com>
+Date: Wed, 8 Jan 2020 09:57:37 +0800
+Subject: [PATCH] modify arguments parsing
+
+---
+ pyanaconda/argument_parsing.py | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/pyanaconda/argument_parsing.py b/pyanaconda/argument_parsing.py
+index b7b1777..1a7f418 100644
+--- a/pyanaconda/argument_parsing.py
++++ b/pyanaconda/argument_parsing.py
+@@ -588,7 +588,7 @@ def getArgumentParser(version_string, boot_cmdline=None):
+ 
+     # some defaults change based on cmdline flags
+     if boot_cmdline is not None:
+-        if "console" in boot_cmdline:
++        if "console" in boot_cmdline and "inst.text" in boot_cmdline:
+             ap.set_defaults(display_mode=DisplayModes.TUI)
+ 
+     return ap
+-- 
+1.8.3.1
+
