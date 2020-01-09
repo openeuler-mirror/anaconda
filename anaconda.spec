@@ -3,7 +3,7 @@
 
 Name:		anaconda
 Version:	29.24.7
-Release:	18
+Release:	19
 Summary:	Graphical system installer
 License:	GPLv2+ and MIT
 URL:		https://fedoraproject.org/wiki/Anaconda
@@ -40,6 +40,7 @@ Patch9022:	anaconda-modify-interface-is-extended-in-Chinese-mod.patch
 Patch9023:      bugfix-fix-vender-issue.patch 
 Patch9024:      bugfix-disable-adding-virtual-device-in-network-spokes.patch
 Patch9025:      bugfix-for-encrypting-partion.patch
+Patch9026:      bugfix-modify-arguments-parsing.patch
 
 BuildRequires:	audit-libs-devel libtool gettext-devel >= 0.19.8 gtk3-devel >= 3.22.17
 BuildRequires:  gtk-doc gtk3-devel-docs >= 3.22.17 glib2-doc gobject-introspection-devel
@@ -212,7 +213,13 @@ update-desktop-database &> /dev/null || :
 %{_datadir}/gtk-doc
 
 %changelog
-* Wed Feb 1 2020 openEuler Buildteam <buildteam@openeuler.org> - 29.24.7-18
+* Wed Jan 8 2020 openEuler Buildteam <buildteam@openeuler.org> - 29.24.7-19
+- Type:bugfix
+- ID:NA
+- SUG:NA
+- DESC:modify arguments parsing
+
+* Wed Jan 1 2020 openEuler Buildteam <buildteam@openeuler.org> - 29.24.7-18
 - Type:bugfix
 - ID:NA
 - SUG:NA
