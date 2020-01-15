@@ -3,7 +3,7 @@
 
 Name:		anaconda
 Version:	29.24.7
-Release:	21
+Release:	22
 Summary:	Graphical system installer
 License:	GPLv2+ and MIT
 URL:		https://fedoraproject.org/wiki/Anaconda
@@ -43,6 +43,7 @@ Patch9025:      bugfix-for-encrypting-partion.patch
 Patch9026:      bugfix-modify-arguments-parsing.patch
 Patch9027:      anaconda-add-boot-options-for-raid-3408.patch
 Patch9028:      anaconda-add-kdump-parameter-into-kernel-cmdline.patch
+Patch9029:      anaconda-skip-checks-if-no-username-is-set.patch
 
 BuildRequires:	audit-libs-devel libtool gettext-devel >= 0.19.8 gtk3-devel >= 3.22.17
 BuildRequires:  gtk-doc gtk3-devel-docs >= 3.22.17 glib2-doc gobject-introspection-devel
@@ -53,7 +54,7 @@ BuildRequires:  libtimezonemap-devel >= 0.4.1-2 libxml2
 
 Requires:       anaconda-core = %{version}-%{release}
 Requires:       anaconda-tui = %{version}-%{release}
-Requires:       udisks2-iscsi libblockdev-plugins-all realmd isomd5sum kexec-tools
+Requires:       libblockdev-plugins-all realmd isomd5sum kexec-tools
 Requires:       createrepo_c tmux gdb rsync python3-meh-gui adwaita-icon-theme dracut-live
 Requires:       tigervnc-server-minimal libxklavier libgnomekbd libtimezonemap xz
 Requires:       nm-connection-editor keybinder3 anaconda-user-help yelp system-logos
@@ -215,6 +216,9 @@ update-desktop-database &> /dev/null || :
 %{_datadir}/gtk-doc
 
 %changelog
+* Thu Jan 16 2020 openEuler Buildteam <buildteam@openeuler.org> - 29.24.7-22
+- optimization the patch
+
 * Wed Jan 15 2020 openEuler Buildteam <buildteam@openeuler.org> - 29.24.7-21
 - Type:bugfix
 - ID:NA
