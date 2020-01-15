@@ -1,0 +1,29 @@
+From 10e74d1ae32d7323bea98a3667cae4b995c7a511 Mon Sep 17 00:00:00 2001
+From: Jialong Chen <chenjialong@huawei.com>
+Date: Wed, 15 Jan 2020 21:42:36 +0800
+Subject: [PATCH] add kdump parameter into kernel cmdline
+
+Signed-off-by: Jialong Chen <chenjialong@huawei.com>
+---
+ pyanaconda/bootloader.py | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/pyanaconda/bootloader.py b/pyanaconda/bootloader.py
+index 4f96c99..5162316 100644
+--- a/pyanaconda/bootloader.py
++++ b/pyanaconda/bootloader.py
+@@ -1537,9 +1537,9 @@ class GRUB2(GRUB):
+         if blivet.arch.is_aarch64():
+             log.info("check boot args:%s",arg_str)
+             arg_str=re.sub("console=[a-zA-Z0-9,]*","",arg_str)
+-            arg_str+=" smmu.bypassdev=0x1000:0x17 smmu.bypassdev=0x1000:0x15"
++            arg_str+=" smmu.bypassdev=0x1000:0x17 smmu.bypassdev=0x1000:0x15 crashkernel=1024M,high"
+         else:
+-            arg_str+=" quiet"
++            arg_str+=" quiet crashkernel=512M"
+ 
+         log.info("bootloader.py: used boot args: %s ", arg_str)
+         defaults.write("GRUB_CMDLINE_LINUX=\"%s\"\n" % arg_str)
+-- 
+1.8.3.1
+

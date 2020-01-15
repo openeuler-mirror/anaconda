@@ -3,7 +3,7 @@
 
 Name:		anaconda
 Version:	29.24.7
-Release:	20
+Release:	21
 Summary:	Graphical system installer
 License:	GPLv2+ and MIT
 URL:		https://fedoraproject.org/wiki/Anaconda
@@ -42,6 +42,7 @@ Patch9024:      bugfix-disable-adding-virtual-device-in-network-spokes.patch
 Patch9025:      bugfix-for-encrypting-partion.patch
 Patch9026:      bugfix-modify-arguments-parsing.patch
 Patch9027:      anaconda-add-boot-options-for-raid-3408.patch
+Patch9028:      anaconda-add-kdump-parameter-into-kernel-cmdline.patch
 
 BuildRequires:	audit-libs-devel libtool gettext-devel >= 0.19.8 gtk3-devel >= 3.22.17
 BuildRequires:  gtk-doc gtk3-devel-docs >= 3.22.17 glib2-doc gobject-introspection-devel
@@ -214,6 +215,12 @@ update-desktop-database &> /dev/null || :
 %{_datadir}/gtk-doc
 
 %changelog
+* Wed Jan 15 2020 openEuler Buildteam <buildteam@openeuler.org> - 29.24.7-21
+- Type:bugfix
+- ID:NA
+- SUG:NA
+- DESC:add boot options for kdump.
+
 * Sat Jan 11 2020 openEuler Buildteam <buildteam@openeuler.org> - 29.24.7-20
 - Type:bugfix
 - ID:NA
