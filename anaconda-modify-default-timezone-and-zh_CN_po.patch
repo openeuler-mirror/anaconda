@@ -1,0 +1,83 @@
+From e620f323fcbaa45f16b8863d2e0417fb423aea16 Mon Sep 17 00:00:00 2001
+From: fengtao <fengtao40@huawei.com>
+Date: Thu, 16 Jan 2020 21:41:33 +0800
+Subject: [PATCH] modify default timezone and zh_CN_po
+
+---
+ po/zh_CN.po                                              | 2 +-
+ pyanaconda/kickstart.py                                  | 4 ++--
+ pyanaconda/modules/timezone/timezone.py                  | 2 +-
+ pyanaconda/ui/gui/spokes/datetime_spoke.py               | 2 +-
+ tests/nosetests/pyanaconda_tests/module_timezone_test.py | 2 +-
+ 5 files changed, 6 insertions(+), 6 deletions(-)
+
+diff --git a/po/zh_CN.po b/po/zh_CN.po
+index c492042..cf59d45 100644
+--- a/po/zh_CN.po
++++ b/po/zh_CN.po
+@@ -4193,7 +4193,7 @@ msgstr "准备安装"
+ #: pyanaconda/ui/gui/hubs/progress.glade:146
+ msgctxt "GUI|Progress"
+ msgid "_Finish configuration"
+-msgstr "完成配置(_F)"
++msgstr "结束配置(_F)"
+ 
+ #: pyanaconda/ui/gui/hubs/progress.glade:200
+ msgctxt "GUI|Progress"
+diff --git a/pyanaconda/kickstart.py b/pyanaconda/kickstart.py
+index ac007f7..4229b2d 100644
+--- a/pyanaconda/kickstart.py
++++ b/pyanaconda/kickstart.py
+@@ -2209,8 +2209,8 @@ class Timezone(RemovedCommand):
+         if not timezone.is_valid_timezone(kickstart_timezone):
+             # this should never happen, but for pity's sake
+             timezone_log.warning("Timezone %s set in kickstart is not valid, falling "
+-                                 "back to default (America/New_York).", kickstart_timezone)
+-            timezone_proxy.SetTimezone("America/New_York")
++                                 "back to default (Asia/Shanghai).", kickstart_timezone)
++            timezone_proxy.SetTimezone("Asia/Shanghai")
+ 
+         timezone.write_timezone_config(timezone_proxy, util.getSysroot())
+ 
+diff --git a/pyanaconda/modules/timezone/timezone.py b/pyanaconda/modules/timezone/timezone.py
+index aa65563..7137086 100644
+--- a/pyanaconda/modules/timezone/timezone.py
++++ b/pyanaconda/modules/timezone/timezone.py
+@@ -34,7 +34,7 @@ class TimezoneModule(KickstartModule):
+     def __init__(self):
+         super().__init__()
+         self.timezone_changed = Signal()
+-        self._timezone = "America/New_York"
++        self._timezone = "Asia/Shanghai"
+ 
+         self.is_utc_changed = Signal()
+         self._is_utc = False
+diff --git a/pyanaconda/ui/gui/spokes/datetime_spoke.py b/pyanaconda/ui/gui/spokes/datetime_spoke.py
+index 93594e2..5636809 100644
+--- a/pyanaconda/ui/gui/spokes/datetime_spoke.py
++++ b/pyanaconda/ui/gui/spokes/datetime_spoke.py
+@@ -64,7 +64,7 @@ SERVER_POOL = 1
+ SERVER_WORKING = 2
+ SERVER_USE = 3
+ 
+-DEFAULT_TZ = "America/New_York"
++DEFAULT_TZ = "Asia/Shanghai"
+ 
+ SPLIT_NUMBER_SUFFIX_RE = re.compile(r'([^0-9]*)([-+])([0-9]+)')
+ 
+diff --git a/tests/nosetests/pyanaconda_tests/module_timezone_test.py b/tests/nosetests/pyanaconda_tests/module_timezone_test.py
+index 71cf6f6..e1fd63b 100644
+--- a/tests/nosetests/pyanaconda_tests/module_timezone_test.py
++++ b/tests/nosetests/pyanaconda_tests/module_timezone_test.py
+@@ -78,7 +78,7 @@ class TimezoneInterfaceTestCase(unittest.TestCase):
+         ks_in = None
+         ks_out = """
+         # System timezone
+-        timezone America/New_York
++        timezone Asia/Shanghai
+         """
+         self._test_kickstart(ks_in, ks_out)
+ 
+-- 
+1.8.3.1
+
