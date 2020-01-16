@@ -3,7 +3,7 @@
 
 Name:		anaconda
 Version:	29.24.7
-Release:	23
+Release:	24
 Summary:	Graphical system installer
 License:	GPLv2+ and MIT
 URL:		https://fedoraproject.org/wiki/Anaconda
@@ -45,6 +45,7 @@ Patch9027:      anaconda-add-boot-options-for-raid-3408.patch
 Patch9028:      anaconda-add-kdump-parameter-into-kernel-cmdline.patch
 Patch9029:      anaconda-skip-checks-if-no-username-is-set.patch
 Patch9030:      anaconda-modify-openeuler-in-welcome-to-lowercase.patch
+Patch9031:      bugfix-setup-fail-in-decode.patch   
 
 BuildRequires:	audit-libs-devel libtool gettext-devel >= 0.19.8 gtk3-devel >= 3.22.17
 BuildRequires:  gtk-doc gtk3-devel-docs >= 3.22.17 glib2-doc gobject-introspection-devel
@@ -217,6 +218,12 @@ update-desktop-database &> /dev/null || :
 %{_datadir}/gtk-doc
 
 %changelog
+* Thu Jan 16 2020 openEuler Buildteam <buildteam@openeuler.org> - 29.24.7-24
+- Type:bugfix
+- Id:NA
+- SUG:NA
+- DESC:fix setup fail in decode
+
 * Thu Jan 16 2020 openEuler Buildteam <buildteam@openeuler.org> - 29.24.7-23
 - Type:enhancement
 - Id:NA
