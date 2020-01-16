@@ -1,0 +1,24 @@
+diff -urNp a/pyanaconda/bootloader.py b/pyanaconda/bootloader.py
+--- a/pyanaconda/bootloader.py	2020-01-16 20:01:15.862288105 +0800
++++ b/pyanaconda/bootloader.py	2020-01-16 20:03:58.044568791 +0800
+@@ -2491,7 +2491,7 @@ def writeSysconfigKernel(storage, versio
+         log.error("failed to get package name for default kernel")
+         return
+ 
+-    kernel = h.name.decode()
++    kernel = h.name.encode().decode()
+ 
+     f = open(util.getSysroot() + "/etc/sysconfig/kernel", "w+")
+     f.write("# UPDATEDEFAULT specifies if new-kernel-pkg should make\n"
+diff -urNp a/pyanaconda/payload/__init__.py b/pyanaconda/payload/__init__.py
+--- a/pyanaconda/payload/__init__.py	2020-01-16 20:01:15.822287542 +0800
++++ b/pyanaconda/payload/__init__.py	2020-01-16 20:03:32.604211014 +0800
+@@ -1112,7 +1112,7 @@ class PackagePayload(Payload):
+         ts = rpm.TransactionSet(util.getSysroot())
+         mi = ts.dbMatch('providename', 'kernel')
+         for hdr in mi:
+-            unicode_fnames = (f.decode("utf-8") for f in hdr.filenames)
++            unicode_fnames = (f.encode().decode("utf-8") for f in hdr.filenames)
+             # Find all /boot/vmlinuz- files and strip off vmlinuz-
+             files.extend((f.split("/")[-1][8:] for f in unicode_fnames
+                 if fnmatch(f, "/boot/vmlinuz-*") or
