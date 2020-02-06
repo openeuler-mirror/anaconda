@@ -1,0 +1,38 @@
+From 1ce4ab95a64e64b7b4eab52c2172149816900572 Mon Sep 17 00:00:00 2001
+Date: Thu, 6 Feb 2020 12:08:08 +0800
+Subject: [PATCH] modify network hostname dot illegal
+
+---
+ anaconda-29.24.7/pyanaconda/core/regexes.py | 2 +-
+ anaconda-29.24.7/pyanaconda/network.py      | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/pyanaconda/core/regexes.py b/pyanaconda/core/regexes.py
+index 1f1da07..544d40e 100644
+--- a/pyanaconda/core/regexes.py
++++ b/pyanaconda/core/regexes.py
+@@ -103,7 +103,7 @@ IPV4_NETMASK_WITH_ANCHORS = re.compile("^" + IPV4_NETMASK_WITHOUT_ANCHORS + "$")
+ # with a period, but it can end with one.
+ # This regex uses negative lookahead and lookback assertions to enforce the
+ # hyphen rules and make it way more confusing
+-HOSTNAME_PATTERN_WITHOUT_ANCHORS = r'(?:(?!-)[A-Za-z0-9-]{1,63}(?<!-)(?:\.(?!-)[A-Za-z0-9-]{1,63}(?<!-))*\.?)'
++HOSTNAME_PATTERN_WITHOUT_ANCHORS = r'(?:(?!-)[A-Za-z0-9-]{1,63}(?<!-)(?:\.(?!-)[A-Za-z0-9-]{1,63}(?<!-))*)'
+ 
+ # URL Hostname
+ # This matches any hostname, IPv4 literal or properly encased IPv6 literal
+diff --git a/pyanaconda/network.py b/pyanaconda/network.py
+index 02dba66..1cde6d2 100644
+--- a/pyanaconda/network.py
++++ b/pyanaconda/network.py
+@@ -121,7 +121,7 @@ def sanityCheckHostname(hostname):
+         return (False, _("Host names can only contain the characters 'a-z', "
+                          "'A-Z', '0-9', '-', or '.', parts between periods "
+                           "must contain something being 63 or fewer "
+-                          "characters and cannot start or end with '-'."))
++                          "characters and cannot start or end with '.'and'-'."))
+ 
+     return (True, "")
+ 
+-- 
+1.8.3.1
+
