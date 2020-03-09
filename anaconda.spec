@@ -3,7 +3,7 @@
 
 Name:		anaconda
 Version:	29.24.7
-Release:	27
+Release:	28
 Summary:	Graphical system installer
 License:	GPLv2+ and MIT
 URL:		https://fedoraproject.org/wiki/Anaconda
@@ -49,6 +49,7 @@ Patch9031:      bugfix-setup-fail-in-decode.patch
 Patch9032:      anaconda-modify-default-timezone-and-zh_CN_po.patch
 Patch9033:      bugfix-modify-network-hostname-dot-illegal.patch
 Patch9034:      backport-Remove-initThreading-method-from-pyanaconda-threading.patch
+Patch9035:      huawei-add-boot-options-for-dummy.patch
 
 BuildRequires:	audit-libs-devel libtool gettext-devel >= 0.19.8 gtk3-devel >= 3.22.17
 BuildRequires:  gtk-doc gtk3-devel-docs >= 3.22.17 glib2-doc gobject-introspection-devel
@@ -221,6 +222,12 @@ update-desktop-database &> /dev/null || :
 %{_datadir}/gtk-doc
 
 %changelog
+* Mon Mar 9 2020 openEuler Buildteam <buildteam@openeuler.org> - 29.24.7-28
+- Type:bugfix
+- Id:NA
+- SUG:NA
+- DESC:add boot options for dummy
+
 * Wed Feb 12 2020 openEuler Buildteam <buildteam@openeuler.org> - 29.24.7-27
 - Type:bugfix
 - Id:NA
