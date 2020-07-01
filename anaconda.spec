@@ -26,7 +26,7 @@ Patch9012:    add-boot-options-for-smmu-and-crashkernel.patch
 Patch9013:    disable-product-name-in-welcome-is-uppercase.patch
 Patch9014:    modify-default-timezone.patch
 Patch9015:    modify-network-hostname-dot-illegal.patch
-
+Patch9016:    disable-ssh-login-checkbox.patch
 
 %define dbusver 1.2.3
 %define dnfver 3.6.0
