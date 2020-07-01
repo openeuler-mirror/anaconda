@@ -1,7 +1,7 @@
 From e8ce5155f21af58e119c61e10895fcb5d8c21995 Mon Sep 17 00:00:00 2001
 From: t_feng <fengtao40@huawei.com>
 Date: Thu, 18 Jun 2020 17:00:13 +0800
-Subject: [PATCH] huawei add passwd policy
+Subject: [PATCH] add passwd policy
 
 ---
  data/interactive-defaults.ks | 6 +++---

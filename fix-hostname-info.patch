@@ -1,7 +1,7 @@
 From 8ecae3e85d9eeedb131dbc026dcdf5bba95cdb15 Mon Sep 17 00:00:00 2001
 From: t_feng <fengtao40@huawei.com>
 Date: Thu, 18 Jun 2020 17:13:47 +0800
-Subject: [PATCH] huawei fix hostname info
+Subject: [PATCH] fix hostname info
 
 ---
  po/zh_CN.po           | 6 +++---

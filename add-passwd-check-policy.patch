@@ -1,7 +1,7 @@
 From ebfecf7cdd3ed8cdaf118d3da97518c6f4de5023 Mon Sep 17 00:00:00 2001
 From: t_feng <fengtao40@huawei.com>
 Date: Thu, 18 Jun 2020 17:21:09 +0800
-Subject: [PATCH] huawei add passwd check policy
+Subject: [PATCH] add passwd check policy
 
 ---
  pyanaconda/ui/gui/spokes/root_password.py | 2 +-
