@@ -1,0 +1,55 @@
+From 59a4b9b04388e327e135f3ab9893698e2b3f5a5d Mon Sep 17 00:00:00 2001
+From: t_feng <fengtao40@huawei.com>
+Date: Fri, 19 Jun 2020 11:44:31 +0800
+Subject: [PATCH] modify default timezone
+
+---
+ pyanaconda/modules/timezone/installation.py | 4 ++--
+ pyanaconda/modules/timezone/timezone.py     | 2 +-
+ pyanaconda/ui/gui/spokes/datetime_spoke.py  | 2 +-
+ 3 files changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/pyanaconda/modules/timezone/installation.py b/pyanaconda/modules/timezone/installation.py
+index 6383df1..9c6ae40 100644
+--- a/pyanaconda/modules/timezone/installation.py
++++ b/pyanaconda/modules/timezone/installation.py
+@@ -63,8 +63,8 @@ class ConfigureTimezoneTask(Task):
+         if not is_valid_timezone(self._timezone):
+             # this should never happen, but for pity's sake
+             log.warning("Timezone %s set in kickstart is not valid, "
+-                        "falling back to default (America/New_York).", self._timezone)
+-            self._timezone = "America/New_York"
++                        "falling back to default (Asia/Shanghai).", self._timezone)
++            self._timezone = "Asia/Shanghai"
+ 
+     def _make_timezone_symlink(self):
+         """Create the symlink that actually defines timezone."""
+diff --git a/pyanaconda/modules/timezone/timezone.py b/pyanaconda/modules/timezone/timezone.py
+index 0678072..db1cd18 100644
+--- a/pyanaconda/modules/timezone/timezone.py
++++ b/pyanaconda/modules/timezone/timezone.py
+@@ -40,7 +40,7 @@ class TimezoneService(KickstartService):
+     def __init__(self):
+         super().__init__()
+         self.timezone_changed = Signal()
+-        self._timezone = "America/New_York"
++        self._timezone = "Asia/Shanghai"
+ 
+         self.is_utc_changed = Signal()
+         self._is_utc = False
+diff --git a/pyanaconda/ui/gui/spokes/datetime_spoke.py b/pyanaconda/ui/gui/spokes/datetime_spoke.py
+index 00b1bd9..f01d245 100644
+--- a/pyanaconda/ui/gui/spokes/datetime_spoke.py
++++ b/pyanaconda/ui/gui/spokes/datetime_spoke.py
+@@ -65,7 +65,7 @@ SERVER_POOL = 1
+ SERVER_WORKING = 2
+ SERVER_USE = 3
+ 
+-DEFAULT_TZ = "America/New_York"
++DEFAULT_TZ = "Asia/Shanghai"
+ 
+ SPLIT_NUMBER_SUFFIX_RE = re.compile(r'([^0-9]*)([-+])([0-9]+)')
+ 
+-- 
+2.23.0
+

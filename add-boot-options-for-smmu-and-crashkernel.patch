@@ -1,0 +1,25 @@
+From c5a47d3285678f9d9ebbbab3d18946d858513732 Mon Sep 17 00:00:00 2001
+From: t_feng <fengtao40@huawei.com>
+Date: Fri, 19 Jun 2020 11:04:30 +0800
+Subject: [PATCH] add boot options for smmu and crashkernel
+
+---
+ data/anaconda.conf | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/data/anaconda.conf b/data/anaconda.conf
+index 89731f4..e75354d 100644
+--- a/data/anaconda.conf
++++ b/data/anaconda.conf
+@@ -124,7 +124,7 @@ preserved_arguments =
+      speakup_synth apic noapic apm ide noht acpi video
+      pci nodmraid nompath nomodeset noiswmd fips selinux
+      biosdevname ipv6.disable net.ifnames net.ifnames.prefix
+-     nosmt
++     nosmt smmu.bypassdev crashkernel
+ 
+ 
+ [Storage]
+-- 
+2.23.0
+

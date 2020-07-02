@@ -1,0 +1,28 @@
+From b896b694238389a85539f60cab6ee41ab04c4f29 Mon Sep 17 00:00:00 2001
+From: t_feng <fengtao40@huawei.com>
+Date: Fri, 19 Jun 2020 10:25:20 +0800
+Subject: [PATCH] remove vender issue in netdev
+
+---
+ pyanaconda/ui/gui/spokes/network.py | 5 ++---
+ 1 file changed, 2 insertions(+), 3 deletions(-)
+
+diff --git a/pyanaconda/ui/gui/spokes/network.py b/pyanaconda/ui/gui/spokes/network.py
+index 1318e17..e906f9e 100644
+--- a/pyanaconda/ui/gui/spokes/network.py
++++ b/pyanaconda/ui/gui/spokes/network.py
+@@ -782,9 +782,8 @@ class NetworkControlBox(GObject.GObject):
+                   unplugged)
+ 
+         if device:
+-            title += '\n<span size="small">%s %s</span>' % \
+-                    (escape_markup(device.get_vendor() or ""),
+-                     escape_markup(device.get_product() or ""))
++            title += '\n<span size="small">%s</span>' % \
++                     (escape_markup(device.get_product() or ""))
+         return title
+ 
+     def refresh_ui(self, state=None):
+-- 
+2.23.0
+

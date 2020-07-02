@@ -1,6 +1,18 @@
-diff -uNrp a/data/tmux.conf b/data/tmux.conf
---- a/data/tmux.conf	2018-06-08 05:31:59.000000000 +0800
-+++ b/data/tmux.conf	2019-09-17 15:05:42.068000000 +0800
+From cf192d77045b8aeb8cdcd55c98a93ad64fea3c3b Mon Sep 17 00:00:00 2001
+From: t_feng <fengtao40@huawei.com>
+Date: Fri, 19 Jun 2020 09:20:14 +0800
+Subject: [PATCH] hide help button
+
+---
+ data/tmux.conf                |  3 +--
+ pyanaconda/ui/gui/__init__.py | 27 ---------------------------
+ widgets/src/BaseWindow.c      | 21 ---------------------
+ 3 files changed, 1 insertion(+), 50 deletions(-)
+
+diff --git a/data/tmux.conf b/data/tmux.conf
+index 87c9cb7..63240f7 100644
+--- a/data/tmux.conf
++++ b/data/tmux.conf
 @@ -1,7 +1,6 @@
  # tmux.conf for the anaconda environment
  
@@ -9,19 +21,20 @@ diff -uNrp a/data/tmux.conf b/data/tmux.conf
  
  set-option -s exit-unattached off
  set-option -g base-index 1
-@@ -20,7 +19,7 @@ set-option -g history-limit 10000
- # then re-attach to it in the tmux service run on the console tty.
- new-session -d -s anaconda -n main "anaconda"
+@@ -25,7 +24,7 @@ set-option -g history-limit 10000
+ # rhbz#1722181
+ new-session -d -s anaconda -n main "LD_PRELOAD=libgomp.so.1 anaconda"
  
 -set-option status-right '#[fg=blue]#(echo -n "Switch tab: Alt+Tab | Help: F1 ")'
 +set-option status-right '#[fg=blue]#(echo -n "Switch tab: Alt+Tab ")'
  
  new-window -d -n shell          "bash --login"
  new-window -d -n log            "tail -F /tmp/anaconda.log"
-diff -uNrp a/pyanaconda/ui/gui/__init__.py b/pyanaconda/ui/gui/__init__.py
---- a/pyanaconda/ui/gui/__init__.py	2019-09-17 14:58:04.272000000 +0800
-+++ b/pyanaconda/ui/gui/__init__.py	2019-09-17 15:05:42.068000000 +0800
-@@ -438,20 +438,6 @@ class MainWindow(Gtk.Window):
+diff --git a/pyanaconda/ui/gui/__init__.py b/pyanaconda/ui/gui/__init__.py
+index 06373d9..6a6e3b9 100644
+--- a/pyanaconda/ui/gui/__init__.py
++++ b/pyanaconda/ui/gui/__init__.py
+@@ -443,20 +443,6 @@ class MainWindow(Gtk.Window):
          # Return False to indicate that the child allocation is not yet set
          return False
  
@@ -42,7 +55,7 @@ diff -uNrp a/pyanaconda/ui/gui/__init__.py b/pyanaconda/ui/gui/__init__.py
      def _on_child_added(self, widget, user_data):
          # If this is GtkLabel, apply the language attribute
          if isinstance(widget, Gtk.Label):
-@@ -475,8 +461,6 @@ class MainWindow(Gtk.Window):
+@@ -480,8 +466,6 @@ class MainWindow(Gtk.Window):
          old_screen = self._stack.get_visible_child()
          if old_screen:
              old_screen.remove_accelerator(self._accel_group, Gdk.KEY_F12, 0)
@@ -51,7 +64,7 @@ diff -uNrp a/pyanaconda/ui/gui/__init__.py b/pyanaconda/ui/gui/__init__.py
  
          # Check if the widget is already on the stack
          if child not in self._stack_contents:
-@@ -493,17 +477,6 @@ class MainWindow(Gtk.Window):
+@@ -498,17 +482,6 @@ class MainWindow(Gtk.Window):
              child.window.add_accelerator("button-clicked", self._accel_group,
                      Gdk.KEY_F12, 0, 0)
  
@@ -69,9 +82,10 @@ diff -uNrp a/pyanaconda/ui/gui/__init__.py b/pyanaconda/ui/gui/__init__.py
          self._stack.set_visible_child(child.window)
  
          if child.focusWidgetName:
-diff -uNrp a/widgets/src/BaseWindow.c b/widgets/src/BaseWindow.c
---- a/widgets/src/BaseWindow.c	2018-06-08 05:31:59.000000000 +0800
-+++ b/widgets/src/BaseWindow.c	2019-09-17 15:08:23.324000000 +0800
+diff --git a/widgets/src/BaseWindow.c b/widgets/src/BaseWindow.c
+index 6a1e372..203d4a7 100644
+--- a/widgets/src/BaseWindow.c
++++ b/widgets/src/BaseWindow.c
 @@ -393,30 +393,11 @@ G_GNUC_END_IGNORE_DEPRECATIONS
      gtk_widget_set_margin_top(win->priv->layout_indicator, 6);
      gtk_widget_set_margin_bottom(win->priv->layout_indicator, 6);
@@ -103,7 +117,7 @@ diff -uNrp a/widgets/src/BaseWindow.c b/widgets/src/BaseWindow.c
  
      /* Last thing for the main_box is a revealer for the info bar */
      win->priv->info_revealer = gtk_revealer_new();
-@@ -832,8 +813,6 @@ void anaconda_base_window_retranslate(An
+@@ -832,8 +813,6 @@ void anaconda_base_window_retranslate(AnacondaBaseWindow *win) {
  
      gtk_label_set_text(GTK_LABEL(win->priv->beta_label), _(win->priv->orig_beta));
  
@@ -112,3 +126,6 @@ diff -uNrp a/widgets/src/BaseWindow.c b/widgets/src/BaseWindow.c
      /* retranslate the layout indicator */
      anaconda_layout_indicator_retranslate(ANACONDA_LAYOUT_INDICATOR(win->priv->layout_indicator));
  }
+-- 
+2.23.0
+

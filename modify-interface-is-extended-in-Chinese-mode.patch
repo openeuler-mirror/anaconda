@@ -1,0 +1,25 @@
+From 1999c1bd693ee187cc699fd1f1d4ac77086373b9 Mon Sep 17 00:00:00 2001
+From: t_feng <fengtao40@huawei.com>
+Date: Fri, 19 Jun 2020 09:26:00 +0800
+Subject: [PATCH] modify interface is extended in Chinese mode
+
+---
+ po/zh_CN.po | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/po/zh_CN.po b/po/zh_CN.po
+index be8cefe..7ee5511 100644
+--- a/po/zh_CN.po
++++ b/po/zh_CN.po
+@@ -6429,7 +6429,7 @@ msgstr "搜索方式(_B)："
+ 
+ #: pyanaconda/ui/gui/spokes/advanced_storage.glade:153
+ msgid "Port / Target / LUN #"
+-msgstr "端口 / 目标 / 逻辑单位数标示符 (LUN #) "
++msgstr "端口 / 目标 / LUN # "
+ 
+ #: pyanaconda/ui/gui/spokes/advanced_storage.glade:154
+ msgid "Target WWID"
+-- 
+2.23.0
+
