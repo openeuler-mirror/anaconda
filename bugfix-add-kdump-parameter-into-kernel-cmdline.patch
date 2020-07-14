@@ -1,0 +1,42 @@
+From e8e0d299420138e95dae58fcd4b5669e72217947 Mon Sep 17 00:00:00 2001
+From: Jialong Chen <chenjialong@huawei.com>
+Date: Tue, 14 Jul 2020 21:45:01 +0800
+Subject: [PATCH] add kdump parameter into kernel cmdline
+
+---
+ pyanaconda/modules/storage/bootloader/grub2.py | 12 ++++++++++--
+ 1 file changed, 10 insertions(+), 2 deletions(-)
+
+diff --git a/pyanaconda/modules/storage/bootloader/grub2.py b/pyanaconda/modules/storage/bootloader/grub2.py
+index c6b7db4..57fb2e5 100644
+--- a/pyanaconda/modules/storage/bootloader/grub2.py
++++ b/pyanaconda/modules/storage/bootloader/grub2.py
+@@ -17,6 +17,7 @@
+ #
+ import os
+ import re
++import blivet
+ from _ped import PARTITION_BIOS_GRUB
+ 
+ from blivet.devicelibs import raid
+@@ -266,8 +267,15 @@ class GRUB2(BootLoader):
+         # this is going to cause problems for systems containing multiple
+         # linux installations or even multiple boot entries with different
+         # boot arguments
+-        log.info("bootloader.py: used boot args: %s ", self.boot_args)
+-        defaults.write("GRUB_CMDLINE_LINUX=\"%s\"\n" % self.boot_args)
++        arg_str = "%s" % self.boot_args
++        if blivet.arch.is_aarch64():
++            log.info("check boot args:%s", arg_str)
++            arg_str += "crashkernel=1024M,high"
++        else:
++            arg_str += "crashkernel=512M"
++
++        log.info("bootloader.py: used boot args: %s ", arg_str)
++        defaults.write("GRUB_CMDLINE_LINUX=\"%s\"\n" % arg_str)
+         defaults.write("GRUB_DISABLE_RECOVERY=\"true\"\n")
+         #defaults.write("GRUB_THEME=\"/boot/grub2/themes/system/theme.txt\"\n")
+ 
+-- 
+1.8.3.1
+
