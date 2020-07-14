@@ -1,7 +1,7 @@
 %define _empty_manifest_terminate_build 0
 Name:    anaconda
 Version: 33.19
-Release: 1
+Release: 2
 Summary: Graphical system installer
 License: GPLv2+ and MIT
 URL:     http://fedoraproject.org/wiki/Anaconda
@@ -27,6 +27,7 @@ Patch9013:    disable-product-name-in-welcome-is-uppercase.patch
 Patch9014:    modify-default-timezone.patch
 Patch9015:    modify-network-hostname-dot-illegal.patch
 Patch9016:    disable-ssh-login-checkbox.patch
+Patch9017:    bugfix-add-kdump-parameter-into-kernel-cmdline.patch
 
 %define dbusver 1.2.3
 %define dnfver 3.6.0
@@ -238,6 +239,12 @@ update-desktop-database &> /dev/null || :
 %{_datadir}/gtk-doc
 
 %changelog
+* Tue Jul 14 2020 zhangqiumiao <zhangqiumiao1@huawei.com> - 33.19-2
+- Type:bugfix
+- Id:NA
+- SUG:NA
+- DESC:add kdump parameter into kernel cmdline
+
 * Fri Jun 19 2020 fengtao <fengtao40@huawei.com> - 33.19-1
 - update version to 33.19
 
