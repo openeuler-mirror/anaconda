@@ -1,0 +1,127 @@
+From 4e699fe30da24771b80ff1fe64d7791bcb444f79 Mon Sep 17 00:00:00 2001
+From: Vendula Poncova <vponcova@redhat.com>
+Date: Tue, 21 Jul 2020 10:57:00 +0200
+Subject: [PATCH] Allow to detect devices with the iso9660 file system as
+ optical media
+
+Test that the DBus method FindOpticalMedia identifies devices with the iso9660 file
+system as optical media, so it is able to find NVDIMM devices with iso9660.
+
+The DBus method GetDevicesToIgnore of the NVDIMM module shouldn't return NVDIMM
+devices with the iso9660 file system. They can be used as an installation source.
+
+Protect all devices with the iso9660 file system. It will protect, for example, NVDIMM
+devices with the iso9660 file system that can be used only as an installation source
+anyway.
+
+Related: rhbz#1856264
+---
+ .../modules/storage/devicetree/model.py       |  5 ++++
+ pyanaconda/modules/storage/nvdimm/nvdimm.py   | 12 ++++++++-
+ .../module_device_tree_test.py                | 27 ++++++++++++++++---
+ 3 files changed, 39 insertions(+), 5 deletions(-)
+
+diff --git a/pyanaconda/modules/storage/devicetree/model.py b/pyanaconda/modules/storage/devicetree/model.py
+index 4d0ecdb..cdee5a8 100644
+--- a/pyanaconda/modules/storage/devicetree/model.py
++++ b/pyanaconda/modules/storage/devicetree/model.py
+@@ -303,6 +303,11 @@ class InstallerStorage(Blivet):
+         # cdroms, involves unmounting which is undesirable (see bug #1671713).
+         protected.extend(dev for dev in self.devicetree.devices if dev.type == "cdrom")
+ 
++        # Protect also all devices with an iso9660 file system. It will protect
++        # NVDIMM devices that can be used only as an installation source anyway
++        # (see the bug #1856264).
++        protected.extend(dev for dev in self.devicetree.devices if dev.format.type == "iso9660")
++
+         # Mark the collected devices as protected.
+         for dev in protected:
+             log.debug("Marking device %s as protected.", dev.name)
+diff --git a/pyanaconda/modules/storage/nvdimm/nvdimm.py b/pyanaconda/modules/storage/nvdimm/nvdimm.py
+index 0bbcc6e..4476dd1 100644
+--- a/pyanaconda/modules/storage/nvdimm/nvdimm.py
++++ b/pyanaconda/modules/storage/nvdimm/nvdimm.py
+@@ -21,6 +21,7 @@ import gi
+ gi.require_version("BlockDev", "2.0")
+ from gi.repository import BlockDev as blockdev
+ 
++from blivet import udev
+ from blivet.static_data import nvdimm
+ 
+ from pykickstart.constants import NVDIMM_ACTION_RECONFIGURE, NVDIMM_ACTION_USE
+@@ -90,6 +91,9 @@ class NVDIMMModule(KickstartBaseModule):
+         installation, the device(s) must be specified by nvdimm kickstart
+         command. Also, only devices in sector mode are allowed.
+ 
++        Don't ignore devices that have an iso9660 file system. We might
++        want to use them as an installation source.
++
+         :return: a set of device names
+         """
+         namespaces_to_use = self.get_namespaces_to_use()
+@@ -97,7 +101,13 @@ class NVDIMMModule(KickstartBaseModule):
+         devices_to_ignore = set()
+ 
+         for ns_name, ns_info in nvdimm.namespaces.items():
+-            if ns_info.mode != blockdev.NVDIMMNamespaceMode.SECTOR:
++            info = udev.get_device(device_node="/dev/" + ns_info.blockdev)
++
++            if info and udev.device_get_format(info) == "iso9660":
++                log.debug("%s / %s won't be ignored - NVDIMM device has "
++                          "an iso9660 file system", ns_name, ns_info.blockdev)
++                continue
++            elif ns_info.mode != blockdev.NVDIMMNamespaceMode.SECTOR:
+                 log.debug("%s / %s will be ignored - NVDIMM device is not "
+                           "in sector mode", ns_name, ns_info.blockdev)
+             elif ns_name not in namespaces_to_use and ns_info.blockdev not in devices_to_use:
+diff --git a/tests/nosetests/pyanaconda_tests/module_device_tree_test.py b/tests/nosetests/pyanaconda_tests/module_device_tree_test.py
+index 838c70e..5e52843 100644
+--- a/tests/nosetests/pyanaconda_tests/module_device_tree_test.py
++++ b/tests/nosetests/pyanaconda_tests/module_device_tree_test.py
+@@ -24,10 +24,10 @@ from unittest.mock import patch, Mock, PropertyMock
+ from tests.nosetests.pyanaconda_tests import patch_dbus_publish_object, check_task_creation
+ 
+ from blivet.devices import StorageDevice, DiskDevice, DASDDevice, ZFCPDiskDevice, PartitionDevice, \
+-    LUKSDevice, iScsiDiskDevice, NVDIMMNamespaceDevice, FcoeDiskDevice
++    LUKSDevice, iScsiDiskDevice, NVDIMMNamespaceDevice, FcoeDiskDevice, OpticalDevice
+ from blivet.errors import StorageError, FSError
+ from blivet.formats import get_format
+-from blivet.formats.fs import FS
++from blivet.formats.fs import FS, Iso9660FS
+ from blivet.formats.luks import LUKS
+ from blivet.size import Size
+ 
+@@ -627,9 +627,28 @@ class DeviceTreeInterfaceTestCase(unittest.TestCase):
+             str(cm.exception), "Failed to unmount dev1 from /path: Fake error."
+         )
+ 
+-    def find_install_media_test(self):
++    @patch.object(Iso9660FS, "check_module")
++    def find_install_media_test(self, check_module):
+         """Test FindInstallMedia."""
+-        self.assertEqual(self.interface.FindOpticalMedia(), [])
++        dev1 = OpticalDevice("dev1")
++        dev1.size = Size("2 GiB")
++        dev1.format = get_format("iso9660")
++        dev1.controllable = True
++        self._add_device(dev1)
++
++        dev2 = StorageDevice("dev2")
++        dev2.size = Size("2 GiB")
++        dev2.format = get_format("iso9660")
++        dev2.controllable = True
++        self._add_device(dev2)
++
++        dev3 = StorageDevice("dev3")
++        dev3.size = Size("2 GiB")
++        dev3.format = get_format("ext4")
++        dev3.controllable = True
++        self._add_device(dev3)
++
++        self.assertEqual(self.interface.FindOpticalMedia(), ["dev1", "dev2"])
+ 
+     @patch.object(FS, "update_size_info")
+     def find_mountable_partitions_test(self, update_size_info):
+-- 
+2.23.0
+
