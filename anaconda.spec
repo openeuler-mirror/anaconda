@@ -1,7 +1,7 @@
 %define _empty_manifest_terminate_build 0
 Name:    anaconda
 Version: 33.19
-Release: 2
+Release: 3
 Summary: Graphical system installer
 License: GPLv2+ and MIT
 URL:     http://fedoraproject.org/wiki/Anaconda
@@ -28,6 +28,9 @@ Patch9014:    modify-default-timezone.patch
 Patch9015:    modify-network-hostname-dot-illegal.patch
 Patch9016:    disable-ssh-login-checkbox.patch
 Patch9017:    bugfix-add-kdump-parameter-into-kernel-cmdline.patch
+
+Patch6001:    anaconda-Fix-stage2-as-default-sources.patch
+Patch6002:    anaconda-Allow-to-detect-devices-with-the-iso9660-file-system.patch
 
 %define dbusver 1.2.3
 %define dnfver 3.6.0
@@ -239,6 +242,12 @@ update-desktop-database &> /dev/null || :
 %{_datadir}/gtk-doc
 
 %changelog
+* Fri Aug 7 2020 fengtao <fengtao40@huawei.com> - 33.19-3
+- Type:bugfix
+- Id:NA
+- SUG:NA
+- DESC:fix stage2 as default sources
+
 * Tue Jul 14 2020 zhangqiumiao <zhangqiumiao1@huawei.com> - 33.19-2
 - Type:bugfix
 - Id:NA
