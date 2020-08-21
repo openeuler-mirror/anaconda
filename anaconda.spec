@@ -3,7 +3,7 @@
 
 Name:		anaconda
 Version:	29.24.7
-Release:	30
+Release:	31
 Summary:	Graphical system installer
 License:	GPLv2+ and MIT
 URL:		https://fedoraproject.org/wiki/Anaconda
@@ -50,6 +50,7 @@ Patch9032:      anaconda-modify-default-timezone-and-zh_CN_po.patch
 Patch9033:      bugfix-modify-network-hostname-dot-illegal.patch
 Patch9034:      backport-Remove-initThreading-method-from-pyanaconda-threading.patch
 Patch9035:      huawei-add-boot-options-for-dummy.patch
+Patch9036:      anaconda-Set-up-LD_PRELOAD-for-the-Payloads-module.patch
 
 BuildRequires:	audit-libs-devel libtool gettext-devel >= 0.19.8 gtk3-devel >= 3.22.17
 BuildRequires:  gtk-doc gtk3-devel-docs >= 3.22.17 glib2-doc gobject-introspection-devel
@@ -222,6 +223,12 @@ update-desktop-database &> /dev/null || :
 %{_datadir}/gtk-doc
 
 %changelog
+* Fri Aug 21 2020 zhangqiumiao <zhangqiumiao1@huawei.com> - 29.24.7-31
+- Type:bugfix
+- Id:NA
+- SUG:NA
+- DESC:Set up LD_PRELOAD for the Payloads module
+
 * Tue Aug 18 2020 chenyaqiang <chenyaqiang@huawei.com> - 29.24.7-30
 - rebuild for package build
 

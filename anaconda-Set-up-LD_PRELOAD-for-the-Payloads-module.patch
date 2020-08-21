@@ -1,0 +1,85 @@
+From e39ab9aee03aebda41e4c247e5f3e58f62abb54b Mon Sep 17 00:00:00 2001
+From: Vendula Poncova <vponcova@redhat.com>
+Date: Tue, 2 Jun 2020 17:20:19 +0200
+Subject: [PATCH] Extend the start-module script
+
+Allow to specify environment variables with the --env options. The environment
+will be set up before the module is started.
+
+Examples:
+
+  ./start-module pyanaconda.modules.boss
+  ./start-module --env LD_PRELOAD=libgomp.so.1 pyanaconda.modules.payloads
+
+Related: rhbz#1722181
+
+The environment variable LD_PRELOAD needs to be set up during the start of
+the Payloads module, but it needs to be dropped after that.
+
+After the modularization, only the Payloads module should require LD_PRELOAD.
+
+Related: rhbz#1722181
+---
+ ...g.fedoraproject.Anaconda.Modules.Payload.service |  2 +-
+ pyanaconda/modules/payload/__main__.py              |  4 ++++
+ scripts/start-module                                | 21 +++++++++++++++++++++
+ 3 files changed, 26 insertions(+), 1 deletion(-)
+
+diff --git a/data/dbus/org.fedoraproject.Anaconda.Modules.Payload.service b/data/dbus/org.fedoraproject.Anaconda.Modules.Payload.service
+index f6a50c2..a33f87a 100644
+--- a/data/dbus/org.fedoraproject.Anaconda.Modules.Payload.service
++++ b/data/dbus/org.fedoraproject.Anaconda.Modules.Payload.service
+@@ -1,4 +1,4 @@
+ [D-BUS Service]
+ Name=org.fedoraproject.Anaconda.Modules.Payload
+-Exec=/usr/libexec/anaconda/start-module pyanaconda.modules.payload
++Exec=/usr/libexec/anaconda/start-module --env LD_PRELOAD=libgomp.so.1 pyanaconda.modules.payload
+ User=root
+diff --git a/pyanaconda/modules/payload/__main__.py b/pyanaconda/modules/payload/__main__.py
+index 2d53f94..863b151 100644
+--- a/pyanaconda/modules/payload/__main__.py
++++ b/pyanaconda/modules/payload/__main__.py
+@@ -1,6 +1,10 @@
+ from pyanaconda.modules.common import init
+ init()
+ 
++import os
++if "LD_PRELOAD" in os.environ:
++    del os.environ["LD_PRELOAD"]
++
+ from pyanaconda.modules.payload.payload import PayloadModule
+ payload_module = PayloadModule()
+ payload_module.run()
+diff --git a/scripts/start-module b/scripts/start-module
+index 4bc5b0f..6e8da2a 100755
+--- a/scripts/start-module
++++ b/scripts/start-module
+@@ -1,4 +1,25 @@
+ #!/bin/bash
++# Start the Anaconda's Python module $1.
++# Examples:
++#   ./start-module pyanaconda.modules.boss
++#   ./start-module --env LD_PRELOAD=libgomp.so.1 pyanaconda.modules.payloads
++#
++
++# Process the arguments.
++while true
++do
++  case $1 in
++    # Set up the environment.
++    --env)
++      export $2
++      shift 2
++    ;;
++    # Nothing else to do.
++    *)
++      break
++    ;;
++  esac
++done
+ 
+ # add updates & product image directories to PYTHONPATH if
+ # it looks like we are in the installation environment
+-- 
+1.8.3.1
+
