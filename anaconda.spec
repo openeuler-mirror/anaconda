@@ -3,7 +3,7 @@
 
 Name:		anaconda
 Version:	29.24.7
-Release:	31
+Release:	32
 Summary:	Graphical system installer
 License:	GPLv2+ and MIT
 URL:		https://fedoraproject.org/wiki/Anaconda
@@ -13,6 +13,8 @@ Patch6000:      anaconda-change-log-localtime-to-gmtime.patch
 Patch6001:      bugfix-Increase-network-timeout-constant.patch
 Patch6002:      bugfix-Set-timeout-for-all-session.get-calls.patch
 Patch6003:      anaconda-not-acquire-the-lock-of-imp.patch
+Patch6004:      anaconda-Set-up-LD_PRELOAD-for-the-Payloads-module.patch
+Patch6005:      anaconda-add-a-temporary-hack-to-fix-installations-on-ppc64le.patch
 
 Patch9000:      bugfix-update-network-and-hostname-translation.patch
 Patch9001:      add-password-policy.patch
@@ -50,7 +52,6 @@ Patch9032:      anaconda-modify-default-timezone-and-zh_CN_po.patch
 Patch9033:      bugfix-modify-network-hostname-dot-illegal.patch
 Patch9034:      backport-Remove-initThreading-method-from-pyanaconda-threading.patch
 Patch9035:      huawei-add-boot-options-for-dummy.patch
-Patch9036:      anaconda-Set-up-LD_PRELOAD-for-the-Payloads-module.patch
 
 BuildRequires:	audit-libs-devel libtool gettext-devel >= 0.19.8 gtk3-devel >= 3.22.17
 BuildRequires:  gtk-doc gtk3-devel-docs >= 3.22.17 glib2-doc gobject-introspection-devel
@@ -223,6 +224,12 @@ update-desktop-database &> /dev/null || :
 %{_datadir}/gtk-doc
 
 %changelog
+* Mon Aug 24 2020 yanan <yanan@huawei.com> - 29.24.7-32
+- Type:bugfix
+- Id:NA
+- SUG:NA
+- DESC:add a temporary hack to fix installations on ppc64le and aarch64
+
 * Fri Aug 21 2020 zhangqiumiao <zhangqiumiao1@huawei.com> - 29.24.7-31
 - Type:bugfix
 - Id:NA
