@@ -1,0 +1,39 @@
+From ebfecf7cdd3ed8cdaf118d3da97518c6f4de5023 Mon Sep 17 00:00:00 2001
+From: t_feng <fengtao40@huawei.com>
+Date: Thu, 18 Jun 2020 17:21:09 +0800
+Subject: [PATCH] add passwd check policy
+
+---
+ pyanaconda/ui/gui/spokes/root_password.py | 2 +-
+ pyanaconda/ui/gui/spokes/user.py          | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/pyanaconda/ui/gui/spokes/root_password.py b/pyanaconda/ui/gui/spokes/root_password.py
+index cfb9663..313ba0f 100644
+--- a/pyanaconda/ui/gui/spokes/root_password.py
++++ b/pyanaconda/ui/gui/spokes/root_password.py
+@@ -290,7 +290,7 @@ class PasswordSpoke(FirstbootSpokeMixIn, NormalSpoke, GUISpokeInputCheckHandler)
+                     self.needs_waiver = False
+             else:
+                 if not self._validity_check.result.success:
+-                    self.can_go_back = True
++                    self.can_go_back = False
+                     self.needs_waiver = True
+                 elif not self._ascii_check.result.success:
+                     self.can_go_back = True
+diff --git a/pyanaconda/ui/gui/spokes/user.py b/pyanaconda/ui/gui/spokes/user.py
+index 82fbdc8..29e60cb 100644
+--- a/pyanaconda/ui/gui/spokes/user.py
++++ b/pyanaconda/ui/gui/spokes/user.py
+@@ -673,7 +673,7 @@ class UserSpoke(FirstbootSpokeMixIn, NormalSpoke, GUISpokeInputCheckHandler):
+                 if not self._confirm_check.result.success:
+                     self.can_go_back = False
+                 if not self._validity_check.result.success:
+-                    self.can_go_back = True
++                    self.can_go_back = False
+                     self.needs_waiver = True
+                 elif not self._ascii_check.result.success:
+                     self.can_go_back = True
+-- 
+2.23.0
+

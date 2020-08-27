@@ -1,16 +1,17 @@
-From 2c35b2f3ff077a2a43c64e908e89b26dde852091 Mon Sep 17 00:00:00 2001
-Date: Thu, 16 Jan 2020 15:11:50 +0800
-Subject: [PATCH] modify openeuler in welcome to lowercase
+From e1d294331217ec7380f7f186d7a6837e72770432 Mon Sep 17 00:00:00 2001
+From: t_feng <fengtao40@huawei.com>
+Date: Fri, 19 Jun 2020 11:42:23 +0800
+Subject: [PATCH] disable-product-name-in-welcome-is-uppercase
 
 ---
- anaconda-29.24.7/pyanaconda/ui/gui/spokes/welcome.py | 2 +-
+ pyanaconda/ui/gui/spokes/welcome.py | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/pyanaconda/ui/gui/spokes/welcome.py b/pyanaconda/ui/gui/spokes/welcome.py
-index 2c60a6a..70213ec 100644
+index 3373f1d..639fdcd 100644
 --- a/pyanaconda/ui/gui/spokes/welcome.py
 +++ b/pyanaconda/ui/gui/spokes/welcome.py
-@@ -248,7 +248,7 @@ class WelcomeLanguageSpoke(LangLocaleHandler, StandaloneSpoke):
+@@ -251,7 +251,7 @@ class WelcomeLanguageSpoke(StandaloneSpoke, LangLocaleHandler):
          languageEntry.set_placeholder_text(_(self._origStrings[languageEntry]))
  
          # And of course, don't forget the underlying window.
@@ -20,5 +21,5 @@ index 2c60a6a..70213ec 100644
  
          # Retranslate the window title text
 -- 
-1.8.3.1
+2.23.0
 

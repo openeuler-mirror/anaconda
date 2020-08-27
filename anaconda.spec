@@ -1,76 +1,80 @@
-%define livearches %{ix86} x86_64
 %define _empty_manifest_terminate_build 0
+Name:    anaconda
+Version: 33.19
+Release: 1
+Summary: Graphical system installer
+License: GPLv2+ and MIT
+URL:     http://fedoraproject.org/wiki/Anaconda
+Source0: https://github.com/rhinstaller/anaconda/archive/%{name}-%{version}.tar.bz2
+Source1: openeuler.conf
 
-Name:		anaconda
-Version:	29.24.7
-Release:	32
-Summary:	Graphical system installer
-License:	GPLv2+ and MIT
-URL:		https://fedoraproject.org/wiki/Anaconda
-Source0:	%{name}-%{version}.tar.bz2
+Patch6000:    Fix-hiding-of-network-device-activation-switch.patch
 
-Patch6000:      anaconda-change-log-localtime-to-gmtime.patch
-Patch6001:      bugfix-Increase-network-timeout-constant.patch
-Patch6002:      bugfix-Set-timeout-for-all-session.get-calls.patch
-Patch6003:      anaconda-not-acquire-the-lock-of-imp.patch
-Patch6004:      anaconda-Set-up-LD_PRELOAD-for-the-Payloads-module.patch
-Patch6005:      anaconda-add-a-temporary-hack-to-fix-installations-on-ppc64le.patch
+Patch9000:    add-passwd-policy.patch
+Patch9001:    fix-hostname-info.patch
+patch9002:    add-passwd-check-policy.patch
+Patch9003:    bugfix-fix-data-encrypt-weak-passphrase-save.patch
+Patch9004:    disable-set-passwd-without-confirmation.patch
+Patch9005:    bugfix-logo-display-in-low-screen-resolution.patch
+Patch9006:    make-name-not-force-to-uppercase.patch
+Patch9007:    bugfix-GUI-nfs-unknown-error.patch
+Patch9008:    hide-help-button.patch
+Patch9009:    modify-interface-is-extended-in-Chinese-mode.patch
+Patch9010:    remove-vender-issue-in-netdev.patch
+Patch9011:    modify-arguments-parsing.patch
+Patch9012:    add-boot-options-for-smmu-and-crashkernel.patch
+Patch9013:    disable-product-name-in-welcome-is-uppercase.patch
+Patch9014:    modify-default-timezone.patch
+Patch9015:    modify-network-hostname-dot-illegal.patch
+Patch9016:    disable-ssh-login-checkbox.patch
+Patch9017:    bugfix-add-kdump-parameter-into-kernel-cmdline.patch
 
-Patch9000:      bugfix-update-network-and-hostname-translation.patch
-Patch9001:      add-password-policy.patch
-Patch9002:      bugfix-add-check-url-while-no-network.patch
-Patch9003:      anaconda-fix-hostname-info.patch
-Patch9004:      add-openEuler-password-policy.patch
-Patch9005:      anaconda-prohibit-press-done-twice.patch
-Patch9006:      change_passwd_min_length_to_8.patch
-Patch9007:      bugfix-fix-data-encrypt-weak-passphrase-save.patch
-Patch9008:      bugfix-disable-set-password-without-confirmation.patch
-Patch9009:      bugfix-set-right-eula-location.patch
-Patch9010:      bugfix-aarch64-anaconda-do-not-use-console.patch
-Patch9011:      bugfix-x86-bootloader-install-fail.patch
-Patch9012:      force-set-root-password.patch
-Patch9013:      anaconda-fix-logo-display-in-low-screen-resolution.patch
-Patch9014:      anaconda-fix-rnotes-display-in-low-screen-resolution.patch
-Patch9015:      anaconda-make-name-not-force-to-uppercase.patch
-Patch9016:      anaconda-add-moreos-install-class.patch
-Patch9017:      anaconda-fix-password-expired.patch
-Patch9018:      anaconda-fix-GUI-nfs-unknown-error.patch
-Patch9019:      anaconda-change-topbar-background-size.patch
-Patch9020:      anaconda-hide-help-button.patch
-Patch9021:      anaconda-add-quiet-cmdline-args-for-x86.patch
-Patch9022:	anaconda-modify-interface-is-extended-in-Chinese-mod.patch
-Patch9023:      bugfix-fix-vender-issue.patch 
-Patch9024:      bugfix-disable-adding-virtual-device-in-network-spokes.patch
-Patch9025:      bugfix-for-encrypting-partion.patch
-Patch9026:      bugfix-modify-arguments-parsing.patch
-Patch9027:      anaconda-add-boot-options-for-raid-3408.patch
-Patch9028:      anaconda-add-kdump-parameter-into-kernel-cmdline.patch
-Patch9029:      anaconda-skip-checks-if-no-username-is-set.patch
-Patch9030:      anaconda-modify-openeuler-in-welcome-to-lowercase.patch
-Patch9031:      bugfix-setup-fail-in-decode.patch   
-Patch9032:      anaconda-modify-default-timezone-and-zh_CN_po.patch
-Patch9033:      bugfix-modify-network-hostname-dot-illegal.patch
-Patch9034:      backport-Remove-initThreading-method-from-pyanaconda-threading.patch
-Patch9035:      huawei-add-boot-options-for-dummy.patch
+Patch6001:    anaconda-Fix-stage2-as-default-sources.patch
+Patch6002:    anaconda-Allow-to-detect-devices-with-the-iso9660-file-system.patch
 
-BuildRequires:	audit-libs-devel libtool gettext-devel >= 0.19.8 gtk3-devel >= 3.22.17
-BuildRequires:  gtk-doc gtk3-devel-docs >= 3.22.17 glib2-doc gobject-introspection-devel
-BuildRequires:  glade-devel libgnomekbd-devel libxklavier-devel >= 5.4 pango-devel
-BuildRequires:  python3-kickstart >= 3.16-1 python3-devel python3-nose systemd 
-BuildRequires:  rpm-devel >= 4.10.0 libarchive-devel >= 3.0.4 gdk-pixbuf2-devel
-BuildRequires:  libtimezonemap-devel >= 0.4.1-2 libxml2 
+%define dbusver 1.2.3
+%define dnfver 3.6.0
+%define dracutver 034-7
+%define fcoeutilsver 1.0.12-3.20100323git
+%define gettextver 0.19.8
+%define gtk3ver 3.22.17
+%define helpver 22.1-1
+%define isomd5sum 1.0.10
+%define langtablever 0.0.49
+%define libarchivever 3.0.4
+%define libblockdevver 2.1
+%define libtimezonemapver 0.4.1-2
+%define libxklavierver 5.4
+%define mehver 0.23-1
+%define nmver 1.0
+%define pykickstartver 3.25-1
+%define pypartedver 2.5-2
+%define rpmver 4.10.0
+%define simplelinever 1.1-1
+%define utillinuxver 2.15.1
+%define dasbusver 0.4
+BuildRequires: python3-pygments
 
-Requires:       anaconda-core = %{version}-%{release}
-Requires:       anaconda-tui = %{version}-%{release}
-Requires:       libblockdev-plugins-all realmd isomd5sum kexec-tools
-Requires:       createrepo_c tmux gdb rsync python3-meh-gui adwaita-icon-theme dracut-live
-Requires:       tigervnc-server-minimal libxklavier libgnomekbd libtimezonemap xz
-Requires:       nm-connection-editor keybinder3 anaconda-user-help yelp system-logos
-Requires:       blivet-gui-runtime python3 dracut dracut-network python3-kickstart
+BuildRequires: audit-libs-devel libtool gettext-devel >= %{gettextver} gtk3-devel >= %{gtk3ver}
+BuildRequires: gtk-doc gtk3-devel-docs >= %{gtk3ver} glib2-doc gobject-introspection-devel
+BuildRequires: glade-devel libgnomekbd-devel libxklavier-devel >= %{libxklavierver} pango-devel
+BuildRequires: python3-kickstart >= %{pykickstartver} python3-devel python3-nose systemd
+BuildRequires: rpm-devel >= %{rpmver} libarchive-devel >= %{libarchivever} gdk-pixbuf2-devel
+BuildRequires: libtimezonemap-devel >= %{libtimezonemapver} libxml2
+BuildRequires: gsettings-desktop-schemas metacity
 
-%ifarch %livearches
-BuildRequires:  desktop-file-utils 
-Requires:       zenity fcoe-utils
+Requires: anaconda-core = %{version}-%{release}
+Requires: anaconda-tui = %{version}-%{release}
+Requires: libblockdev-plugins-all >= %{libblockdevver} realmd isomd5sum >= %{isomd5sum}
+Requires: kexec-tools createrepo_c tmux gdb rsync python3-meh-gui >= %{mehver}
+Requires: adwaita-icon-theme python3-kickstart
+Requires: tigervnc-server-minimal libxklavier >= %{libxklavierver} libgnomekbd
+Requires: libtimezonemap >= %{libtimezonemapver} xz
+Requires: nm-connection-editor keybinder3 anaconda-user-help >= %{helpver} yelp system-logos
+Requires: blivet-gui-runtime python3 dracut >= %{dracutver} dracut-network dracut-live
+%ifarch %{ix86} x86_64
+BuildRequires: desktop-file-utils
+Requires: zenity fcoe-utils >= %{fcoeutilsver}
 %endif
 
 Provides:       anaconda-gui = %{version}-%{release}
@@ -86,63 +90,65 @@ Provides:       anaconda-install-env-deps = %{version}-%{release}
 Obsoletes:      anaconda-install-env-deps < %{version}-%{release}
 
 %description
-The 'anaconda' dracut module handles installer-specific boot tasks and
-options. This includes driver disks, kickstarts, and finding the anaconda
-runtime on NFS/HTTP/FTP servers or local disks.
+The anaconda package is a metapackage for the Anaconda installer.
 
-%package        core
-Summary:        Core of the Anaconda installer
-Requires:       python3-libs python3-dnf >= 3.6.0 python3-blivet >= 1:3.1.0-1
-Requires:       python3-blockdev >= 2.1 rpm-python3 >= 4.10.0 python3-productmd
-Requires:       libreport-anaconda >= 2.0.21-1 libselinux-python3 python3-meh >= 0.23-1
-Requires:       python3-pyparted >= 2.5-2 python3-requests python3-requests-file
-Requires:       python3-requests-ftp python3-kickstart langtable-data >= 0.0.34
-Requires:       langtable-python3 >= 0.0.34 util-linux >= 2.15.1 python3-gobject-base
-Requires:       python3-dbus python3-pwquality python3-systemd python3-pydbus 
-Requires:       cracklib-dicts python3-pytz teamd NetworkManager NetworkManager-libnm
-Requires:       dhclient kbd chrony python3-ntplib systemd python3-pid 
-Requires:       python3-ordered-set >= 2.0.0 python3-coverage glibc-langpack-en 
-Requires:       anaconda-tui = %{version}-%{release}
+%package core
+Summary: Core of the Anaconda installer
+Requires: python3-libs python3-dnf >= %{dnfver} python3-blivet >= 1:3.2.2-1
+Requires: python3-blockdev >= %{libblockdevver} rpm-python3 >= %{rpmver} python3-productmd
+Requires: libreport-anaconda >= 2.0.21-1 libselinux-python3 python3-meh >= %{mehver}
+Requires: python3-pyparted >= %{pypartedver} python3-requests python3-requests-file
+Requires: python3-requests-ftp python3-kickstart >= %{pykickstartver}
+Requires: python3-langtable >= %{langtablever} util-linux >= %{utillinuxver} python3-gobject-base
+Requires: python3-dbus python3-pwquality python3-systemd python3-dasbus >= %{dasbusver}
+Requires: cracklib-dicts python3-pytz teamd NetworkManager >= %{nmver} NetworkManager-libnm >= %{nmver}
+Requires: NetworkManager-team dhclient kbd chrony python3-ntplib systemd python3-pid
+Requires: python3-ordered-set >= 2.0.0 glibc-langpack-en dbus-daemon
+Requires: flatpak-libs
+# required because of the rescue mode and VNC question
+Requires: anaconda-tui = %{version}-%{release}
+Provides: anaconda-images = %{version}-%{release}
+Obsoletes: anaconda-images <= 10
+Provides: anaconda-runtime = %{version}-%{release}
+Obsoletes: anaconda-runtime < %{version}-%{release}
+Obsoletes: booty <= 0.107-1
 
-Provides:       anaconda-images = %{version}-%{release}
-Obsoletes:      anaconda-images < %{version}-%{release}
+# Ensure it's not possible for a version of grubby to be installed
+# that doesn't work with btrfs subvolumes correctly...
+Conflicts: grubby < 8.40-10
 
-Provides:       anaconda-runtime = %{version}-%{release} 
-Obsoletes:      anaconda-runtime < %{version}-%{release}
-Obsoletes:      booty <= 0.107-1
-
-%ifarch %livearches
-Requires:       usermode
+%ifarch %{ix86} x86_64
+Requires: usermode
 %endif
 
-%description    core
+%description core
 The anaconda-core package contains the program which was used to install your
 system.
 
-%package        tui
-Summary:        Textual user interface for the Anaconda installer
-Requires:       anaconda-core = %{version}-%{release} python3-simpleline
+%package tui
+Summary: Textual user interface for the Anaconda installer
+Requires: anaconda-core = %{version}-%{release} python3-simpleline >= %{simplelinever}
 
-%description    tui
+%description tui
 This package contains textual user interface for the Anaconda installer.
 
-%package        devel
-Summary:        Header files for anaconda
-Requires:       glade %{name} = %{version}-%{release}
-Provides:       anaconda-widgets-devel = %{version}-%{release}
-Obsoletes:      anaconda-widgets-devel < %{version}-%{release}
 
-%description    devel
-Header files for anaconda
+%package devel
+Summary: Development files for anaconda-widgets
+Requires: glade
+Requires: %{name}-widgets = %{version}-%{release}
+
+%description devel
+This package contains libraries and header files needed for writing the anaconda
+installer.  It also contains Python and Glade support files, as well as
+documentation for working with this library.
+
 
 %prep
 %autosetup -n %{name}-%{version} -p1
 
-cd pyanaconda/installclasses
-sed -i "s/more_os_name/%{efi_vendor}/g" more_os_name.py
-mv more_os_name.py %{efi_vendor}.py
-
 %build
+# use actual build-time release number, not tarball creation time release number
 %configure ANACONDA_RELEASE=%{release}
 %make_build
 
@@ -150,15 +156,22 @@ mv more_os_name.py %{efi_vendor}.py
 %make_install
 %delete_la
 
+# install openEuler conf for anaconda
+install -m 0755 %{SOURCE1} %{buildroot}/%{_sysconfdir}/%{name}/product.d/
+
+# Create an empty directory for addons
 install -d -m 0755 %{buildroot}%{_datadir}/anaconda/addons
 
-%ifarch %livearches
+%ifarch %{ix86} x86_64
 desktop-file-install --dir=%{buildroot}%{_datadir}/applications %{buildroot}%{_datadir}/applications/liveinst.desktop
 %endif
 
+# If no langs found, keep going
+%find_lang %{name} || :
+
 %ldconfig_scriptlets
 
-%ifarch %livearches
+%ifarch %{ix86} x86_64
 %post
 update-desktop-database &> /dev/null || :
 
@@ -168,7 +181,6 @@ update-desktop-database &> /dev/null || :
 
 %files
 %defattr(-,root,root)
-%doc README
 %license COPYING
 %{_libdir}/libAnacondaWidgets.so.*
 %{_libdir}/girepository*/AnacondaWidgets*typelib
@@ -177,9 +189,8 @@ update-desktop-database &> /dev/null || :
 %{_prefix}/libexec/anaconda/dd_*
 %{_prefix}/lib/dracut/modules.d/80%{name}/*
 
-%files        core
+%files core
 %defattr(-,root,root)
-%doc README 
 %license COPYING
 %{_sbindir}/anaconda
 %{_sbindir}/handle-sshpw
@@ -202,7 +213,14 @@ update-desktop-database &> /dev/null || :
 %exclude %{python3_sitearch}/pyanaconda/__pycache__/rescue.*
 %exclude %{python3_sitearch}/pyanaconda/ui/gui/*
 %exclude %{python3_sitearch}/pyanaconda/ui/tui/*
-%ifarch %livearches
+%{_bindir}/analog
+%{_bindir}/anaconda-cleanup
+%dir %{_sysconfdir}/%{name}
+%config %{_sysconfdir}/%{name}/*
+%dir %{_sysconfdir}/%{name}/conf.d
+%config %{_sysconfdir}/%{name}/conf.d/*
+%dir %{_sysconfdir}/%{name}/product.d
+%config %{_sysconfdir}/%{name}/product.d/*
 %{_sbindir}/liveinst 
 %{_bindir}/liveinst
 %{_libexecdir}/liveinst-setup.sh
@@ -210,20 +228,23 @@ update-desktop-database &> /dev/null || :
 %{_sysconfdir}/xdg/autostart/*.desktop
 %config(noreplace) %{_sysconfdir}/pam.d/*
 %config(noreplace) %{_sysconfdir}/security/console.apps/* 
-%endif
 
-%files        tui
+%files tui
 %{python3_sitearch}/pyanaconda/rescue.py
 %{python3_sitearch}/pyanaconda/__pycache__/rescue.*
 %{python3_sitearch}/pyanaconda/ui/tui/*
 
-%files        devel
+%files devel
 %{_libdir}/libAnacondaWidgets.so
+%{_libdir}/glade/modules/libAnacondaWidgets.so
 %{_includedir}/*
 %{_datadir}/glade/catalogs/AnacondaWidgets.xml
 %{_datadir}/gtk-doc
 
 %changelog
+* Thu Aug 27 2020 hanzhijun <hanzhijun1@huawei.com> - 33.19-1
+- update version to 33.19
+
 * Mon Aug 24 2020 yanan <yanan@huawei.com> - 29.24.7-32
 - Type:bugfix
 - Id:NA
