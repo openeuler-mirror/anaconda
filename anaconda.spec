@@ -1,7 +1,7 @@
 %define _empty_manifest_terminate_build 0
 Name:    anaconda
 Version: 33.19
-Release: 3
+Release: 4
 Summary: Graphical system installer
 License: GPLv2+ and MIT
 URL:     http://fedoraproject.org/wiki/Anaconda
@@ -242,6 +242,12 @@ update-desktop-database &> /dev/null || :
 %{_datadir}/gtk-doc
 
 %changelog
+* Thu Aug 27 2020 fengtao <fengtao40@huawei.com> - 33.19-4
+- Type:bugfix
+- Id:NA
+- SUG:NA
+- DESC:fix kdump patch err
+
 * Fri Aug 7 2020 fengtao <fengtao40@huawei.com> - 33.19-3
 - Type:bugfix
 - Id:NA

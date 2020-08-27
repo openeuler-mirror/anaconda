@@ -28,9 +28,9 @@ index c6b7db4..57fb2e5 100644
 +        arg_str = "%s" % self.boot_args
 +        if blivet.arch.is_aarch64():
 +            log.info("check boot args:%s", arg_str)
-+            arg_str += "crashkernel=1024M,high"
++            arg_str += " crashkernel=1024M,high"
 +        else:
-+            arg_str += "crashkernel=512M"
++            arg_str += " crashkernel=512M"
 +
 +        log.info("bootloader.py: used boot args: %s ", arg_str)
 +        defaults.write("GRUB_CMDLINE_LINUX=\"%s\"\n" % arg_str)
