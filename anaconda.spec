@@ -1,7 +1,7 @@
 %define _empty_manifest_terminate_build 0
 Name:    anaconda
 Version: 33.19
-Release: 3
+Release: 4
 Summary: Graphical system installer
 License: GPLv2+ and MIT
 URL:     http://fedoraproject.org/wiki/Anaconda
@@ -71,7 +71,7 @@ Requires: adwaita-icon-theme python3-kickstart
 Requires: tigervnc-server-minimal libxklavier >= %{libxklavierver} libgnomekbd
 Requires: libtimezonemap >= %{libtimezonemapver} xz
 Requires: nm-connection-editor keybinder3 anaconda-user-help >= %{helpver} yelp system-logos
-Requires: blivet-gui-runtime python3 dracut >= %{dracutver} dracut-network dracut-live
+Requires: python3 dracut >= %{dracutver} dracut-network dracut-live
 %ifarch %{ix86} x86_64
 BuildRequires: desktop-file-utils
 Requires: zenity fcoe-utils >= %{fcoeutilsver}
@@ -188,6 +188,7 @@ update-desktop-database &> /dev/null || :
 %{python3_sitearch}/pyanaconda/ui/gui/*
 %{_prefix}/libexec/anaconda/dd_*
 %{_prefix}/lib/dracut/modules.d/80%{name}/*
+%exclude %{python3_sitearch}/pyanaconda/ui/gui/spokes/blivet_gui.*
 
 %files core
 %defattr(-,root,root)
@@ -208,6 +209,7 @@ update-desktop-database &> /dev/null || :
 %exclude %{_prefix}/libexec/anaconda/dd_*
 %exclude %{_libdir}/libAnacondaWidgets.so
 %exclude %{_datadir}/gtk-doc
+%exclude %{_datadir}/anaconda/ui/spokes/blivet_gui.*
 %exclude %{_datadir}/glade/catalogs/AnacondaWidgets.xml
 %exclude %{python3_sitearch}/pyanaconda/rescue.py*
 %exclude %{python3_sitearch}/pyanaconda/__pycache__/rescue.*
@@ -242,15 +244,21 @@ update-desktop-database &> /dev/null || :
 %{_datadir}/gtk-doc
 
 %changelog
+* Fri Aug 28 2020 zhangqiumiao <zhangqiumiao1@huawei.com> - 33.19-4
+- Type:bugfix
+- ID:NA
+- SUG:NA
+- DESC:remove dependency on blivet-gui-runtime
+
 * Fri Aug 7 2020 fengtao <fengtao40@huawei.com> - 33.19-3
 - Type:bugfix
-- Id:NA
+- ID:NA
 - SUG:NA
 - DESC:fix stage2 as default sources
 
 * Tue Jul 14 2020 zhangqiumiao <zhangqiumiao1@huawei.com> - 33.19-2
 - Type:bugfix
-- Id:NA
+- ID:NA
 - SUG:NA
 - DESC:add kdump parameter into kernel cmdline
 
