@@ -1,14 +1,15 @@
-From 1ce4ab95a64e64b7b4eab52c2172149816900572 Mon Sep 17 00:00:00 2001
-Date: Thu, 6 Feb 2020 12:08:08 +0800
+From 343751258b3a4b3e21cf52add5a9ddf600065835 Mon Sep 17 00:00:00 2001
+From: t_feng <fengtao40@huawei.com>
+Date: Fri, 19 Jun 2020 11:48:25 +0800
 Subject: [PATCH] modify network hostname dot illegal
 
 ---
- anaconda-29.24.7/pyanaconda/core/regexes.py | 2 +-
- anaconda-29.24.7/pyanaconda/network.py      | 2 +-
+ pyanaconda/core/regexes.py | 2 +-
+ pyanaconda/network.py      | 2 +-
  2 files changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/pyanaconda/core/regexes.py b/pyanaconda/core/regexes.py
-index 1f1da07..544d40e 100644
+index 63ab668..f86e403 100644
 --- a/pyanaconda/core/regexes.py
 +++ b/pyanaconda/core/regexes.py
 @@ -103,7 +103,7 @@ IPV4_NETMASK_WITH_ANCHORS = re.compile("^" + IPV4_NETMASK_WITHOUT_ANCHORS + "$")
@@ -21,18 +22,18 @@ index 1f1da07..544d40e 100644
  # URL Hostname
  # This matches any hostname, IPv4 literal or properly encased IPv6 literal
 diff --git a/pyanaconda/network.py b/pyanaconda/network.py
-index 02dba66..1cde6d2 100644
+index 127a1bd..30cf2af 100644
 --- a/pyanaconda/network.py
 +++ b/pyanaconda/network.py
-@@ -121,7 +121,7 @@ def sanityCheckHostname(hostname):
+@@ -119,7 +119,7 @@ def is_valid_hostname(hostname, local=False):
          return (False, _("Host names can only contain the characters 'a-z', "
                           "'A-Z', '0-9', '-', or '.', parts between periods "
-                           "must contain something being 63 or fewer "
--                          "characters and cannot start or end with '-'."))
-+                          "characters and cannot start or end with '.'and'-'."))
+                          "must contain something being 63 or fewer "
+-                         "characters and cannot start or end with '-'."))
++                         "characters and cannot start or end with '.' and '-'."))
  
      return (True, "")
  
 -- 
-1.8.3.1
+2.23.0
 

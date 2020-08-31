@@ -1,7 +1,17 @@
-diff -Naur anaconda-21.48.22.134-old/data/interactive-defaults.ks anaconda-21.48.22.134/data/interactive-defaults.ks
---- anaconda-21.48.22.134-old/data/interactive-defaults.ks	2018-11-03 09:06:09.893000000 -0400
-+++ anaconda-21.48.22.134/data/interactive-defaults.ks	2018-11-03 09:07:25.449000000 -0400
-@@ -5,9 +5,9 @@
+From e8ce5155f21af58e119c61e10895fcb5d8c21995 Mon Sep 17 00:00:00 2001
+From: t_feng <fengtao40@huawei.com>
+Date: Thu, 18 Jun 2020 17:00:13 +0800
+Subject: [PATCH] add passwd policy
+
+---
+ data/interactive-defaults.ks | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/data/interactive-defaults.ks b/data/interactive-defaults.ks
+index a906c8c..0177cf9 100644
+--- a/data/interactive-defaults.ks
++++ b/data/interactive-defaults.ks
+@@ -4,9 +4,9 @@ firstboot --enable
  
  %anaconda
  # Default password policies
@@ -14,3 +24,6 @@ diff -Naur anaconda-21.48.22.134-old/data/interactive-defaults.ks anaconda-21.48
  # NOTE: This applies only to *fully* interactive installations, partial kickstart
  #       installations use defaults specified in pyanaconda/pwpolicy.py.
  #       Automated kickstart installs simply ignore the password policy as the policy
+-- 
+2.23.0
+

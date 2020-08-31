@@ -1,0 +1,29 @@
+From 3216e5fc1c39354e66c977f76465303ea2a11859 Mon Sep 17 00:00:00 2001
+From: t_feng <fengtao40@huawei.com>
+Date: Thu, 18 Jun 2020 16:45:27 +0800
+Subject: [PATCH] Fix hiding of network device activation switch
+
+---
+ pyanaconda/ui/gui/spokes/network.py | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/pyanaconda/ui/gui/spokes/network.py b/pyanaconda/ui/gui/spokes/network.py
+index d6c1e4b..1318e17 100644
+--- a/pyanaconda/ui/gui/spokes/network.py
++++ b/pyanaconda/ui/gui/spokes/network.py
+@@ -1019,8 +1019,10 @@ class NetworkControlBox(GObject.GObject):
+ 
+         switch = self.builder.get_object("device_%s_off_switch" % dev_type_str)
+         if dev_type_str == "wired":
+-            switch.set_visible(state not in (NM.DeviceState.UNAVAILABLE,
+-                                             NM.DeviceState.UNMANAGED))
++            visible = state not in (NM.DeviceState.UNAVAILABLE, NM.DeviceState.UNMANAGED)
++            switch.set_visible(visible)
++            if not visible:
++                switch.set_no_show_all(True)
+             self._updating_device = True
+             switch.set_active(state not in (NM.DeviceState.UNMANAGED,
+                                             NM.DeviceState.UNAVAILABLE,
+-- 
+2.23.0
+

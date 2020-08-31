@@ -1,0 +1,26 @@
+From 7af95c3ee0fe3f0c2a5ec6fb05673f10c19441f9 Mon Sep 17 00:00:00 2001
+From: t_feng <fengtao40@huawei.com>
+Date: Thu, 18 Jun 2020 22:48:03 +0800
+Subject: [PATCH] bugfix GUI nfs unknown error
+
+---
+ pyanaconda/ui/gui/spokes/installation_source.py | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/pyanaconda/ui/gui/spokes/installation_source.py b/pyanaconda/ui/gui/spokes/installation_source.py
+index 396cad6..16e81b4 100644
+--- a/pyanaconda/ui/gui/spokes/installation_source.py
++++ b/pyanaconda/ui/gui/spokes/installation_source.py
+@@ -1141,6 +1141,9 @@ class SourceSpoke(NormalSpoke, GUISpokeInputCheckHandler, SourceSwitchHandler):
+                 else:
+                     return _("Remote directory is required")
+ 
++            if ":" not in url_string or len(url_string.split(":")) != 2:
++                return _("Server must be specified as SERVER:/PATH")
++
+         return InputCheck.CHECK_OK
+ 
+     def _check_url_entry(self, inputcheck):
+-- 
+2.23.0
+
