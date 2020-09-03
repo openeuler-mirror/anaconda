@@ -1,7 +1,7 @@
 %define _empty_manifest_terminate_build 0
 Name:    anaconda
 Version: 33.19
-Release: 4
+Release: 5
 Summary: Graphical system installer
 License: GPLv2+ and MIT
 URL:     http://fedoraproject.org/wiki/Anaconda
@@ -28,6 +28,7 @@ Patch9014:    modify-default-timezone.patch
 Patch9015:    modify-network-hostname-dot-illegal.patch
 Patch9016:    disable-ssh-login-checkbox.patch
 Patch9017:    bugfix-add-kdump-parameter-into-kernel-cmdline.patch
+Patch9018:    bugfix-fix-password-policy.patch
 
 Patch6001:    anaconda-Fix-stage2-as-default-sources.patch
 Patch6002:    anaconda-Allow-to-detect-devices-with-the-iso9660-file-system.patch
@@ -242,21 +243,27 @@ update-desktop-database &> /dev/null || :
 %{_datadir}/gtk-doc
 
 %changelog
+* Thu Sep 3 2020 zhangqiumiao <zhangqiumiao1@huawei.com> - 33.19-5
+- Type:bugfix
+- ID:NA
+- SUG:NA
+- DESC:fix password policy
+
 * Thu Aug 27 2020 fengtao <fengtao40@huawei.com> - 33.19-4
 - Type:bugfix
-- Id:NA
+- ID:NA
 - SUG:NA
 - DESC:fix kdump patch err
 
 * Fri Aug 7 2020 fengtao <fengtao40@huawei.com> - 33.19-3
 - Type:bugfix
-- Id:NA
+- ID:NA
 - SUG:NA
 - DESC:fix stage2 as default sources
 
 * Tue Jul 14 2020 zhangqiumiao <zhangqiumiao1@huawei.com> - 33.19-2
 - Type:bugfix
-- Id:NA
+- ID:NA
 - SUG:NA
 - DESC:add kdump parameter into kernel cmdline
 
@@ -265,37 +272,37 @@ update-desktop-database &> /dev/null || :
 
 * Mon Mar 9 2020 openEuler Buildteam <buildteam@openeuler.org> - 29.24.7-28
 - Type:bugfix
-- Id:NA
+- ID:NA
 - SUG:NA
 - DESC:add boot options for dummy
 
 * Wed Feb 12 2020 openEuler Buildteam <buildteam@openeuler.org> - 29.24.7-27
 - Type:bugfix
-- Id:NA
+- ID:NA
 - SUG:NA
 - DESC:Remove initThreading method from pyanaconda.threading
 
 * Thu Feb 06 2020 openEuler Buildteam <buildteam@openeuler.org> - 29.24.7-26
 - Type:bugfix
-- Id:NA
+- ID:NA
 - SUG:NA
 - DESC:modify network hostname dot error
 
 * Thu Jan 16 2020 openEuler Buildteam <buildteam@openeuler.org> - 29.24.7-25
 - Type:bugfix
-- Id:NA
+- ID:NA
 - SUG:NA
 - DESC:modify default timezone and zh_CN.po
 
 * Thu Jan 16 2020 openEuler Buildteam <buildteam@openeuler.org> - 29.24.7-24
 - Type:bugfix
-- Id:NA
+- ID:NA
 - SUG:NA
 - DESC:fix setup fail in decode
 
 * Thu Jan 16 2020 openEuler Buildteam <buildteam@openeuler.org> - 29.24.7-23
 - Type:enhancement
-- Id:NA
+- ID:NA
 - SUG:NA
 - DESC:modify openeuler in welcome to lowercase
 
