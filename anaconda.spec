@@ -1,7 +1,7 @@
 %define _empty_manifest_terminate_build 0
 Name:    anaconda
 Version: 33.19
-Release: 5
+Release: 6
 Summary: Graphical system installer
 License: GPLv2+ and MIT
 URL:     http://fedoraproject.org/wiki/Anaconda
@@ -12,23 +12,21 @@ Patch6000:    Fix-hiding-of-network-device-activation-switch.patch
 
 Patch9000:    add-passwd-policy.patch
 Patch9001:    fix-hostname-info.patch
-patch9002:    add-passwd-check-policy.patch
-Patch9003:    bugfix-fix-data-encrypt-weak-passphrase-save.patch
-Patch9004:    disable-set-passwd-without-confirmation.patch
-Patch9005:    bugfix-logo-display-in-low-screen-resolution.patch
-Patch9006:    make-name-not-force-to-uppercase.patch
-Patch9007:    bugfix-GUI-nfs-unknown-error.patch
-Patch9008:    hide-help-button.patch
-Patch9009:    modify-interface-is-extended-in-Chinese-mode.patch
-Patch9010:    remove-vender-issue-in-netdev.patch
-Patch9011:    modify-arguments-parsing.patch
-Patch9012:    add-boot-options-for-smmu-and-crashkernel.patch
-Patch9013:    disable-product-name-in-welcome-is-uppercase.patch
-Patch9014:    modify-default-timezone.patch
-Patch9015:    modify-network-hostname-dot-illegal.patch
-Patch9016:    disable-ssh-login-checkbox.patch
-Patch9017:    bugfix-add-kdump-parameter-into-kernel-cmdline.patch
-Patch9018:    bugfix-fix-password-policy.patch
+Patch9002:    disable-set-passwd-without-confirmation.patch
+Patch9003:    bugfix-logo-display-in-low-screen-resolution.patch
+Patch9004:    make-name-not-force-to-uppercase.patch
+Patch9005:    bugfix-GUI-nfs-unknown-error.patch
+Patch9006:    hide-help-button.patch
+Patch9007:    modify-interface-is-extended-in-Chinese-mode.patch
+Patch9008:    remove-vender-issue-in-netdev.patch
+Patch9009:    modify-arguments-parsing.patch
+Patch9010:    add-boot-options-for-smmu-and-crashkernel.patch
+Patch9011:    disable-product-name-in-welcome-is-uppercase.patch
+Patch9012:    modify-default-timezone.patch
+Patch9013:    modify-network-hostname-dot-illegal.patch
+Patch9014:    disable-ssh-login-checkbox.patch
+Patch9015:    bugfix-add-kdump-parameter-into-kernel-cmdline.patch
+Patch9016:    bugfix-fix-password-policy.patch
 
 Patch6001:    anaconda-Fix-stage2-as-default-sources.patch
 Patch6002:    anaconda-Allow-to-detect-devices-with-the-iso9660-file-system.patch
@@ -243,6 +241,13 @@ update-desktop-database &> /dev/null || :
 %{_datadir}/gtk-doc
 
 %changelog
+* Thu Sep 10 2020 zhangqiumiao <zhangqiumiao1@huawei.com> - 33.19-6
+- Type:bugfix
+- ID:NA
+- SUG:NA
+- DESC:revert add-passwd-check-policy.patch and bugfix-gix-encrypt-weak-passphrase-save.patch
+       fix password policy
+
 * Thu Sep 3 2020 zhangqiumiao <zhangqiumiao1@huawei.com> - 33.19-5
 - Type:bugfix
 - ID:NA
