@@ -1,7 +1,7 @@
 %define _empty_manifest_terminate_build 0
 Name:    anaconda
 Version: 33.19
-Release: 6
+Release: 7
 Summary: Graphical system installer
 License: GPLv2+ and MIT
 URL:     http://fedoraproject.org/wiki/Anaconda
@@ -20,13 +20,13 @@ Patch9006:    hide-help-button.patch
 Patch9007:    modify-interface-is-extended-in-Chinese-mode.patch
 Patch9008:    remove-vender-issue-in-netdev.patch
 Patch9009:    modify-arguments-parsing.patch
-Patch9010:    add-boot-options-for-smmu-and-crashkernel.patch
 Patch9011:    disable-product-name-in-welcome-is-uppercase.patch
 Patch9012:    modify-default-timezone.patch
 Patch9013:    modify-network-hostname-dot-illegal.patch
 Patch9014:    disable-ssh-login-checkbox.patch
 Patch9015:    bugfix-add-kdump-parameter-into-kernel-cmdline.patch
 Patch9016:    bugfix-fix-password-policy.patch
+Patch9017:    add-boot-args-for-smmu-and-video.patch
 
 Patch6001:    anaconda-Fix-stage2-as-default-sources.patch
 Patch6002:    anaconda-Allow-to-detect-devices-with-the-iso9660-file-system.patch
@@ -241,6 +241,12 @@ update-desktop-database &> /dev/null || :
 %{_datadir}/gtk-doc
 
 %changelog
+* Fri Sep 11 2020 fengtao <fengtao40@huawei.com> - 33.19-7
+- Type:bugfix
+- ID:NA
+- SUG:NA
+- DESC:add boot args for smmu and video
+
 * Thu Sep 10 2020 zhangqiumiao <zhangqiumiao1@huawei.com> - 33.19-6
 - Type:bugfix
 - ID:NA
