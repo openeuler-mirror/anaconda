@@ -1,7 +1,7 @@
 %define _empty_manifest_terminate_build 0
 Name:    anaconda
 Version: 33.19
-Release: 7
+Release: 8
 Summary: Graphical system installer
 License: GPLv2+ and MIT
 URL:     http://fedoraproject.org/wiki/Anaconda
@@ -27,6 +27,10 @@ Patch9014:    disable-ssh-login-checkbox.patch
 Patch9015:    bugfix-add-kdump-parameter-into-kernel-cmdline.patch
 Patch9016:    bugfix-fix-password-policy.patch
 Patch9017:    add-boot-args-for-smmu-and-video.patch
+Patch9018:    bugfix-do-not-test-if-repo-is-valid-based-on-treeinfo-file.patch
+Patch9019:    bugfix-move-verify-valid-installtree-to-source-module-utils.patch
+Patch9020:    bugfix-add-tests-for-verify-valid-installtree-function.patch
+Patch9021:    bugfix-rename-function-for-a-simple-check-for-DNF-repository.patch
 
 Patch6001:    anaconda-Fix-stage2-as-default-sources.patch
 Patch6002:    anaconda-Allow-to-detect-devices-with-the-iso9660-file-system.patch
@@ -241,6 +245,12 @@ update-desktop-database &> /dev/null || :
 %{_datadir}/gtk-doc
 
 %changelog
+* Mon Sep 14 2020 zhuqingfu <zhuqingfu1@huawei.com> - 33.19-8
+- Type:bugfix
+- ID:NA
+- SUG:NA
+- DESC:do not require treeinfo
+
 * Fri Sep 11 2020 fengtao <fengtao40@huawei.com> - 33.19-7
 - Type:bugfix
 - ID:NA
