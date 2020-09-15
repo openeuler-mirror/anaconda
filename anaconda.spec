@@ -250,7 +250,7 @@ update-desktop-database &> /dev/null || :
 - Type:bugfix
 - ID:NA
 - SUG:NA
-- DESC:bugfix for encrypting partion
+- DESC:disable disk encryption
 
 * Mon Sep 14 2020 zhuqingfu <zhuqingfu1@huawei.com> - 33.19-8
 - Type:bugfix
