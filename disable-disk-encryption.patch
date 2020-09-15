@@ -1,0 +1,71 @@
+From dfa83dee1424cff511db2a26324a7baa11e96fab Mon Sep 17 00:00:00 2001
+From: x30007275 <xiaqirong1@huawei.com>
+Date: Tue, 15 Sep 2020 21:51:19 +0800
+Subject: [PATCH] disable disk encryption
+
+---
+ pyanaconda/ui/gui/spokes/custom_storage.py | 8 ++++----
+ pyanaconda/ui/gui/spokes/storage.py        | 7 ++++---
+ 2 files changed, 8 insertions(+), 7 deletions(-)
+
+diff --git a/pyanaconda/ui/gui/spokes/custom_storage.py b/pyanaconda/ui/gui/spokes/custom_storage.py
+index 347a0e0..d72e315 100644
+--- a/pyanaconda/ui/gui/spokes/custom_storage.py
++++ b/pyanaconda/ui/gui/spokes/custom_storage.py
+@@ -796,8 +796,8 @@ class CustomPartitioningSpoke(NormalSpoke, StorageCheckHandler):
+         fancy_set_sensitive(self._reformatCheckbox, self._permissions.reformat)
+ 
+         # Set up the encryption.
+-        self._encryptCheckbox.set_active(self._request.device_encrypted)
+-        fancy_set_sensitive(self._encryptCheckbox, self._permissions.device_encrypted)
++        self._encryptCheckbox.set_active(False)
++        fancy_set_sensitive(self._encryptCheckbox, False)
+ 
+         self._encryptCheckbox.set_inconsistent(self._request.container_encrypted)
+         text = _("The container is encrypted.") if self._request.container_encrypted else ""
+@@ -1268,7 +1268,7 @@ class CustomPartitioningSpoke(NormalSpoke, StorageCheckHandler):
+                 self._encryptCheckbox.set_active(False)
+                 self._encryptCheckbox.set_inconsistent(True)
+ 
+-            fancy_set_sensitive(self._encryptCheckbox, self._permissions.device_encrypted)
++            fancy_set_sensitive(self._encryptCheckbox, False)
+             self._update_luks_combo()
+ 
+         # Update the UI.
+@@ -1490,7 +1490,7 @@ class CustomPartitioningSpoke(NormalSpoke, StorageCheckHandler):
+ 
+         # Update the UI.
+         fancy_set_sensitive(self._labelEntry, self._permissions.label)
+-        fancy_set_sensitive(self._encryptCheckbox, self._permissions.device_encrypted)
++        fancy_set_sensitive(self._encryptCheckbox, False)
+         self._update_luks_combo()
+         fancy_set_sensitive(self._fsCombo, self._permissions.format_type)
+         self.on_value_changed()
+diff --git a/pyanaconda/ui/gui/spokes/storage.py b/pyanaconda/ui/gui/spokes/storage.py
+index 9494d6a..b2c0d3e 100644
+--- a/pyanaconda/ui/gui/spokes/storage.py
++++ b/pyanaconda/ui/gui/spokes/storage.py
+@@ -289,6 +289,9 @@ class StorageSpoke(NormalSpoke, StorageCheckHandler):
+         # Configure the partitioning methods.
+         self._configure_partitioning_methods()
+ 
++        # disable disk encryption
++        self._encryption_revealer.set_reveal_child(False)
++
+     def _configure_partitioning_methods(self):
+         if "CustomPartitioningSpoke" in conf.ui.hidden_spokes:
+             self._custom_part_radio_button.set_visible(False)
+@@ -325,9 +328,7 @@ class StorageSpoke(NormalSpoke, StorageCheckHandler):
+         # as Blivet GUI handles encryption per encrypted device, not globally.
+         # Hide it also for the interactive partitioning as CustomPartitioningSpoke
+         # provides support for encryption of mount points.
+-        self._encryption_revealer.set_reveal_child(
+-            current_partitioning_method == PARTITIONING_METHOD_AUTOMATIC
+-        )
++        self._encryption_revealer.set_reveal_child(False)
+ 
+         # Hide the reclaim space checkbox if automatic storage configuration is not used.
+         self._reclaim_revealer.set_reveal_child(
+-- 
+1.8.3.1
+
