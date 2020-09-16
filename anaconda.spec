@@ -1,7 +1,7 @@
 %define _empty_manifest_terminate_build 0
 Name:    anaconda
 Version: 33.19
-Release: 8
+Release: 9
 Summary: Graphical system installer
 License: GPLv2+ and MIT
 URL:     http://fedoraproject.org/wiki/Anaconda
@@ -27,6 +27,7 @@ Patch9014:    disable-ssh-login-checkbox.patch
 Patch9015:    bugfix-add-kdump-parameter-into-kernel-cmdline.patch
 Patch9016:    bugfix-fix-password-policy.patch
 Patch9017:    add-boot-args-for-smmu-and-video.patch
+Patch9018:    disable-disk-encryption.patch
 
 Patch6001:    anaconda-Fix-stage2-as-default-sources.patch
 Patch6002:    anaconda-Allow-to-detect-devices-with-the-iso9660-file-system.patch
@@ -243,6 +244,12 @@ update-desktop-database &> /dev/null || :
 %{_datadir}/gtk-doc
 
 %changelog
+* Wed Sep 16 2020 xiaqirong <xiaqirong1@huawei.com> - 33.19-9
+- Type:bugfix
+- ID:NA
+- SUG:NA
+- DESC:disable disk encryption
+
 * Fri Sep 11 2020 fengtao <fengtao40@huawei.com> - 33.19-8
 - Type:bugfix
 - ID:NA
