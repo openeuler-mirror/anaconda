@@ -1,7 +1,7 @@
 %define _empty_manifest_terminate_build 0
 Name:    anaconda
 Version: 33.19
-Release: 9
+Release: 10
 Summary: Graphical system installer
 License: GPLv2+ and MIT
 URL:     http://fedoraproject.org/wiki/Anaconda
@@ -31,6 +31,10 @@ Patch9018:    disable-disk-encryption.patch
 
 Patch6001:    anaconda-Fix-stage2-as-default-sources.patch
 Patch6002:    anaconda-Allow-to-detect-devices-with-the-iso9660-file-system.patch
+Patch6003:    bugfix-do-not-test-if-repo-is-valid-based-on-treeinfo-file.patch
+Patch6004:    bugfix-move-verify-valid-installtree-to-source-module-utils.patch
+Patch6005:    bugfix-add-tests-for-verify-valid-installtree-function.patch
+Patch6006:    bugfix-rename-function-for-a-simple-check-for-DNF-repository.patch
 
 %define dbusver 1.2.3
 %define dnfver 3.6.0
@@ -244,6 +248,12 @@ update-desktop-database &> /dev/null || :
 %{_datadir}/gtk-doc
 
 %changelog
+* Thu Sep 17 2020 zhuqingfu <zhuqingfu1@huawei.com> - 33.19-10
+- Type:bugfix
+- ID:NA
+- SUG:NA
+- DESC:do not require treeinfo
+
 * Wed Sep 16 2020 xiaqirong <xiaqirong1@huawei.com> - 33.19-9
 - Type:bugfix
 - ID:NA
