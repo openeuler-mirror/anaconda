@@ -31,6 +31,10 @@ Patch9017:    bugfix-add-kdump-parameter-into-kernel-cmdline.patch
 
 Patch6001:    anaconda-Fix-stage2-as-default-sources.patch
 Patch6002:    anaconda-Allow-to-detect-devices-with-the-iso9660-file-system.patch
+Patch6003:    bugfix-do-not-test-if-repo-is-valid-based-on-treeinfo-file.patch 
+Patch6004:    bugfix-move-verify-valid-installtree-to-source-module-utils.patch    
+Patch6005:    bugfix-add-tests-for-verify-valid-installtree-function.patch 
+Patch6006:    bugfix-rename-function-for-a-simple-check-for-DNF-repository.patch 
 
 %define dbusver 1.2.3
 %define dnfver 3.6.0
@@ -242,6 +246,12 @@ update-desktop-database &> /dev/null || :
 %{_datadir}/gtk-doc
 
 %changelog
+* Mon Sep 21 2020 zhangrui <zhangrui182@huawei.com> - 33.19-2
+- Type:bugfix
+- Id:NA
+- SUG:NA
+- DESC:do not need to verify treeinfo when using nfs
+
 * Thu Aug 27 2020 hanzhijun <hanzhijun1@huawei.com> - 33.19-1
 - update version to 33.19
 

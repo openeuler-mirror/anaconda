@@ -1,0 +1,107 @@
+From fea8f2db7594482457f1a7f7aebb7ccac4505fa5 Mon Sep 17 00:00:00 2001
+From: Jiri Konecny <jkonecny@redhat.com>
+Date: Fri, 19 Jun 2020 15:36:37 +0200
+Subject: [PATCH] Move verify_valid_installtree to source module utils
+ (#1844287)
+
+It's used only by modules now. We can safely move it.
+
+Related: rhbz#1844287
+Related: rhbz#1849093
+---
+ .../payloads/source/harddrive/initialization.py  |  3 +--
+ .../payloads/source/nfs/initialization.py        |  4 ++--
+ pyanaconda/modules/payloads/source/utils.py      | 15 +++++++++++++++
+ pyanaconda/payload/image.py                      | 16 ----------------
+ 4 files changed, 18 insertions(+), 20 deletions(-)
+
+diff --git a/pyanaconda/modules/payloads/source/harddrive/initialization.py b/pyanaconda/modules/payloads/source/harddrive/initialization.py
+index 38d777adca..ed77db6bc9 100644
+--- a/pyanaconda/modules/payloads/source/harddrive/initialization.py
++++ b/pyanaconda/modules/payloads/source/harddrive/initialization.py
+@@ -22,8 +22,7 @@
+ from pyanaconda.modules.common.errors.payload import SourceSetupError
+ from pyanaconda.modules.common.task import Task
+ from pyanaconda.modules.payloads.source.utils import find_and_mount_device, \
+-    find_and_mount_iso_image
+-from pyanaconda.payload.image import verify_valid_installtree
++    find_and_mount_iso_image, verify_valid_installtree
+ from pyanaconda.payload.utils import unmount
+ from pyanaconda.anaconda_loggers import get_module_logger
+ 
+diff --git a/pyanaconda/modules/payloads/source/nfs/initialization.py b/pyanaconda/modules/payloads/source/nfs/initialization.py
+index 00112c3ecb..56e95060c6 100644
+--- a/pyanaconda/modules/payloads/source/nfs/initialization.py
++++ b/pyanaconda/modules/payloads/source/nfs/initialization.py
+@@ -21,9 +21,9 @@
+ from pyanaconda.core.payload import parse_nfs_url
+ from pyanaconda.modules.common.errors.payload import SourceSetupError
+ from pyanaconda.modules.common.task import Task
+-from pyanaconda.modules.payloads.source.utils import find_and_mount_iso_image
++from pyanaconda.modules.payloads.source.utils import find_and_mount_iso_image, \
++    verify_valid_installtree
+ from pyanaconda.payload.errors import PayloadSetupError
+-from pyanaconda.payload.image import verify_valid_installtree
+ from pyanaconda.payload.utils import mount, unmount
+ 
+ log = get_module_logger(__name__)
+diff --git a/pyanaconda/modules/payloads/source/utils.py b/pyanaconda/modules/payloads/source/utils.py
+index b9642a945c..ed9e5da49b 100644
+--- a/pyanaconda/modules/payloads/source/utils.py
++++ b/pyanaconda/modules/payloads/source/utils.py
+@@ -148,6 +148,21 @@ def _create_iso_path(path, iso_name):
+     return path
+ 
+ 
++def verify_valid_installtree(path):
++    """Check if the given path is a valid installtree repository.
++
++    :param str path: install tree path
++    :returns: True if repository is valid false otherwise
++    :rtype: bool
++    """
++    repomd_path = join_paths(path, "repodata/repomd.xml")
++
++    if os.path.exists(repomd_path) and os.path.isfile(repomd_path):
++        return True
++
++    return False
++
++
+ class MountPointGenerator:
+     _counter = 0
+ 
+diff --git a/pyanaconda/payload/image.py b/pyanaconda/payload/image.py
+index 4b6d0c7bb9..9401e29388 100644
+--- a/pyanaconda/payload/image.py
++++ b/pyanaconda/payload/image.py
+@@ -28,7 +28,6 @@
+ from blivet.size import Size
+ 
+ from pyanaconda import isys
+-from pyanaconda.core.util import join_paths
+ from pyanaconda.errors import errorHandler, ERROR_RAISE, InvalidImageSizeError, MissingImageError
+ from pyanaconda.modules.common.constants.objects import DEVICE_TREE
+ from pyanaconda.modules.common.constants.services import STORAGE
+@@ -129,21 +128,6 @@ def find_first_iso_image(path, mount_path="/mnt/install/cdimage"):
+     return None
+ 
+ 
+-def verify_valid_installtree(path):
+-    """Check if the given path is a valid installtree repository.
+-
+-    :param str path: install tree path
+-    :returns: True if repository is valid false otherwise
+-    :rtype: bool
+-    """
+-    repomd_path = join_paths(path, "repodata/repomd.xml")
+-
+-    if os.path.exists(repomd_path) and os.path.isfile(repomd_path):
+-        return True
+-
+-    return False
+-
+-
+ def _check_repodata(mount_path):
+     install_tree_meta = InstallTreeMetadata()
+     if not install_tree_meta.load_file(mount_path):
