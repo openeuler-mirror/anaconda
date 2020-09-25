@@ -1,7 +1,7 @@
 %define _empty_manifest_terminate_build 0
 Name:    anaconda
 Version: 33.19
-Release: 9
+Release: 10
 Summary: Graphical system installer
 License: GPLv2+ and MIT
 URL:     http://fedoraproject.org/wiki/Anaconda
@@ -35,6 +35,7 @@ Patch9022:    disable-disk-encryption.patch
 
 Patch6001:    anaconda-Fix-stage2-as-default-sources.patch
 Patch6002:    anaconda-Allow-to-detect-devices-with-the-iso9660-file-system.patch
+Patch9023:    bugfix-add-dnf-transaction-timeout.patch
 
 %define dbusver 1.2.3
 %define dnfver 3.6.0
@@ -246,6 +247,12 @@ update-desktop-database &> /dev/null || :
 %{_datadir}/gtk-doc
 
 %changelog
+* Fri Sep 25 2020 fengtao <fengtao40@huawei.com> - 33.19-10
+- Type:bugfix
+- ID:NA
+- SUG:NA
+- DESC:add dnf transactions timeout
+
 * Tue Sep 15 2020 xiaqirong <xiaqirong1@huawei.com> - 33.19-9
 - Type:bugfix
 - ID:NA
