@@ -1,6 +1,6 @@
-From dfa83dee1424cff511db2a26324a7baa11e96fab Mon Sep 17 00:00:00 2001
+From bec6776715baaff79d29e1703b7c3306c265071b Mon Sep 17 00:00:00 2001
 From: xia_qirong <xiaqirong1@huawei.com>
-Date: Tue, 15 Sep 2020 21:51:19 +0800
+Date: Wed, 16 Sep 2020 15:28:39 +0800
 Subject: [PATCH] disable disk encryption
 
 ---
