@@ -1,7 +1,7 @@
 %define _empty_manifest_terminate_build 0
 Name:    anaconda
 Version: 33.19
-Release: 10
+Release: 11
 Summary: Graphical system installer
 License: GPLv2+ and MIT
 URL:     http://fedoraproject.org/wiki/Anaconda
@@ -77,7 +77,7 @@ Requires: adwaita-icon-theme python3-kickstart
 Requires: tigervnc-server-minimal libxklavier >= %{libxklavierver} libgnomekbd
 Requires: libtimezonemap >= %{libtimezonemapver} xz
 Requires: nm-connection-editor keybinder3 anaconda-user-help >= %{helpver} yelp system-logos
-Requires: blivet-gui-runtime python3 dracut >= %{dracutver} dracut-network dracut-live
+Requires: python3 dracut >= %{dracutver} dracut-network dracut-live
 %ifarch %{ix86} x86_64
 BuildRequires: desktop-file-utils
 Requires: zenity fcoe-utils >= %{fcoeutilsver}
@@ -194,6 +194,7 @@ update-desktop-database &> /dev/null || :
 %{python3_sitearch}/pyanaconda/ui/gui/*
 %{_prefix}/libexec/anaconda/dd_*
 %{_prefix}/lib/dracut/modules.d/80%{name}/*
+%exclude %{python3_sitearch}/pyanaconda/ui/gui/spokes/blivet_gui.*
 
 %files core
 %defattr(-,root,root)
@@ -214,6 +215,7 @@ update-desktop-database &> /dev/null || :
 %exclude %{_prefix}/libexec/anaconda/dd_*
 %exclude %{_libdir}/libAnacondaWidgets.so
 %exclude %{_datadir}/gtk-doc
+%exclude %{_datadir}/anaconda/ui/spokes/blivet_gui.*
 %exclude %{_datadir}/glade/catalogs/AnacondaWidgets.xml
 %exclude %{python3_sitearch}/pyanaconda/rescue.py*
 %exclude %{python3_sitearch}/pyanaconda/__pycache__/rescue.*
@@ -248,48 +250,54 @@ update-desktop-database &> /dev/null || :
 %{_datadir}/gtk-doc
 
 %changelog
-* Fri Sep 25 2020 fengtao <fengtao40@huawei.com> - 33.19-10
+* Sat Sep 26 2020 fengtao <fengtao40@huawei.com> - 33.19-11
 - Type:bugfix
 - ID:NA
 - SUG:NA
 - DESC:add dnf transactions timeout
 
-* Tue Sep 15 2020 xiaqirong <xiaqirong1@huawei.com> - 33.19-9
-- Type:bugfix
-- ID:NA
-- SUG:NA
-- DESC:disable disk encryption
-
-* Mon Sep 14 2020 zhuqingfu <zhuqingfu1@huawei.com> - 33.19-8
+* Thu Sep 17 2020 zhuqingfu <zhuqingfu1@huawei.com> - 33.19-10
 - Type:bugfix
 - ID:NA
 - SUG:NA
 - DESC:do not require treeinfo
 
-* Fri Sep 11 2020 fengtao <fengtao40@huawei.com> - 33.19-7
+* Wed Sep 16 2020 xiaqirong <xiaqirong1@huawei.com> - 33.19-9
+- Type:bugfix
+- ID:NA
+- SUG:NA
+- DESC:disable disk encryption
+
+* Fri Sep 11 2020 fengtao <fengtao40@huawei.com> - 33.19-8
 - Type:bugfix
 - ID:NA
 - SUG:NA
 - DESC:add boot args for smmu and video
 
-* Thu Sep 10 2020 zhangqiumiao <zhangqiumiao1@huawei.com> - 33.19-6
+* Thu Sep 10 2020 zhangqiumiao <zhangqiumiao1@huawei.com> - 33.19-7
 - Type:bugfix
 - ID:NA
 - SUG:NA
-- DESC:revert add-passwd-check-policy.patch and bugfix-gix-encrypt-weak-passphrase-save.patch
+- DESC:revert add-passwd-check-policy.patch and bugfix-fix-encrypt-weak-passphrase-save.patch
        fix password policy
 
-* Thu Sep 3 2020 zhangqiumiao <zhangqiumiao1@huawei.com> - 33.19-5
+* Fri Sep 4 2020 zhangqiumiao <zhangqiumiao1@huawei.com> - 33.19-6
 - Type:bugfix
 - ID:NA
 - SUG:NA
 - DESC:fix password policy
 
-* Thu Aug 27 2020 fengtao <fengtao40@huawei.com> - 33.19-4
+* Mon Aug 31 2020 zhangqiumiao <zhangqiumiao1@huawei.com> - 33.19-5
 - Type:bugfix
 - ID:NA
 - SUG:NA
 - DESC:fix kdump patch err
+
+* Fri Aug 28 2020 zhangqiumiao <zhangqiumiao1@huawei.com> - 33.19-4
+- Type:bugfix
+- ID:NA
+- SUG:NA
+- DESC:remove dependency on blivet-gui-runtime
 
 * Fri Aug 7 2020 fengtao <fengtao40@huawei.com> - 33.19-3
 - Type:bugfix
