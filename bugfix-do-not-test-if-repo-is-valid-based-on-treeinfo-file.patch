@@ -1,0 +1,54 @@
+From 6cee8e5a59a9c424d2bc79b5474a749c4f786b40 Mon Sep 17 00:00:00 2001
+From: Jiri Konecny <jkonecny@redhat.com>
+Date: Fri, 19 Jun 2020 14:12:21 +0200
+Subject: [PATCH] Do not test if repo is valid based on .treeinfo file
+ (#1844287)
+
+Not all repositories need to have .treeinfo file. When it is not a compose but
+only a third party repo it's probably created by just running createrepo_c which
+does not create this file. We do not want to disable these repositories.
+
+So instead check that repodata/repomd.xml file is present. Based on my
+discussion with DNF/RPM developers it seems like the best approach.
+
+Resolves: rhbz#1844287
+Resolves: rhbz#1849093
+
+Reported-by: Adam Williamson <awilliam@redhat.com>
+---
+ pyanaconda/payload/image.py | 10 +++++-----
+ 1 file changed, 5 insertions(+), 5 deletions(-)
+
+diff --git a/pyanaconda/payload/image.py b/pyanaconda/payload/image.py
+index b76b33db40..4b6d0c7bb9 100644
+--- a/pyanaconda/payload/image.py
++++ b/pyanaconda/payload/image.py
+@@ -28,6 +28,7 @@
+ from blivet.size import Size
+ 
+ from pyanaconda import isys
++from pyanaconda.core.util import join_paths
+ from pyanaconda.errors import errorHandler, ERROR_RAISE, InvalidImageSizeError, MissingImageError
+ from pyanaconda.modules.common.constants.objects import DEVICE_TREE
+ from pyanaconda.modules.common.constants.services import STORAGE
+@@ -129,16 +130,15 @@ def find_first_iso_image(path, mount_path="/mnt/install/cdimage"):
+ 
+ 
+ def verify_valid_installtree(path):
+-    """Check if the given path is a valid installtree repository
++    """Check if the given path is a valid installtree repository.
+ 
+     :param str path: install tree path
+     :returns: True if repository is valid false otherwise
+     :rtype: bool
+     """
+-    # TODO: This can be enhanced to check for repodata folder.
+-    if os.path.exists(os.path.join(path, ".treeinfo")):
+-        return True
+-    elif os.path.exists(os.path.join(path, "treeinfo")):
++    repomd_path = join_paths(path, "repodata/repomd.xml")
++
++    if os.path.exists(repomd_path) and os.path.isfile(repomd_path):
+         return True
+ 
+     return False
