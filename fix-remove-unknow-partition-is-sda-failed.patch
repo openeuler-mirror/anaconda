@@ -1,0 +1,46 @@
+From ad48d3ab850c9dd40908a51eae3580fcc148e171 Mon Sep 17 00:00:00 2001
+From: xqrustc2020 <69908158+xqrustc2020@users.noreply.github.com>
+Date: Tue, 29 Sep 2020 13:16:43 +0800
+Subject: [PATCH] fix remove unkown partition in sda failed
+
+fix: cannot create partition when sda exists a ext4 filesystem.
+When you clicked the "-" button, only the format on sda should be
+destroyed without removing sda from the device tree, but sda 
+was also destroyed. As a result, sda cannot be found during disk
+initialization and an error was reported.
+Resolves: rhbz#1878661
+---
+ .../modules/storage/partitioning/interactive/utils.py  | 10 ++++------
+ 1 file changed, 4 insertions(+), 6 deletions(-)
+
+diff --git a/pyanaconda/modules/storage/partitioning/interactive/utils.py b/pyanaconda/modules/storage/partitioning/interactive/utils.py
+index b52876a..fe7bd59 100644
+--- a/pyanaconda/modules/storage/partitioning/interactive/utils.py
++++ b/pyanaconda/modules/storage/partitioning/interactive/utils.py
+@@ -1046,8 +1046,10 @@ def _destroy_device(storage, device):
+     :param device: an instance of a device
+     """
+     # Remove the device.
+-    if device.is_disk and device.partitioned and not device.format.supported:
+-        storage.recursive_remove(device)
++    if device.is_disk:
++        if device.partitioned and not device.format.supported:
++            storage.recursive_remove(device)
++        storage.initialize_disk(device)
+     elif device.direct and not device.isleaf:
+         # We shouldn't call this method for with non-leaf devices
+         # except for those which are also directly accessible like
+@@ -1057,10 +1059,6 @@ def _destroy_device(storage, device):
+     else:
+         storage.destroy_device(device)
+ 
+-    # Initialize the disk.
+-    if device.is_disk:
+-        storage.initialize_disk(device)
+-
+     # Remove empty extended partitions.
+     if getattr(device, "is_logical", False):
+         storage.remove_empty_extended_partitions()
+-- 
+2.23.0
+
