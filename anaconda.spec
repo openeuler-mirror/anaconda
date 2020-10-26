@@ -1,7 +1,7 @@
 %define _empty_manifest_terminate_build 0
 Name:    anaconda
 Version: 33.19
-Release: 11
+Release: 12
 Summary: Graphical system installer
 License: GPLv2+ and MIT
 URL:     http://fedoraproject.org/wiki/Anaconda
@@ -37,6 +37,9 @@ Patch6005:    bugfix-add-tests-for-verify-valid-installtree-function.patch
 Patch6006:    bugfix-rename-function-for-a-simple-check-for-DNF-repository.patch
 
 Patch9023:    bugfix-add-dnf-transaction-timeout.patch
+
+Patch6007:    fix-0-storage-devices-selected.patch
+Patch6008:    fix-remove-unknow-partition-is-sda-failed.patch
 
 %define dbusver 1.2.3
 %define dnfver 3.6.0
@@ -250,6 +253,12 @@ update-desktop-database &> /dev/null || :
 %{_datadir}/gtk-doc
 
 %changelog
+* Mon Oct 26 2020 fengtao <fengtao40@huawei.com> - 33.19-12
+- Type:bugfix
+- ID:NA
+- SUG:NA
+- DESC:bugfix for partitioning when sda exists a ext4 filesystem
+
 * Sat Sep 26 2020 fengtao <fengtao40@huawei.com> - 33.19-11
 - Type:bugfix
 - ID:NA
