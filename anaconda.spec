@@ -1,7 +1,7 @@
 %define _empty_manifest_terminate_build 0
 Name:    anaconda
 Version: 33.19
-Release: 2
+Release: 12
 Summary: Graphical system installer
 License: GPLv2+ and MIT
 URL:     http://fedoraproject.org/wiki/Anaconda
@@ -12,29 +12,34 @@ Patch6000:    Fix-hiding-of-network-device-activation-switch.patch
 
 Patch9000:    add-passwd-policy.patch
 Patch9001:    fix-hostname-info.patch
-patch9002:    add-passwd-check-policy.patch
-Patch9003:    bugfix-fix-data-encrypt-weak-passphrase-save.patch
-Patch9004:    disable-set-passwd-without-confirmation.patch
-Patch9005:    bugfix-logo-display-in-low-screen-resolution.patch
-Patch9006:    make-name-not-force-to-uppercase.patch
-Patch9007:    bugfix-GUI-nfs-unknown-error.patch
-Patch9008:    hide-help-button.patch
-Patch9009:    modify-interface-is-extended-in-Chinese-mode.patch
-Patch9010:    remove-vender-issue-in-netdev.patch
-Patch9011:    modify-arguments-parsing.patch
-Patch9012:    add-boot-options-for-smmu-and-crashkernel.patch
-Patch9013:    disable-product-name-in-welcome-is-uppercase.patch
-Patch9014:    modify-default-timezone.patch
-Patch9015:    modify-network-hostname-dot-illegal.patch
-Patch9016:    disable-ssh-login-checkbox.patch
-Patch9017:    bugfix-add-kdump-parameter-into-kernel-cmdline.patch
+Patch9002:    disable-set-passwd-without-confirmation.patch
+Patch9003:    bugfix-logo-display-in-low-screen-resolution.patch
+Patch9004:    make-name-not-force-to-uppercase.patch
+Patch9005:    bugfix-GUI-nfs-unknown-error.patch
+Patch9006:    hide-help-button.patch
+Patch9007:    modify-interface-is-extended-in-Chinese-mode.patch
+Patch9008:    remove-vender-issue-in-netdev.patch
+Patch9009:    modify-arguments-parsing.patch
+Patch9011:    disable-product-name-in-welcome-is-uppercase.patch
+Patch9012:    modify-default-timezone.patch
+Patch9013:    modify-network-hostname-dot-illegal.patch
+Patch9014:    disable-ssh-login-checkbox.patch
+Patch9015:    bugfix-add-kdump-parameter-into-kernel-cmdline.patch
+Patch9016:    bugfix-fix-password-policy.patch
+Patch9017:    add-boot-args-for-smmu-and-video.patch
+Patch9018:    disable-disk-encryption.patch
 
 Patch6001:    anaconda-Fix-stage2-as-default-sources.patch
 Patch6002:    anaconda-Allow-to-detect-devices-with-the-iso9660-file-system.patch
-Patch6003:    bugfix-do-not-test-if-repo-is-valid-based-on-treeinfo-file.patch 
-Patch6004:    bugfix-move-verify-valid-installtree-to-source-module-utils.patch    
-Patch6005:    bugfix-add-tests-for-verify-valid-installtree-function.patch 
-Patch6006:    bugfix-rename-function-for-a-simple-check-for-DNF-repository.patch 
+Patch6003:    bugfix-do-not-test-if-repo-is-valid-based-on-treeinfo-file.patch
+Patch6004:    bugfix-move-verify-valid-installtree-to-source-module-utils.patch
+Patch6005:    bugfix-add-tests-for-verify-valid-installtree-function.patch
+Patch6006:    bugfix-rename-function-for-a-simple-check-for-DNF-repository.patch
+
+Patch9023:    bugfix-add-dnf-transaction-timeout.patch
+
+Patch6007:    fix-0-storage-devices-selected.patch
+Patch6008:    fix-remove-unknow-partition-is-sda-failed.patch
 
 %define dbusver 1.2.3
 %define dnfver 3.6.0
@@ -75,7 +80,7 @@ Requires: adwaita-icon-theme python3-kickstart
 Requires: tigervnc-server-minimal libxklavier >= %{libxklavierver} libgnomekbd
 Requires: libtimezonemap >= %{libtimezonemapver} xz
 Requires: nm-connection-editor keybinder3 anaconda-user-help >= %{helpver} yelp system-logos
-Requires: blivet-gui-runtime python3 dracut >= %{dracutver} dracut-network dracut-live
+Requires: python3 dracut >= %{dracutver} dracut-network dracut-live
 %ifarch %{ix86} x86_64
 BuildRequires: desktop-file-utils
 Requires: zenity fcoe-utils >= %{fcoeutilsver}
@@ -192,6 +197,7 @@ update-desktop-database &> /dev/null || :
 %{python3_sitearch}/pyanaconda/ui/gui/*
 %{_prefix}/libexec/anaconda/dd_*
 %{_prefix}/lib/dracut/modules.d/80%{name}/*
+%exclude %{python3_sitearch}/pyanaconda/ui/gui/spokes/blivet_gui.*
 
 %files core
 %defattr(-,root,root)
@@ -212,6 +218,7 @@ update-desktop-database &> /dev/null || :
 %exclude %{_prefix}/libexec/anaconda/dd_*
 %exclude %{_libdir}/libAnacondaWidgets.so
 %exclude %{_datadir}/gtk-doc
+%exclude %{_datadir}/anaconda/ui/spokes/blivet_gui.*
 %exclude %{_datadir}/glade/catalogs/AnacondaWidgets.xml
 %exclude %{python3_sitearch}/pyanaconda/rescue.py*
 %exclude %{python3_sitearch}/pyanaconda/__pycache__/rescue.*
@@ -246,66 +253,109 @@ update-desktop-database &> /dev/null || :
 %{_datadir}/gtk-doc
 
 %changelog
-* Mon Sep 21 2020 zhangrui <zhangrui182@huawei.com> - 33.19-2
+* Mon Oct 26 2020 fengtao <fengtao40@huawei.com> - 33.19-12
 - Type:bugfix
-- Id:NA
+- ID:NA
 - SUG:NA
-- DESC:do not need to verify treeinfo when using nfs
+- DESC:bugfix for partitioning when sda exists a ext4 filesystem
 
-* Thu Aug 27 2020 hanzhijun <hanzhijun1@huawei.com> - 33.19-1
+* Sat Sep 26 2020 fengtao <fengtao40@huawei.com> - 33.19-11
+- Type:bugfix
+- ID:NA
+- SUG:NA
+- DESC:add dnf transactions timeout
+
+* Thu Sep 17 2020 zhuqingfu <zhuqingfu1@huawei.com> - 33.19-10
+- Type:bugfix
+- ID:NA
+- SUG:NA
+- DESC:do not require treeinfo
+
+* Wed Sep 16 2020 xiaqirong <xiaqirong1@huawei.com> - 33.19-9
+- Type:bugfix
+- ID:NA
+- SUG:NA
+- DESC:disable disk encryption
+
+* Fri Sep 11 2020 fengtao <fengtao40@huawei.com> - 33.19-8
+- Type:bugfix
+- ID:NA
+- SUG:NA
+- DESC:add boot args for smmu and video
+
+* Thu Sep 10 2020 zhangqiumiao <zhangqiumiao1@huawei.com> - 33.19-7
+- Type:bugfix
+- ID:NA
+- SUG:NA
+- DESC:revert add-passwd-check-policy.patch and bugfix-fix-encrypt-weak-passphrase-save.patch
+       fix password policy
+
+* Fri Sep 4 2020 zhangqiumiao <zhangqiumiao1@huawei.com> - 33.19-6
+- Type:bugfix
+- ID:NA
+- SUG:NA
+- DESC:fix password policy
+
+* Mon Aug 31 2020 zhangqiumiao <zhangqiumiao1@huawei.com> - 33.19-5
+- Type:bugfix
+- ID:NA
+- SUG:NA
+- DESC:fix kdump patch err
+
+* Fri Aug 28 2020 zhangqiumiao <zhangqiumiao1@huawei.com> - 33.19-4
+- Type:bugfix
+- ID:NA
+- SUG:NA
+- DESC:remove dependency on blivet-gui-runtime
+
+* Fri Aug 7 2020 fengtao <fengtao40@huawei.com> - 33.19-3
+- Type:bugfix
+- ID:NA
+- SUG:NA
+- DESC:fix stage2 as default sources
+
+* Tue Jul 14 2020 zhangqiumiao <zhangqiumiao1@huawei.com> - 33.19-2
+- Type:bugfix
+- ID:NA
+- SUG:NA
+- DESC:add kdump parameter into kernel cmdline
+
+* Fri Jun 19 2020 fengtao <fengtao40@huawei.com> - 33.19-1
 - update version to 33.19
-
-* Mon Aug 24 2020 yanan <yanan@huawei.com> - 29.24.7-32
-- Type:bugfix
-- Id:NA
-- SUG:NA
-- DESC:add a temporary hack to fix installations on ppc64le and aarch64
-
-* Fri Aug 21 2020 zhangqiumiao <zhangqiumiao1@huawei.com> - 29.24.7-31
-- Type:bugfix
-- Id:NA
-- SUG:NA
-- DESC:Set up LD_PRELOAD for the Payloads module
-
-* Tue Aug 18 2020 chenyaqiang <chenyaqiang@huawei.com> - 29.24.7-30
-- rebuild for package build
-
-* Mon May 25 2020 openEuler Buildteam <buildteam@openeuler.org> - 29.24.7-29
-- rebuild for dracut
 
 * Mon Mar 9 2020 openEuler Buildteam <buildteam@openeuler.org> - 29.24.7-28
 - Type:bugfix
-- Id:NA
+- ID:NA
 - SUG:NA
 - DESC:add boot options for dummy
 
 * Wed Feb 12 2020 openEuler Buildteam <buildteam@openeuler.org> - 29.24.7-27
 - Type:bugfix
-- Id:NA
+- ID:NA
 - SUG:NA
 - DESC:Remove initThreading method from pyanaconda.threading
 
 * Thu Feb 06 2020 openEuler Buildteam <buildteam@openeuler.org> - 29.24.7-26
 - Type:bugfix
-- Id:NA
+- ID:NA
 - SUG:NA
 - DESC:modify network hostname dot error
 
 * Thu Jan 16 2020 openEuler Buildteam <buildteam@openeuler.org> - 29.24.7-25
 - Type:bugfix
-- Id:NA
+- ID:NA
 - SUG:NA
 - DESC:modify default timezone and zh_CN.po
 
 * Thu Jan 16 2020 openEuler Buildteam <buildteam@openeuler.org> - 29.24.7-24
 - Type:bugfix
-- Id:NA
+- ID:NA
 - SUG:NA
 - DESC:fix setup fail in decode
 
 * Thu Jan 16 2020 openEuler Buildteam <buildteam@openeuler.org> - 29.24.7-23
 - Type:enhancement
-- Id:NA
+- ID:NA
 - SUG:NA
 - DESC:modify openeuler in welcome to lowercase
 

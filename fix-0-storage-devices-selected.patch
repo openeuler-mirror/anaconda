@@ -1,0 +1,40 @@
+From aa819ebee288aa307dc204337228c402189fd5e5 Mon Sep 17 00:00:00 2001
+From: "Qr.Xia" <69908158+xqrustc2020@users.noreply.github.com>
+Date: Mon, 12 Oct 2020 11:04:27 +0800
+Subject: [PATCH] fix 0 storage devices selected
+
+"0 storage devices selected" is printed because the format_type of sda
+is "ext4" rather than "disklabel", and disk 'sda' is filtered by
+filter_disks_by_names(partitioned_devices, selected_disks).
+Resolves: rhbz#1878661
+---
+ pyanaconda/ui/gui/spokes/custom_storage.py | 6 ++----
+ 1 file changed, 2 insertions(+), 4 deletions(-)
+
+diff --git a/pyanaconda/ui/gui/spokes/custom_storage.py b/pyanaconda/ui/gui/spokes/custom_storage.py
+index d72e315..b89866c 100644
+--- a/pyanaconda/ui/gui/spokes/custom_storage.py
++++ b/pyanaconda/ui/gui/spokes/custom_storage.py
+@@ -47,7 +47,7 @@ from pyanaconda.modules.common.structures.partitioning import PartitioningReques
+ from pyanaconda.modules.common.structures.device_factory import DeviceFactoryRequest, \
+     DeviceFactoryPermissions
+ from pyanaconda.product import productName, productVersion
+-from pyanaconda.ui.lib.storage import reset_bootloader, create_partitioning, filter_disks_by_names
++from pyanaconda.ui.lib.storage import reset_bootloader, create_partitioning
+ from pyanaconda.core.storage import DEVICE_TYPE_UNSUPPORTED, DEVICE_TEXT_MAP, \
+     MOUNTPOINT_DESCRIPTIONS, NAMED_DEVICE_TYPES, CONTAINER_DEVICE_TYPES, device_type_from_autopart, \
+     PROTECTED_FORMAT_TYPES, DEVICE_TYPE_BTRFS, DEVICE_TYPE_MD, Size
+@@ -303,9 +303,7 @@ class CustomPartitioningSpoke(NormalSpoke, StorageCheckHandler):
+         self._default_file_system = self._device_tree.GetDefaultFileSystem()
+ 
+         # Initialize the selected disks.
+-        selected_disks = self._disk_selection.SelectedDisks
+-        partitioned_devices = self._device_tree.GetPartitioned()
+-        self._selected_disks = filter_disks_by_names(partitioned_devices, selected_disks)
++        self._selected_disks = self._disk_selection.SelectedDisks
+ 
+         # Update the UI elements.
+         self._do_refresh(init_expanded_pages=True)
+-- 
+2.23.0
+
