@@ -1,0 +1,24 @@
+From 9f6c2300b7b4c9671275159d6355c731574120ba Mon Sep 17 00:00:00 2001
+From: ft272781150 <t.feng94@foxmail.com>
+Date: Thu, 11 Jun 2020 10:19:49 +0800
+Subject: [PATCH] Use modinfo to check ko before modprobe
+
+---
+ dracut/anaconda-modprobe.sh | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/dracut/anaconda-modprobe.sh b/dracut/anaconda-modprobe.sh
+index 8dd9ab36e7..39c47776c4 100755
+--- a/dracut/anaconda-modprobe.sh
++++ b/dracut/anaconda-modprobe.sh
+@@ -38,6 +38,10 @@ MODULE_LIST+=" raid0 raid1 raid5 raid6 raid456 raid10 linear dm-mod dm-zero  \
+               sha256 lrw xts "
+ 
+ for m in $MODULE_LIST; do
++    if ! modinfo $m >/dev/null 2>&1 ; then
++        echo "anaconda-modprobe: Module $m not found" >&2
++        continue
++    fi
+     if modprobe $m ; then
+         debug_msg "$m was loaded"
+     else
