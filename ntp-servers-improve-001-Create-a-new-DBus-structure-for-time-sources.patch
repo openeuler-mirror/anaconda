@@ -1,0 +1,119 @@
+From 554be1cfd3d09035e0370f1efc46d3fc40f8496d Mon Sep 17 00:00:00 2001
+From: Vendula Poncova <vponcova@redhat.com>
+Date: Fri, 3 Jul 2020 11:11:46 +0200
+Subject: [PATCH] Create a new DBus structure for time sources
+
+Use the class TimeSourceData to represent a time source.
+---
+ pyanaconda/core/constants.py                  |  4 +
+ .../modules/common/structures/timezone.py     | 84 +++++++++++++++++++
+ 2 files changed, 88 insertions(+)
+ create mode 100644 pyanaconda/modules/common/structures/timezone.py
+
+diff --git a/pyanaconda/core/constants.py b/pyanaconda/core/constants.py
+index 536529f4e0..5124f05b7f 100644
+--- a/pyanaconda/core/constants.py
++++ b/pyanaconda/core/constants.py
+@@ -306,6 +306,10 @@ class SecretStatus(Enum):
+ # Window title text
+ WINDOW_TITLE_TEXT = N_("Anaconda Installer")
+ 
++# Types of time sources.
++TIME_SOURCE_SERVER = "SERVER"
++TIME_SOURCE_POOL = "POOL"
++
+ # NTP server checking
+ NTP_SERVER_OK = 0
+ NTP_SERVER_NOK = 1
+diff --git a/pyanaconda/modules/common/structures/timezone.py b/pyanaconda/modules/common/structures/timezone.py
+new file mode 100644
+index 0000000000..d18234f681
+--- /dev/null
++++ b/pyanaconda/modules/common/structures/timezone.py
+@@ -0,0 +1,84 @@
++#
++# DBus structures for the timezone data.
++#
++# Copyright (C) 2020  Red Hat, Inc.  All rights reserved.
++#
++# This program is free software; you can redistribute it and/or modify
++# it under the terms of the GNU General Public License as published by
++# the Free Software Foundation; either version 2 of the License, or
++# (at your option) any later version.
++#
++# This program is distributed in the hope that it will be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program.  If not, see <http://www.gnu.org/licenses/>.
++#
++from dasbus.structure import DBusData
++from dasbus.typing import *  # pylint: disable=wildcard-import
++
++from pyanaconda.core.constants import TIME_SOURCE_SERVER
++
++__all__ = ["TimeSourceData"]
++
++
++class TimeSourceData(DBusData):
++    """Data for a time source."""
++
++    def __init__(self):
++        self._type = TIME_SOURCE_SERVER
++        self._hostname = ""
++        self._options = []
++
++    @property
++    def type(self) -> Str:
++        """Type of the time source.
++
++        Supported values:
++
++            SERVER  A single NTP server
++            POOL    A pool of NTP servers
++
++        :return: a type of the time source
++        """
++        return self._type
++
++    @type.setter
++    def type(self, value: Str):
++        self._type = value
++
++    @property
++    def hostname(self) -> Str:
++        """Name of the time server.
++
++        For example:
++
++            ntp.cesnet.cz
++
++        :return: a host name
++        """
++        return self._hostname
++
++    @hostname.setter
++    def hostname(self, value: Str):
++        self._hostname = value
++
++    @property
++    def options(self) -> List[Str]:
++        """Options of the time source.
++
++        For example:
++
++            nts, ntsport 1234, iburst
++
++        See ``man chrony.conf``.
++
++        :return: a list of options
++        """
++        return self._options
++
++    @options.setter
++    def options(self, value):
++        self._options = value
+--
+2.23.0
