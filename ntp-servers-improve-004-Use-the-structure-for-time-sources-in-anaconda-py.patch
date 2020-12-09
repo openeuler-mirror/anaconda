@@ -1,0 +1,113 @@
+From 19dea71f13d55d49e9dfbcc5d941afd5eb5d9e6d Mon Sep 17 00:00:00 2001
+From: Vendula Poncova <vponcova@redhat.com>
+Date: Fri, 3 Jul 2020 12:08:05 +0200
+Subject: [PATCH] Use the structure for time sources in anaconda.py
+
+Modify anaconda.py to work with TimeSourceData instead of strings.
+---
+ anaconda.py                 | 11 +--------
+ pyanaconda/startup_utils.py | 45 +++++++++++++++++++++++++++----------
+ 2 files changed, 34 insertions(+), 22 deletions(-)
+
+diff --git a/anaconda.py b/anaconda.py
+index 1abdeb2e1a..d6bb57190c 100755
+--- a/anaconda.py
++++ b/anaconda.py
+@@ -325,7 +325,6 @@ def setup_environment():
+ 
+     from pyanaconda import vnc
+     from pyanaconda import kickstart
+-    from pyanaconda import ntp
+     from pyanaconda import keyboard
+     # we are past the --version and --help shortcut so we can import display &
+     # startup_utils, which import Blivet, without slowing down anything critical
+@@ -714,15 +713,7 @@ def _earlyExceptionHandler(ty, value, traceback):
+         geoloc.geoloc.refresh()
+ 
+     # setup ntp servers and start NTP daemon if not requested otherwise
+-    if conf.system.can_set_time_synchronization:
+-        kickstart_ntpservers = timezone_proxy.NTPServers
+-
+-        if kickstart_ntpservers:
+-            pools, servers = ntp.internal_to_pools_and_servers(kickstart_ntpservers)
+-            ntp.save_servers_to_config(pools, servers)
+-
+-        if timezone_proxy.NTPEnabled:
+-            util.start_service("chronyd")
++    startup_utils.start_chronyd()
+ 
+     # Finish the initialization of the setup on boot action.
+     # This should be done sooner and somewhere else once it is possible.
+diff --git a/pyanaconda/startup_utils.py b/pyanaconda/startup_utils.py
+index f08b19e11a..e53d5491c1 100644
+--- a/pyanaconda/startup_utils.py
++++ b/pyanaconda/startup_utils.py
+@@ -17,29 +17,28 @@
+ # License and may only be used or replicated with the express permission of
+ # Red Hat, Inc.
+ #
+-from pyanaconda.core.configuration.anaconda import conf
+-from pyanaconda.core.i18n import _
+-
+-from pyanaconda.anaconda_loggers import get_stdout_logger, get_storage_logger, get_packaging_logger
+-stdout_log = get_stdout_logger()
+-
+-from pyanaconda.anaconda_loggers import get_module_logger
+-log = get_module_logger(__name__)
+-
+ import sys
+ import time
+ import os
++import blivet
+ 
+-from pyanaconda.core import util, constants
+-from pyanaconda import product
++from pyanaconda import product, ntp
+ from pyanaconda import anaconda_logging
+ from pyanaconda import network
+ from pyanaconda import safe_dbus
+ from pyanaconda import kickstart
++from pyanaconda.anaconda_loggers import get_stdout_logger, get_storage_logger, \
++    get_packaging_logger, get_module_logger
++from pyanaconda.core import util, constants
++from pyanaconda.core.configuration.anaconda import conf
++from pyanaconda.core.i18n import _
+ from pyanaconda.flags import flags
+ from pyanaconda.screensaver import inhibit_screensaver
++from pyanaconda.modules.common.structures.timezone import TimeSourceData
++from pyanaconda.modules.common.constants.services import TIMEZONE
+ 
+-import blivet
++stdout_log = get_stdout_logger()
++log = get_module_logger(__name__)
+ 
+ 
+ def gtk_warning(title, reason):
+@@ -373,3 +372,25 @@ def parse_kickstart(ks, addon_paths, strict_mode=False):
+         kickstart.parseKickstart(ksdata, ks, strict_mode=strict_mode, pass_to_boss=True)
+ 
+     return ksdata
++
++
++def start_chronyd():
++    """Start the NTP daemon chronyd.
++
++    Set up NTP servers and start NTP daemon if not requested otherwise.
++    """
++    if not conf.system.can_set_time_synchronization:
++        log.debug("Skip the time synchronization.")
++        return
++
++    timezone_proxy = TIMEZONE.get_proxy()
++    enabled = timezone_proxy.NTPEnabled
++    servers = TimeSourceData.from_structure_list(
++        timezone_proxy.TimeSources
++    )
++
++    if servers:
++        ntp.save_servers_to_config(servers)
++
++    if enabled:
++        util.start_service("chronyd")
+--
+2.23.0

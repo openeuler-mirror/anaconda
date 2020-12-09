@@ -1,7 +1,7 @@
 %define _empty_manifest_terminate_build 0
 Name:    anaconda
 Version: 33.19
-Release: 13
+Release: 14
 Summary: Graphical system installer
 License: GPLv2+ and MIT
 URL:     http://fedoraproject.org/wiki/Anaconda
@@ -41,6 +41,16 @@ Patch9023:    bugfix-add-dnf-transaction-timeout.patch
 Patch6007:    fix-0-storage-devices-selected.patch
 Patch6008:    fix-remove-unknow-partition-is-sda-failed.patch
 Patch6009:    use-modinfo-to-check-ko-before-modprobe.patch
+Patch6010:    ntp-servers-improve-001-Create-a-new-DBus-structure-for-time-sources.patch
+Patch6011:    ntp-servers-improve-002-Use-the-structure-for-time-sources-in-ntp-py.patch
+Patch6012:    ntp-servers-improve-003-Use-the-structure-for-time-sources-in-the-Timezone-module.patch
+Patch6013:    ntp-servers-improve-004-Use-the-structure-for-time-sources-in-anaconda-py.patch
+Patch6014:    ntp-servers-improve-005-Use-the-structure-for-time-sources-in-network-py.patch
+Patch6015:    ntp-servers-improve-006-Add-support-for-the-NTP-server-status-cache.patch
+Patch6016:    ntp-servers-improve-007-Add-support-for-generating-a-summary-of-the-NTP-servers.patch
+Patch6017:    ntp-servers-improve-008-Use-the-structure-for-time-sources-in-TUI.patch
+Patch6018:    ntp-servers-improve-009-Use-the-structure-for-time-sources-in-GUI.patch
+Patch6019:    ntp-servers-improve-010-Add-support-for-the-timesource-kickstart-command.patch
 
 %define dbusver 1.2.3
 %define dnfver 3.6.0
@@ -57,7 +67,7 @@ Patch6009:    use-modinfo-to-check-ko-before-modprobe.patch
 %define libxklavierver 5.4
 %define mehver 0.23-1
 %define nmver 1.0
-%define pykickstartver 3.25-1
+%define pykickstartver 3.27-1
 %define pypartedver 2.5-2
 %define rpmver 4.10.0
 %define simplelinever 1.1-1
@@ -254,6 +264,12 @@ update-desktop-database &> /dev/null || :
 %{_datadir}/gtk-doc
 
 %changelog
+* Fri Dec 04 2020 gaihuiying <gaihuiying1@huawei.com> - 33.19-14
+- Type:bugfix
+- ID:NA
+- SUG:NA
+- DESC:improve ntp servers to fix unkown error
+
 * Sat Nov 28 2020 lunankun <lunankun@huawei.com> - 33.19-13
 - Type:bugfix
 - ID:NA
