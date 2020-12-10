@@ -1,7 +1,7 @@
 %define _empty_manifest_terminate_build 0
 Name:    anaconda
 Version: 33.19
-Release: 13
+Release: 14
 Summary: Graphical system installer
 License: GPLv2+ and MIT
 URL:     http://fedoraproject.org/wiki/Anaconda
@@ -41,6 +41,8 @@ Patch9023:    bugfix-add-dnf-transaction-timeout.patch
 Patch6007:    fix-0-storage-devices-selected.patch
 Patch6008:    fix-remove-unknow-partition-is-sda-failed.patch
 Patch6009:    use-modinfo-to-check-ko-before-modprobe.patch
+
+Patch9024:    Change-length-limit-of-hostname-from-255-to-64.patch
 
 %define dbusver 1.2.3
 %define dnfver 3.6.0
@@ -254,6 +256,12 @@ update-desktop-database &> /dev/null || :
 %{_datadir}/gtk-doc
 
 %changelog
+* Thu Dec 10 2020 zhouyihang <zhouyihang3@huawei.com> - 33.19-14
+- Type:bugfix
+- ID:NA
+- SUG:NA
+- DESC:Change length limit of hostname from 255 to 64
+
 * Sat Nov 28 2020 lunankun <lunankun@huawei.com> - 33.19-13
 - Type:bugfix
 - ID:NA
