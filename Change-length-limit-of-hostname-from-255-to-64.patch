@@ -1,0 +1,27 @@
+From f4a9c3a8588ec5a6563d76a0a4d319e078912f01 Mon Sep 17 00:00:00 2001
+From: sherlock2010 <15151851377@163.com>
+Date: Thu, 10 Dec 2020 14:26:12 +0800
+Subject: [PATCH] Change length limit of hostname from 255 to 64
+
+---
+ pyanaconda/network.py | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/pyanaconda/network.py b/pyanaconda/network.py
+index 6aab84a..00ccd0a 100644
+--- a/pyanaconda/network.py
++++ b/pyanaconda/network.py
+@@ -109,8 +109,8 @@ def is_valid_hostname(hostname, local=False):
+     if not hostname:
+         return (False, _("Host name cannot be None or an empty string."))
+ 
+-    if len(hostname) > 255:
+-        return (False, _("Host name must be 255 or fewer characters in length."))
++    if len(hostname) > 64:
++        return (False, _("Host name must be 64 or fewer characters in length."))
+ 
+     if local and hostname[-1] == ".":
+         return (False, _("Local host name must not end with period '.'."))
+-- 
+1.8.3.1
+

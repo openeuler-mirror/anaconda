@@ -1,7 +1,7 @@
 %define _empty_manifest_terminate_build 0
 Name:    anaconda
 Version: 33.19
-Release: 14
+Release: 15
 Summary: Graphical system installer
 License: GPLv2+ and MIT
 URL:     http://fedoraproject.org/wiki/Anaconda
@@ -51,6 +51,8 @@ Patch6016:    ntp-servers-improve-007-Add-support-for-generating-a-summary-of-th
 Patch6017:    ntp-servers-improve-008-Use-the-structure-for-time-sources-in-TUI.patch
 Patch6018:    ntp-servers-improve-009-Use-the-structure-for-time-sources-in-GUI.patch
 Patch6019:    ntp-servers-improve-010-Add-support-for-the-timesource-kickstart-command.patch
+
+Patch9024:    Change-length-limit-of-hostname-from-255-to-64.patch
 
 %define dbusver 1.2.3
 %define dnfver 3.6.0
@@ -264,6 +266,12 @@ update-desktop-database &> /dev/null || :
 %{_datadir}/gtk-doc
 
 %changelog
+* Thu Dec 10 2020 zhouyihang <zhouyihang3@huawei.com> - 33.19-15
+- Type:bugfix
+- ID:NA
+- SUG:NA
+- DESC:Change length limit of hostname from 255 to 64
+
 * Fri Dec 04 2020 gaihuiying <gaihuiying1@huawei.com> - 33.19-14
 - Type:bugfix
 - ID:NA
