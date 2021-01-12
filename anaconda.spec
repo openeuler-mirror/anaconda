@@ -1,7 +1,7 @@
 %define _empty_manifest_terminate_build 0
 Name:    anaconda
 Version: 33.19
-Release: 15
+Release: 16
 Summary: Graphical system installer
 License: GPLv2+ and MIT
 URL:     http://fedoraproject.org/wiki/Anaconda
@@ -28,6 +28,7 @@ Patch9015:    bugfix-add-kdump-parameter-into-kernel-cmdline.patch
 Patch9016:    bugfix-fix-password-policy.patch
 Patch9017:    add-boot-args-for-smmu-and-video.patch
 Patch9018:    disable-disk-encryption.patch
+Patch9019:    bugfix-set-up-LD_PRELOAD-for-the-Storage-and-Services-module.patch
 
 Patch6001:    anaconda-Fix-stage2-as-default-sources.patch
 Patch6002:    anaconda-Allow-to-detect-devices-with-the-iso9660-file-system.patch
@@ -266,6 +267,12 @@ update-desktop-database &> /dev/null || :
 %{_datadir}/gtk-doc
 
 %changelog
+* Mon Jan 11 2020 yuboyun <yuboyun@huawei.com> - 33.19-16
+- Type:bugfix
+- ID:NA
+- SUG:NA
+- DESC:set up LD_PRELOAD for the Storage and Services module
+
 * Thu Dec 10 2020 zhouyihang <zhouyihang3@huawei.com> - 33.19-15
 - Type:bugfix
 - ID:NA
