@@ -1,0 +1,65 @@
+From 769f395e80c92972900ef348d7dd747014666f70 Mon Sep 17 00:00:00 2001
+From: yu_boyun <1215979730@qq.com>
+Date: Mon, 11 Jan 2021 17:01:58 +0800
+Subject: [PATCH] set up LD_PRELOAD for the Storage and Services module
+
+---
+ data/dbus/org.fedoraproject.Anaconda.Modules.Services.service | 2 +-
+ data/dbus/org.fedoraproject.Anaconda.Modules.Storage.service  | 2 +-
+ pyanaconda/modules/services/__main__.py                       | 4 ++++
+ pyanaconda/modules/storage/__main__.py                        | 4 ++++
+ 4 files changed, 10 insertions(+), 2 deletions(-)
+
+diff --git a/data/dbus/org.fedoraproject.Anaconda.Modules.Services.service b/data/dbus/org.fedoraproject.Anaconda.Modules.Services.service
+index 79c6949..c3a6098 100644
+--- a/data/dbus/org.fedoraproject.Anaconda.Modules.Services.service
++++ b/data/dbus/org.fedoraproject.Anaconda.Modules.Services.service
+@@ -1,4 +1,4 @@
+ [D-BUS Service]
+ Name=org.fedoraproject.Anaconda.Modules.Services
+-Exec=/usr/libexec/anaconda/start-module pyanaconda.modules.services
++Exec=/usr/libexec/anaconda/start-module --env LD_PRELOAD=libgomp.so.1 pyanaconda.modules.services
+ User=root
+diff --git a/data/dbus/org.fedoraproject.Anaconda.Modules.Storage.service b/data/dbus/org.fedoraproject.Anaconda.Modules.Storage.service
+index 018ecf1..780200e 100644
+--- a/data/dbus/org.fedoraproject.Anaconda.Modules.Storage.service
++++ b/data/dbus/org.fedoraproject.Anaconda.Modules.Storage.service
+@@ -1,4 +1,4 @@
+ [D-BUS Service]
+ Name=org.fedoraproject.Anaconda.Modules.Storage
+-Exec=/usr/libexec/anaconda/start-module pyanaconda.modules.storage
++Exec=/usr/libexec/anaconda/start-module --env LD_PRELOAD=libgomp.so.1 pyanaconda.modules.storage
+ User=root
+diff --git a/pyanaconda/modules/services/__main__.py b/pyanaconda/modules/services/__main__.py
+index d4b0879..4327dc9 100644
+--- a/pyanaconda/modules/services/__main__.py
++++ b/pyanaconda/modules/services/__main__.py
+@@ -20,6 +20,10 @@
+ from pyanaconda.modules.common import init
+ init()
+ 
++import os
++if "LD_PRELOAD" in os.environ:
++    del os.environ["LD_PRELOAD"]
++
+ from pyanaconda.modules.services.services import ServicesService
+ service = ServicesService()
+ service.run()
+diff --git a/pyanaconda/modules/storage/__main__.py b/pyanaconda/modules/storage/__main__.py
+index 327a129..29212a9 100644
+--- a/pyanaconda/modules/storage/__main__.py
++++ b/pyanaconda/modules/storage/__main__.py
+@@ -20,6 +20,10 @@
+ from pyanaconda.modules.common import init
+ init("/tmp/storage.log")
+ 
++import os
++if "LD_PRELOAD" in os.environ:
++    del os.environ["LD_PRELOAD"]
++
+ # Initialize Blivet.
+ from pyanaconda.modules.storage.initialization import enable_installer_mode
+ enable_installer_mode()
+-- 
+1.8.3.1
+
