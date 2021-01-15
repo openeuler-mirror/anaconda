@@ -1,7 +1,7 @@
 %define _empty_manifest_terminate_build 0
 Name:    anaconda
 Version: 33.19
-Release: 16
+Release: 17
 Summary: Graphical system installer
 License: GPLv2+ and MIT
 URL:     http://fedoraproject.org/wiki/Anaconda
@@ -54,6 +54,7 @@ Patch6018:    ntp-servers-improve-009-Use-the-structure-for-time-sources-in-GUI.
 Patch6019:    ntp-servers-improve-010-Add-support-for-the-timesource-kickstart-command.patch
 
 Patch9024:    Change-length-limit-of-hostname-from-255-to-64.patch
+Patch9025:    Propagate-a-lazy-proxy-of-the-storage-model.patch
 
 %define dbusver 1.2.3
 %define dnfver 3.6.0
@@ -267,7 +268,13 @@ update-desktop-database &> /dev/null || :
 %{_datadir}/gtk-doc
 
 %changelog
-* Mon Jan 11 2020 yuboyun <yuboyun@huawei.com> - 33.19-16
+* Thu Jan 14 2021 zhouyihang <zhouyihang3@huawei.com> - 33.19-17
+- Type:bugfix
+- ID:NA
+- SUG:NA
+- DESC:Propagate a lazy proxy of the storage model
+
+* Mon Jan 11 2021 yuboyun <yuboyun@huawei.com> - 33.19-16
 - Type:bugfix
 - ID:NA
 - SUG:NA
