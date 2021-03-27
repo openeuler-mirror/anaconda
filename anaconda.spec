@@ -1,7 +1,7 @@
 %define _empty_manifest_terminate_build 0
 Name:    anaconda
 Version: 33.19
-Release: 17
+Release: 18
 Summary: Graphical system installer
 License: GPLv2+ and MIT
 URL:     http://fedoraproject.org/wiki/Anaconda
@@ -55,6 +55,9 @@ Patch6018:    ntp-servers-improve-009-Use-the-structure-for-time-sources-in-GUI.
 Patch6019:    ntp-servers-improve-010-Add-support-for-the-timesource-kickstart-command.patch
 
 Patch9024:    Change-length-limit-of-hostname-from-255-to-64.patch
+
+Patch6020:    bugfix-Schedule-timed-actions-with-the-right-selector-18516.patch 
+Patch6021:    bugfix-Reset-the-state-of-the-custom-partitioning-spoke.patch 
 
 %define dbusver 1.2.3
 %define dnfver 3.6.0
@@ -268,6 +271,12 @@ update-desktop-database &> /dev/null || :
 %{_datadir}/gtk-doc
 
 %changelog
+* Sat Mar 27 2021 zhangrui <zhangrui182@huawei.com> - 33.19-18
+- Type:bugfix
+- ID:NA
+- SUG:NA
+- DESC:reset the state of the custom partiting spoke
+
 * Thu Feb 4 2021 liuxin264 <liuxin264@huawei.com> - 33.19-17
 - Type:bugfix
 - ID:NA
