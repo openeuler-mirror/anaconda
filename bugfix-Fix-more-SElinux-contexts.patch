@@ -1,0 +1,32 @@
+From 1e873f5084f84e16c5d26b65f29ba401ee7f7f94 Mon Sep 17 00:00:00 2001
+From: Vladimir Slavik <vslavik@redhat.com>
+Date: Wed, 3 Jun 2020 15:54:00 +0200
+Subject: [PATCH] Fix more SElinux contexts
+
+Apparently we have them wrong in /boot/loader/entries and /etc/dnf/modules.d/
+See the linmked bugs for more details. This is a bit workaroundish, but works.
+
+Resolves: rhbz#1775975
+Resolves: rhbz#1834189
+---
+ data/post-scripts/80-setfilecons.ks | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/data/post-scripts/80-setfilecons.ks b/data/post-scripts/80-setfilecons.ks
+index d6f183ce8..f08e308e3 100644
+--- a/data/post-scripts/80-setfilecons.ks
++++ b/data/post-scripts/80-setfilecons.ks
+@@ -13,7 +13,9 @@ restorecon -ir /etc/sysconfig/network-scripts /etc/lvm /etc/X11/xorg.conf.d \
+                /var/lib /var/lib/iscsi /var/lock /var/log /var/spool \
+                /var/cache/yum \
+                /dev \
+-               /root
++               /root \
++               /boot \
++               /etc/dnf/modules.d
+ 
+ # Also relabel the OSTree variants of the traditional mounts if present
+ restorecon -ir /var/roothome /var/home /var/opt /var/srv /var/media /var/mnt
+-- 
+2.23.0
+

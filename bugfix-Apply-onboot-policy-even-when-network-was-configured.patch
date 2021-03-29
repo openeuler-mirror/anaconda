@@ -1,0 +1,27 @@
+From b7258aafb1e55b055bc6bcd18b10c83f5a5feec6 Mon Sep 17 00:00:00 2001
+From: Radek Vykydal <rvykydal@redhat.com>
+Date: Wed, 29 Jul 2020 12:43:26 +0200
+Subject: [PATCH] Apply onboot policy even when network was configured in UI.
+
+Resolves: rhbz#1856632
+---
+ pyanaconda/modules/network/network.py | 3 ---
+ 1 file changed, 3 deletions(-)
+
+diff --git a/pyanaconda/modules/network/network.py b/pyanaconda/modules/network/network.py
+index aa5a14b38..507d3b5c1 100644
+--- a/pyanaconda/modules/network/network.py
++++ b/pyanaconda/modules/network/network.py
+@@ -372,9 +372,6 @@ class NetworkService(KickstartService):
+         # Not if any network device was configured via kickstart.
+         if self._original_network_data:
+             return False
+-        # Not if any network device was configured in UI.
+-        if self._use_device_configurations:
+-            return False
+         # Not if there is no configuration to apply the policy to
+         if not self._device_configurations or not self._device_configurations.get_all():
+             return False
+-- 
+2.23.0
+

@@ -1,0 +1,26 @@
+From 82ec245b104c4cc87f322b8824e04f22961c34d6 Mon Sep 17 00:00:00 2001
+From: Jan Stodola <honza.stodola@gmail.com>
+Date: Mon, 31 Aug 2020 21:59:43 +0200
+Subject: [PATCH] The underline character should not be displayed
+
+Fix anaconda showing "1 _storage device selected" on the advanced storage spoke.
+The call was accidentally? removed in 7b7616f
+---
+ pyanaconda/ui/gui/spokes/advanced_storage.py | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/pyanaconda/ui/gui/spokes/advanced_storage.py b/pyanaconda/ui/gui/spokes/advanced_storage.py
+index 88405894e..e3ad33147 100644
+--- a/pyanaconda/ui/gui/spokes/advanced_storage.py
++++ b/pyanaconda/ui/gui/spokes/advanced_storage.py
+@@ -632,6 +632,7 @@ class FilterSpoke(NormalSpoke):
+         if count > 0:
+             really_show(summary_button)
+             label.set_text(summary)
++            label.set_use_underline(True)
+         else:
+             really_hide(summary_button)
+ 
+-- 
+2.23.0
+

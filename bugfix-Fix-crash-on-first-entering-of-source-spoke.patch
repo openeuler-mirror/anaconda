@@ -1,0 +1,40 @@
+From c3dbffacabc60f0149b142a1f6b3f29739e9288b Mon Sep 17 00:00:00 2001
+From: Jiri Konecny <jkonecny@redhat.com>
+Date: Mon, 27 Jul 2020 18:13:30 +0200
+Subject: [PATCH] Fix crash on first entering of source spoke
+
+This is called by removing treeinfo repositories which happens thanks to the
+initialization of the spoke and selecting first line. Just let everything go
+because the repository is added later again (or at least it seems to be working
+like that).
+
+Related: rhbz#1851207
+(cherry picked from commit 5136a4f961c98fec373033027502fba8b409c04d)
+---
+ pyanaconda/ui/gui/spokes/installation_source.py | 10 ++++++----
+ 1 file changed, 6 insertions(+), 4 deletions(-)
+
+diff --git a/pyanaconda/ui/gui/spokes/installation_source.py b/pyanaconda/ui/gui/spokes/installation_source.py
+index 0bd3b6938..7ed95c51d 100644
+--- a/pyanaconda/ui/gui/spokes/installation_source.py
++++ b/pyanaconda/ui/gui/spokes/installation_source.py
+@@ -1639,10 +1639,12 @@ class SourceSpoke(NormalSpoke, GUISpokeInputCheckHandler, SourceSwitchHandler):
+ 
+         # Remove the input validation checks for this repo
+         repo = self._repo_store[itr][REPO_OBJ]
+-        self.remove_check(self._repo_checks[repo.repo_id].name_check)
+-        self.remove_check(self._repo_checks[repo.repo_id].url_check)
+-        self.remove_check(self._repo_checks[repo.repo_id].proxy_check)
+-        del self._repo_checks[repo.repo_id]
++        # avoid crash when the source is changed because of initialization
++        if repo.repo_id in self._repo_checks:
++            self.remove_check(self._repo_checks[repo.repo_id].name_check)
++            self.remove_check(self._repo_checks[repo.repo_id].url_check)
++            self.remove_check(self._repo_checks[repo.repo_id].proxy_check)
++            del self._repo_checks[repo.repo_id]
+ 
+         self._repo_store.remove(itr)
+         if len(self._repo_store) == 0:
+-- 
+2.23.0
+
