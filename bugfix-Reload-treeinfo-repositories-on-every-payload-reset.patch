@@ -1,0 +1,120 @@
+From 6f27de8a38cc7900bb35a4fac4ec258f50207468 Mon Sep 17 00:00:00 2001
+From: Jiri Konecny <jkonecny@redhat.com>
+Date: Thu, 23 Jul 2020 13:49:41 +0200
+Subject: [PATCH] Reload treeinfo repositories on every payload reset
+
+Remove old repositories before loading new ones. We are changing the logic to
+load new ones every time the base repo is changed.
+
+This will solve problem that additional repositories pointing to an
+invalid path. This is happening because we moved source mounting to a
+different folders for each source.
+
+Resolves: rhbz#1851207
+(cherry picked from commit 7b9e6c8ac29d56ed8b5d657ed6729cb5e239d09c)
+---
+ pyanaconda/payload/base.py        |  8 +-------
+ pyanaconda/payload/dnf/payload.py | 29 +++++++++++++++++++----------
+ 2 files changed, 20 insertions(+), 17 deletions(-)
+
+diff --git a/pyanaconda/payload/base.py b/pyanaconda/payload/base.py
+index 285e27e05..5e56dbb29 100644
+--- a/pyanaconda/payload/base.py
++++ b/pyanaconda/payload/base.py
+@@ -39,8 +39,6 @@ class Payload(metaclass=ABCMeta):
+         """
+         self.data = data
+ 
+-        self._first_payload_reset = True
+-
+         # A list of verbose error strings from the subclass
+         self.verbose_errors = []
+ 
+@@ -67,10 +65,6 @@ class Payload(metaclass=ABCMeta):
+         """The DBus type of the source."""
+         return None
+ 
+-    @property
+-    def first_payload_reset(self):
+-        return self._first_payload_reset
+-
+     def is_ready(self):
+         """Is the payload ready?"""
+         return True
+@@ -89,7 +83,7 @@ class Payload(metaclass=ABCMeta):
+ 
+         This method could be overriden.
+         """
+-        self._first_payload_reset = False
++        pass
+ 
+     def release(self):
+         """Release any resources in use by this object, but do not do final
+diff --git a/pyanaconda/payload/dnf/payload.py b/pyanaconda/payload/dnf/payload.py
+index b693c776d..227d32c82 100644
+--- a/pyanaconda/payload/dnf/payload.py
++++ b/pyanaconda/payload/dnf/payload.py
+@@ -1455,6 +1455,8 @@ class DNFPayload(Payload):
+         log.info("Configuring the base repo")
+         self.reset()
+ 
++        self._cleanup_old_treeinfo_repositories()
++
+         # Find the source and its type.
+         source_proxy = self.get_source_proxy()
+         source_type = source_proxy.Type
+@@ -1507,11 +1509,9 @@ class DNFPayload(Payload):
+                 self._refresh_install_tree(data)
+                 self._base.conf.releasever = self._get_release_version(install_tree_url)
+                 base_repo_url = self._get_base_repo_location(install_tree_url)
+-
+-                if self.first_payload_reset:
+-                    self._add_treeinfo_repositories(install_tree_url, base_repo_url)
+-
+                 log.debug("releasever from %s is %s", base_repo_url, self._base.conf.releasever)
++
++                self._load_treeinfo_repositories(base_repo_url)
+             except configparser.MissingSectionHeaderError as e:
+                 log.error("couldn't set releasever from base repo (%s): %s", source_type, e)
+ 
+@@ -1817,12 +1817,11 @@ class DNFPayload(Payload):
+         log.debug("No base repository found in treeinfo file. Using installation tree root.")
+         return install_tree_url
+ 
+-    def _add_treeinfo_repositories(self, install_tree_url, base_repo_url=None):
+-        """Add all repositories from treeinfo file which are not already loaded.
++    def _load_treeinfo_repositories(self, base_repo_url):
++        """Load new repositories from treeinfo file.
+ 
+-        :param install_tree_url: Url to the installation tree root.
+-        :param base_repo_url: Base repository url. This is not saved anywhere when the function
+-        is called. It will be add to the existing urls if not None.
++        :param base_repo_url: base repository url. This is not saved anywhere when the function
++                              is called. It will be add to the existing urls if not None.
+         """
+         if self._install_tree_metadata:
+             existing_urls = []
+@@ -1843,9 +1842,19 @@ class DNFPayload(Payload):
+                     repo = RepoData(name=repo_md.name, baseurl=repo_md.path,
+                                     install=False, enabled=repo_enabled)
+                     repo.treeinfo_origin = True
++                    log.debug("Adding new treeinfo repository %s", repo_md.name)
+                     self.add_repo(repo)
+ 
+-        return install_tree_url
++    def _cleanup_old_treeinfo_repositories(self):
++        """Remove all old treeinfo repositories before loading new ones.
++
++        Find all repositories added from treeinfo file and remove them. After this step new
++        repositories will be loaded from the new link.
++        """
++        for ks_repo_name in self.addons:
++            if self.get_addon_repo(ks_repo_name).treeinfo_origin:
++                log.debug("Removing old treeinfo repository %s", ks_repo_name)
++                self.remove_repo(ks_repo_name)
+ 
+     def _write_dnf_repo(self, repo, repo_path):
+         """Write a repo object to a DNF repo.conf file.
+-- 
+2.23.0
+

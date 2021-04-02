@@ -1,0 +1,101 @@
+From b224f888c225d9735abaa82d0156ae5a4c38d4f5 Mon Sep 17 00:00:00 2001
+From: Vendula Poncova <vponcova@redhat.com>
+Date: Fri, 18 Sep 2020 15:13:14 +0200
+Subject: [PATCH] Never mount partitions on a disk with the iso9660 filesystem
+
+Blivet doesn't recognize these partitions, so we mount the disk in stage2.
+However, it will fail if one of its partitions is already mounted, for example
+in stage1. Therefore, skip these partitions in the script that looks for a root
+image on devices and use the disk instead.
+
+The boot.iso has the following structure:
+
+NAME   TYPE  SIZE FSTYPE  LABEL
+sda    disk  8.8G iso9660 RHEL-8-3-0-BaseOS-x86_64
+|-sda1 part  8.8G iso9660 RHEL-8-3-0-BaseOS-x86_64
+`-sda2 part   10M vfat    ANACONDA
+
+And the following default boot options:
+
+inst.stage2=hd:LABEL=RHEL-8-3-0-BaseOS-x86_64 rd.live.check quiet
+
+Anaconda runs the anaconda-diskroot script for every device that matches the
+specification from the inst.stage2 option. In this example, it is sda and sda1,
+because both of them have the specified label RHEL-8-3-0-BaseOS-x86_64. With
+the fix, the script will detect that sda1 is a partition on a disk with the
+iso9660 filesystem and stop to process sda1. The script will succeed with sda.
+
+We should never rely on the order of the devices.
+
+(cherry-picked from a commit 301a09d)
+
+Related: rhbz#1878784
+---
+ dracut/anaconda-diskroot | 17 ++++++++++++++++-
+ dracut/anaconda-lib.sh   | 22 ++++++++++++++++++++++
+ 2 files changed, 38 insertions(+), 1 deletion(-)
+
+diff --git a/dracut/anaconda-diskroot b/dracut/anaconda-diskroot
+index 8846b1108..2797e6762 100755
+--- a/dracut/anaconda-diskroot
++++ b/dracut/anaconda-diskroot
+@@ -41,7 +41,22 @@ dev="$1"
+ path="$2" # optional, could be empty
+ kickstart="$(getarg ks= inst.ks=)"
+ 
+-[ -e "/dev/root" ] && exit 1 # we already have a root device!
++# Log the device that triggered this job.
++debug_msg "Trying to find a root image on the device $dev."
++
++# Do we already have a root device?
++# Then do not run again.
++[ -e "/dev/root" ] && exit 1
++
++# Skip partitions on a disk with the iso9660 filesystem. Blivet doesn't
++# recognize these partitions, so we mount the disk in stage2. However, it
++# will fail if one of its partitions is already mounted, for example here.
++# Therefore, skip the partitions and use the disk to find our root image.
++# See the bug 1878784.
++if dev_is_on_disk_with_iso9660 "$dev"; then
++  debug_msg "Skipping $dev on a disk with iso9660."
++  exit 1
++fi
+ 
+ # If we're waiting for a cdrom kickstart, the user might need to swap discs.
+ # So if this is a CDROM drive, make a note of it, but don't mount it (yet).
+diff --git a/dracut/anaconda-lib.sh b/dracut/anaconda-lib.sh
+index e2ab7a205..3b86f3df9 100755
+--- a/dracut/anaconda-lib.sh
++++ b/dracut/anaconda-lib.sh
+@@ -253,6 +253,28 @@ dev_is_cdrom() {
+     udevadm info --query=property --name=$1 | grep -q 'ID_CDROM=1'
+ }
+ 
++dev_is_on_disk_with_iso9660() {
++    # Get the name of the device.
++    local dev_name="${1}"
++
++    # Get the path of the device.
++    local dev_path="$(udevadm info -q path --name ${dev_name})"
++
++    # Is the device a partition?
++    udevadm info -q property --path ${dev_path} | grep -q 'DEVTYPE=partition' || return 1
++
++    # Get the path of the parent.
++    local disk_path="${dev_path%/*}"
++
++    # Is the parent a disk?
++    udevadm info -q property --path ${disk_path} | grep -q 'DEVTYPE=disk' || return 1
++
++    # Does the parent has the iso9660 filesystem?
++    udevadm info -q property --path ${disk_path} | grep -q 'ID_FS_TYPE=iso9660' || return 1
++
++    return 0
++}
++
+ # dracut doesn't bring up the network unless:
+ #   a) $netroot is set (i.e. you have a network root device), or
+ #   b) /tmp/net.ifaces exists.
+-- 
+2.23.0
+

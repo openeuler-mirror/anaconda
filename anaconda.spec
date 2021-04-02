@@ -1,7 +1,7 @@
 %define _empty_manifest_terminate_build 0
 Name:    anaconda
 Version: 33.19
-Release: 18
+Release: 19
 Summary: Graphical system installer
 License: GPLv2+ and MIT
 URL:     http://fedoraproject.org/wiki/Anaconda
@@ -56,8 +56,57 @@ Patch6019:    ntp-servers-improve-010-Add-support-for-the-timesource-kickstart-c
 
 Patch9024:    Change-length-limit-of-hostname-from-255-to-64.patch
 
-Patch6020:    bugfix-Schedule-timed-actions-with-the-right-selector-18516.patch 
-Patch6021:    bugfix-Reset-the-state-of-the-custom-partitioning-spoke.patch 
+Patch6020:    bugfix-Schedule-timed-actions-with-the-right-selector-18516.patch
+Patch6021:    bugfix-Reset-the-state-of-the-custom-partitioning-spoke.patch
+Patch6022:    bugfix-Fix-regression-reading-kernel-list-when-collecting-c.patch
+Patch6023:    bugfix-Fix-more-SElinux-contexts.patch
+Patch6024:    bugfix-Fix-issue-when-NFS-path-is-pointing-directly-to-ISO-.patch
+Patch6025:    bugfix-Create-the-initial-storage-model-during-the-initiali.patch
+Patch6026:    bugfix-Always-specify-the-boot-disk.patch
+Patch6027:    bugfix-Fix-passing-of-arguments-when-creating-dracut-argume.patch
+Patch6028:    bugfix-Reconfigure-DNF-payload-after-options-are-set.patch
+Patch6029:    bugfix-Only-pass-one-initrd-image-to-kexec.patch
+Patch6030:    bugfix-Fix-creating-cached-LVs-on-encrypted-PVs.patch
+Patch6031:    bugfix-Run-actions-of-the-Resize-dialog-in-the-reversed-ord.patch
+Patch6032:    bugfix-Reload-treeinfo-repositories-on-every-payload-reset.patch
+Patch6033:    bugfix-Remove-treeinfo-repositories-instead-of-disabling.patch
+Patch6034:    bugfix-Fix-crash-on-first-entering-of-source-spoke.patch
+Patch6035:    bugfix-Keep-treeinfo-repositories-disabled-after-payload-re.patch
+Patch6036:    bugfix-Fix-issue-that-treeinfo-repositories-were-never-disa.patch
+Patch6037:    bugfix-Fix-kickstart-file-error-with-user-groups.patch
+Patch6038:    bugfix-Create-ssh-user-using-only-existing-fields-1860058.patch
+Patch6039:    bugfix-Automatically-break-lines-in-labels-in-software-sele.patch
+Patch6040:    bugfix-Reset-the-RAID-level-of-the-device-request-1828092.patch
+Patch6041:    bugfix-Change-keyboard-ordering-to-US-layout-first-native-s.patch
+Patch6042:    bugfix-Handle-exceptions-from-threads-without-new-instances.patch
+Patch6043:    bugfix-network-fix-configuration-of-virtual-devices-by-boot.patch
+Patch6044:    bugfix-network-do-not-try-to-activate-connection-that-has-n.patch
+Patch6045:    bugfix-network-add-timeout-for-synchronous-activation-of-a-.patch
+Patch6046:    bugfix-Fix-traceback-when-removing-additional-repository.patch
+Patch6047:    bugfix-network-do-not-crash-when-updating-a-connection-with.patch
+Patch6048:    bugfix-Do-not-mount-as-RW-in-Dracut.patch
+Patch6049:    bugfix-The-underline-character-should-not-be-displayed.patch
+Patch6050:    bugfix-Recognize-systemd.unit-anaconda.target-in-anaconda-g.patch
+Patch6051:    bugfix-Always-clear-treeinfo-metadata-1872056.patch
+Patch6052:    bugfix-Apply-onboot-policy-even-when-network-was-configured.patch
+Patch6053:    bugfix-network-fix-parsing-of-hostname-from-ip-if-mac-is-de.patch
+Patch6054:    bugfix-Don-t-generate-container-data-for-non-container-devi.patch
+Patch6055:    bugfix-Differentiate-between-RAID-levels-of-a-device-and-it.patch
+Patch6056:    bugfix-Show-warning-message-when-entered-size-is-not-valid.patch
+Patch6057:    bugfix-Add-the-DBus-method-IsDeviceShrinkable-1875677.patch
+Patch6058:    bugfix-Check-if-original-partitions-are-mounted-too.patch
+Patch6059:    bugfix-network-get-hwadddr-when-binding-to-mac-more-robustl.patch
+Patch6060:    bugfix-Fix-the-combo-box-for-an-URL-type-of-additional-repo.patch
+Patch6061:    bugfix-Never-mount-partitions-on-a-disk-with-the-iso9660-fi.patch
+Patch6062:    bugfix-Add-missing-make-BuildRequires.patch
+Patch6063:    bugfix-Allow-to-format-selected-DASDs.patch
+Patch6064:    bugfix-Add-selinux-0-boot-parameter-when-SELinux-is-set-to-.patch
+Patch6065:    bugfix-Root-password-is-mandatory-if-there-is-not-admin-use.patch
+Patch6066:    bugfix-Fix-traceback-when-starting-installation-with-inst.c.patch
+Patch6067:    bugfix-Fix-checking-ssl-certificate-for-metadata-1745064.patch
+Patch6068:    bugfix-Fix-error-in-initrd-shift-count-out-of-range.patch
+Patch6069:    bugfix-Fix-the-logic-for-enabling-latest-updates.patch
+Patch6070:    bugfix-Don-t-enter-spokes-after-we-leave-the-Summary-hub.patch
 
 %define dbusver 1.2.3
 %define dnfver 3.6.0
@@ -271,6 +320,12 @@ update-desktop-database &> /dev/null || :
 %{_datadir}/gtk-doc
 
 %changelog
+* Mon Mar 29 2021 xuxiaolong <xuxiaolon23@huawei.com> - 33.19-19
+- Type:bugfix
+- ID:NA
+- SUG:NA
+- DESC:sync 50 bugfix commit from github
+
 * Sat Mar 27 2021 zhangrui <zhangrui182@huawei.com> - 33.19-18
 - Type:bugfix
 - ID:NA
