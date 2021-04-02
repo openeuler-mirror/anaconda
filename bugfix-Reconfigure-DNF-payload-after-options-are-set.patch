@@ -1,0 +1,29 @@
+From 2acb1357ee8b931662a1353a8956d5a0be176dec Mon Sep 17 00:00:00 2001
+From: Vladimir Slavik <vslavik@redhat.com>
+Date: Tue, 23 Jun 2020 18:52:32 +0200
+Subject: [PATCH] Reconfigure DNF payload after options are set
+
+Fixes broken multilib boot option.
+
+Resolves: rhbz#1847603
+---
+ pyanaconda/payload/dnf/payload.py | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/pyanaconda/payload/dnf/payload.py b/pyanaconda/payload/dnf/payload.py
+index f92720890..b38e78cd3 100644
+--- a/pyanaconda/payload/dnf/payload.py
++++ b/pyanaconda/payload/dnf/payload.py
+@@ -173,6 +173,9 @@ class DNFPayload(Payload):
+         if opts.multiLib:
+             self.data.packages.multiLib = opts.multiLib
+ 
++        # Reset all the other things now that we have new configuration.
++        self._configure()
++
+     @property
+     def type(self):
+         """The DBus type of the payload."""
+-- 
+2.23.0
+
