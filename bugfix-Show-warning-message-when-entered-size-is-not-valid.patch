@@ -1,0 +1,96 @@
+From 4bf4ba6d9a11cfd652ce48cdaea86bd617b6332a Mon Sep 17 00:00:00 2001
+From: Vladimir Slavik <vslavik@redhat.com>
+Date: Tue, 28 Apr 2020 14:40:53 +0200
+Subject: [PATCH] Show warning message when entered size is not valid
+
+Requires also reordering checks such that the identical text test comes later.
+
+Resolves: rhbz#1809573
+---
+ pyanaconda/ui/gui/spokes/custom_storage.py    | 31 ++++++++++++++-----
+ .../gui/spokes/lib/custom_storage_helpers.py  | 10 ++++++
+ 2 files changed, 33 insertions(+), 8 deletions(-)
+
+diff --git a/pyanaconda/ui/gui/spokes/custom_storage.py b/pyanaconda/ui/gui/spokes/custom_storage.py
+index 08e62cc40..f3755c48c 100644
+--- a/pyanaconda/ui/gui/spokes/custom_storage.py
++++ b/pyanaconda/ui/gui/spokes/custom_storage.py
+@@ -63,7 +63,8 @@ from pyanaconda.ui.gui.spokes.lib.custom_storage_helpers import get_size_from_en
+     get_selected_raid_level, get_default_raid_level, get_container_type, AddDialog,\
+     ConfirmDeleteDialog, DisksDialog, ContainerDialog, NOTEBOOK_LABEL_PAGE, NOTEBOOK_DETAILS_PAGE,\
+     NOTEBOOK_LUKS_PAGE, NOTEBOOK_UNEDITABLE_PAGE, NOTEBOOK_INCOMPLETE_PAGE, NEW_CONTAINER_TEXT,\
+-    CONTAINER_TOOLTIP, get_supported_device_raid_levels, generate_request_description
++    CONTAINER_TOOLTIP, DESIRED_CAPACITY_ERROR, get_supported_device_raid_levels, \
++    generate_request_description
+ from pyanaconda.ui.gui.spokes.lib.passphrase import PassphraseDialog
+ from pyanaconda.ui.gui.spokes.lib.refresh import RefreshDialog
+ from pyanaconda.ui.gui.spokes.lib.summary import ActionSummaryDialog
+@@ -1552,23 +1553,37 @@ class CustomPartitioningSpoke(NormalSpoke, StorageCheckHandler):
+         self._request.device_raid_level = get_selected_raid_level(self._raidLevelCombo)
+         self.on_value_changed()
+ 
+-    def on_size_changed(self, widget):
++    @timed_action(750, 1500, False)
++    def on_size_changed(self, *args):
++        """Callback for text change in "desired capacity" widget"""
+         if not self._sizeEntry.get_sensitive():
+             return
+ 
+-        current_size = Size(self._request.device_size)
+-        displayed_size = current_size.human_readable(max_places=self.MAX_SIZE_PLACES)
+-
+-        if displayed_size == self._sizeEntry.get_text():
+-            return
+-
+         size = get_size_from_entry(
+             self._sizeEntry,
+             lower_bound=self.MIN_SIZE_ENTRY,
+             units=SIZE_UNITS_DEFAULT
+         )
+ 
++        # Show warning if the size string is invalid. Field self._error is used as a "flag" that
++        # the last error was the same. This is done because this warning can fire on every change,
++        # so it would keep flickering at the bottom as you type.
+         if size is None:
++            if self._error != DESIRED_CAPACITY_ERROR:
++                self.clear_errors()
++                self.set_detailed_warning(
++                    _("Invalid input. Specify the Desired Capacity in whole or decimal numbers, "
++                      "with an appropriate unit."),
++                    _(DESIRED_CAPACITY_ERROR)
++                )
++            return
++        elif self._error == DESIRED_CAPACITY_ERROR:
++            self.clear_errors()
++
++        current_size = Size(self._request.device_size)
++        displayed_size = current_size.human_readable(max_places=self.MAX_SIZE_PLACES)
++
++        if displayed_size == self._sizeEntry.get_text():
+             return
+ 
+         self._request.device_size = size.get_bytes()
+diff --git a/pyanaconda/ui/gui/spokes/lib/custom_storage_helpers.py b/pyanaconda/ui/gui/spokes/lib/custom_storage_helpers.py
+index f7ae6cfa3..0dffaf0f7 100644
+--- a/pyanaconda/ui/gui/spokes/lib/custom_storage_helpers.py
++++ b/pyanaconda/ui/gui/spokes/lib/custom_storage_helpers.py
+@@ -49,6 +49,16 @@ CONTAINER_TOOLTIP = N_("Create or select %(container_type)s")
+ CONTAINER_DIALOG_TITLE = N_("CONFIGURE %(container_type)s")
+ CONTAINER_DIALOG_TEXT = N_("Please create a name for this %(container_type)s "
+                            "and select at least one disk below.")
++DESIRED_CAPACITY_ERROR = N_(
++    "Specify the Desired Capacity in whole or decimal numbers, with an appropriate unit.\n\n"
++    "Spaces separating digit groups are not allowed. Units consist of a decimal or binary "
++    "prefix, and optionally the letter B. Letter case does not matter for units. The default "
++    "unit used when units are left out is MiB.\n\n"
++    "Examples of valid input:\n"
++    "'100 GiB' = 100 gibibytes\n"
++    "'512m' = 512 megabytes\n"
++    "'123456789' = 123 terabytes and a bit less than a half\n"
++)
+ 
+ ContainerType = namedtuple("ContainerType", ["name", "label"])
+ 
+-- 
+2.23.0
+

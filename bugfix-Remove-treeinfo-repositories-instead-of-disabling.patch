@@ -1,0 +1,128 @@
+From 6f52b733470d5565bc8e9a2a2415997d0ecbba54 Mon Sep 17 00:00:00 2001
+From: Jiri Konecny <jkonecny@redhat.com>
+Date: Mon, 27 Jul 2020 18:08:30 +0200
+Subject: [PATCH] Remove treeinfo repositories instead of disabling
+
+We now remove repositories from treeinfo file on each payload reset. In that
+case we should not disable these in the source spoke but instead remove them.
+
+We should ideally also show them back to user when the source is switched back
+but that logic to detect if base repo repository have changed is not trivial and
+we had to change _update_payload_repos to achieve this. We don't want to
+introduce any more regressions and that code change could do that.
+
+Related: rhbz#1851207
+(cherry picked from commit 8b99a20860a193d2816b53e89e562ba01bb1a825)
+---
+ .../ui/gui/spokes/installation_source.py      | 44 ++++++++++++-------
+ 1 file changed, 28 insertions(+), 16 deletions(-)
+
+diff --git a/pyanaconda/ui/gui/spokes/installation_source.py b/pyanaconda/ui/gui/spokes/installation_source.py
+index 5b2f56b80..0bd3b6938 100644
+--- a/pyanaconda/ui/gui/spokes/installation_source.py
++++ b/pyanaconda/ui/gui/spokes/installation_source.py
+@@ -429,8 +429,6 @@ class SourceSpoke(NormalSpoke, GUISpokeInputCheckHandler, SourceSwitchHandler):
+         self._network_module = NETWORK.get_proxy()
+         self._device_tree = STORAGE.get_proxy(DEVICE_TREE)
+ 
+-        self._treeinfo_repos_already_disabled = False
+-
+     def apply(self):
+         source_changed = self._update_payload_source()
+         repo_changed = self._update_payload_repos()
+@@ -1205,7 +1203,7 @@ class SourceSpoke(NormalSpoke, GUISpokeInputCheckHandler, SourceSwitchHandler):
+         # the newly enabled button as well as the previously enabled (now
+         # disabled) button.
+         self._on_source_toggled(button, relatedBox)
+-        self._disable_treeinfo_repositories()
++        self._remove_treeinfo_repositories()
+ 
+     def _on_source_toggled(self, button, relatedBox):
+         enabled = button.get_active()
+@@ -1283,7 +1281,7 @@ class SourceSpoke(NormalSpoke, GUISpokeInputCheckHandler, SourceSwitchHandler):
+             button.set_label(os.path.basename(iso_file))
+             button.set_use_underline(False)
+             self._verify_iso_button.set_sensitive(True)
+-            self._disable_treeinfo_repositories()
++            self._remove_treeinfo_repositories()
+ 
+     def on_proxy_clicked(self, button):
+         dialog = ProxyDialog(self.data, self._proxy_url)
+@@ -1331,7 +1329,7 @@ class SourceSpoke(NormalSpoke, GUISpokeInputCheckHandler, SourceSwitchHandler):
+ 
+     def on_protocol_changed(self, combo):
+         self._on_protocol_changed()
+-        self._disable_treeinfo_repositories()
++        self._remove_treeinfo_repositories()
+ 
+     def _on_protocol_changed(self):
+         # Only allow the URL entry to be used if we're using an HTTP/FTP
+@@ -1431,8 +1429,6 @@ class SourceSpoke(NormalSpoke, GUISpokeInputCheckHandler, SourceSwitchHandler):
+             self._clear_repo_info()
+             self._repo_entry_box.set_sensitive(False)
+ 
+-        self._treeinfo_repos_already_disabled = False
+-
+     def _unique_repo_name(self, name):
+         """ Return a unique variation of the name if it already
+             exists in the repo store.
+@@ -1491,13 +1487,16 @@ class SourceSpoke(NormalSpoke, GUISpokeInputCheckHandler, SourceSwitchHandler):
+         self._repo_store[repo_model_path][REPO_ENABLED_COL] = enabled
+         self._repo_store[repo_model_path][REPO_OBJ].enabled = enabled
+ 
+-    def _disable_treeinfo_repositories(self):
++    def _remove_treeinfo_repositories(self):
+         """Disable all repositories loaded from the .treeinfo file"""
+-        if not self._treeinfo_repos_already_disabled:
+-            self._treeinfo_repos_already_disabled = True
+-            for repo_item in self._repo_store:
+-                if repo_item[REPO_OBJ].treeinfo_origin:
+-                    self._set_repo_enabled(repo_item.path, False)
++        removal_repo_list = []
++
++        for repo_item in self._repo_store:
++            if repo_item[REPO_OBJ].treeinfo_origin:
++                removal_repo_list.append(repo_item.path)
++
++        for path in removal_repo_list:
++            self._remove_repository(path)
+ 
+     def _clear_repo_info(self):
+         """ Clear the text from the repo entry fields
+@@ -1589,7 +1588,7 @@ class SourceSpoke(NormalSpoke, GUISpokeInputCheckHandler, SourceSwitchHandler):
+     def on_urlEntry_changed(self, editable, data=None):
+         # Check for and remove a URL prefix that matches the protocol dropdown
+         self._on_urlEtry_changed(editable)
+-        self._disable_treeinfo_repositories()
++        self._remove_treeinfo_repositories()
+ 
+     def _on_urlEtry_changed(self, editable):
+         self._remove_url_prefix(editable, self._protocol_combo_box, self.on_urlEntry_changed)
+@@ -1619,9 +1618,22 @@ class SourceSpoke(NormalSpoke, GUISpokeInputCheckHandler, SourceSwitchHandler):
+         self._repo_entry_box.set_sensitive(True)
+ 
+     def on_removeRepo_clicked(self, button):
+-        """ Remove the selected repository
++        """Remove the selected repository"""
++        self._remove_repository()
++
++    def _remove_repository(self, repo_model_path=None):
++        """Remove repository on repo_model_path or current selection.
++
++        If repo_model_path is not specified then current selection will be used.
++
++        :param repo_model_path: repo_model_path of what we can remove or None
++        :type repo_model_path: repo_store repo_model_path
+         """
+-        itr = self._repo_selection.get_selected()[1]
++        if repo_model_path is None:
++            itr = self._repo_store[repo_model_path].iter
++        else:
++            itr = self._repo_selection.get_selected()[1]
++
+         if not itr:
+             return
+ 
+-- 
+2.23.0
+

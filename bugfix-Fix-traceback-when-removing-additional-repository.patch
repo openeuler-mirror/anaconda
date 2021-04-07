@@ -1,0 +1,34 @@
+From b7ee1291870a0d6689ff6d81e1c50999f38cd6b7 Mon Sep 17 00:00:00 2001
+From: Jiri Konecny <jkonecny@redhat.com>
+Date: Fri, 21 Aug 2020 15:07:28 +0200
+Subject: [PATCH] Fix traceback when removing additional repository
+
+I made a mistake by missing `not` in the condition. That way the repo removal as
+user action crashed Anaconda because variable which was not set was immediately
+used.
+
+Unfortunately, I tested this just on the failing use-case and in that case it
+looked like it is working correctly (but didn't really).
+
+Resolves: rhbz#1871037
+(cherry picked from commit a92428aa61f31d3f25786d4e90108d0d7751d680)
+---
+ pyanaconda/ui/gui/spokes/installation_source.py | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/pyanaconda/ui/gui/spokes/installation_source.py b/pyanaconda/ui/gui/spokes/installation_source.py
+index 7ed95c51d..76631754b 100644
+--- a/pyanaconda/ui/gui/spokes/installation_source.py
++++ b/pyanaconda/ui/gui/spokes/installation_source.py
+@@ -1629,7 +1629,7 @@ class SourceSpoke(NormalSpoke, GUISpokeInputCheckHandler, SourceSwitchHandler):
+         :param repo_model_path: repo_model_path of what we can remove or None
+         :type repo_model_path: repo_store repo_model_path
+         """
+-        if repo_model_path is None:
++        if repo_model_path is not None:
+             itr = self._repo_store[repo_model_path].iter
+         else:
+             itr = self._repo_selection.get_selected()[1]
+-- 
+2.23.0
+

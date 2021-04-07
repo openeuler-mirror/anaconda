@@ -1,0 +1,56 @@
+From 373da9db5d1c7d138f87abfb69165bd9de413a41 Mon Sep 17 00:00:00 2001
+From: Vojtech Trefny <vtrefny@redhat.com>
+Date: Mon, 13 Jul 2020 14:53:42 +0200
+Subject: [PATCH] Fix creating cached LVs on encrypted PVs
+
+We need to get the child device for encrypted PVs because the PV
+devices from kickstart are the underlying partitions, not the
+lvmpv formatted LUKS devices.
+
+Resolves: rhbz#1855973
+---
+ .../partitioning/custom/custom_partitioning.py     | 14 ++++++++++++--
+ 1 file changed, 12 insertions(+), 2 deletions(-)
+
+diff --git a/pyanaconda/modules/storage/partitioning/custom/custom_partitioning.py b/pyanaconda/modules/storage/partitioning/custom/custom_partitioning.py
+index 754a48e2e..17c125dd6 100644
+--- a/pyanaconda/modules/storage/partitioning/custom/custom_partitioning.py
++++ b/pyanaconda/modules/storage/partitioning/custom/custom_partitioning.py
+@@ -851,6 +851,16 @@ class CustomPartitioningTask(NonInteractivePartitioningTask):
+         if data.logvol.lvList:
+             grow_lvm(storage)
+ 
++    def _get_cache_pv_devices(self, devicetree, logvol_data):
++        pv_devices = []
++        for pvname in logvol_data.cache_pvs:
++            pv = lookup_alias(devicetree, pvname)
++            if pv.format.type == "luks":
++                pv_devices.append(pv.children[0])
++            else:
++                pv_devices.append(pv)
++        return pv_devices
++
+     def _execute_logvol_data(self, storage, data, logvol_data):
+         """Execute the logvol data.
+ 
+@@ -927,7 +937,7 @@ class CustomPartitioningTask(NonInteractivePartitioningTask):
+ 
+         # If cache PVs specified, check that they belong to the same VG this LV is a member of
+         if logvol_data.cache_pvs:
+-            pv_devices = (lookup_alias(devicetree, pv) for pv in logvol_data.cache_pvs)
++            pv_devices = self._get_cache_pv_devices(devicetree, logvol_data)
+             if not all(pv in vg.pvs for pv in pv_devices):
+                 raise KickstartParseError(
+                     _("Cache PVs must belong to the same VG as the cached LV"),
+@@ -1096,7 +1106,7 @@ class CustomPartitioningTask(NonInteractivePartitioningTask):
+                 maxsize = None
+ 
+             if logvol_data.cache_size and logvol_data.cache_pvs:
+-                pv_devices = [lookup_alias(devicetree, pv) for pv in logvol_data.cache_pvs]
++                pv_devices = self._get_cache_pv_devices(devicetree, logvol_data)
+                 cache_size = Size("%d MiB" % logvol_data.cache_size)
+                 cache_mode = logvol_data.cache_mode or None
+                 cache_request = LVMCacheRequest(cache_size, pv_devices, cache_mode)
+-- 
+2.23.0
+
