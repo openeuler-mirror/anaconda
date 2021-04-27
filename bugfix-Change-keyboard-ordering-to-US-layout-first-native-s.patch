@@ -1,0 +1,30 @@
+From e05cc18294e67099bf87076e4f23fe5f031fecb5 Mon Sep 17 00:00:00 2001
+From: Sundeep Anand <suanand@redhat.com>
+Date: Wed, 12 Aug 2020 17:56:19 +0530
+Subject: [PATCH] Change keyboard ordering to US layout first, 'native' second.
+ Resolves: rhbz#1039185
+
+---
+ pyanaconda/keyboard.py | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/pyanaconda/keyboard.py b/pyanaconda/keyboard.py
+index 2c3226c6e..081fc96fd 100644
+--- a/pyanaconda/keyboard.py
++++ b/pyanaconda/keyboard.py
+@@ -171,8 +171,10 @@ def set_x_keyboard_defaults(localization_proxy, xkl_wrapper):
+         # store it normalized
+         new_layouts = [normalize_layout_variant(layouts[0])]
+         if not langtable.supports_ascii(layouts[0]):
+-            # does not support typing ASCII chars, append the default layout
+-            new_layouts.append(DEFAULT_KEYBOARD)
++            # The default keymap setting should have "us" before the native layout
++            # which does not support ascii,
++            # refer: https://bugzilla.redhat.com/show_bug.cgi?id=1039185
++            new_layouts.insert(0, DEFAULT_KEYBOARD)
+     else:
+         log.error("Failed to get layout for chosen locale '%s'", locale)
+         new_layouts = [DEFAULT_KEYBOARD]
+-- 
+2.23.0
+

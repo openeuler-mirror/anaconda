@@ -1,0 +1,95 @@
+From 0b4867eba60bbee4b8e1c1bd58966691dd1c2431 Mon Sep 17 00:00:00 2001
+From: Radek Vykydal <rvykydal@redhat.com>
+Date: Wed, 5 Aug 2020 16:35:34 +0200
+Subject: [PATCH] network: fix parsing of hostname from ip= if mac is defined
+ in dhcp
+
+Resolves: rhbz#1852560
+---
+ pyanaconda/core/regexes.py                       |  3 +++
+ pyanaconda/network.py                            | 13 ++++++++-----
+ tests/nosetests/pyanaconda_tests/network_test.py | 11 ++++++++---
+ 3 files changed, 19 insertions(+), 8 deletions(-)
+
+diff --git a/pyanaconda/core/regexes.py b/pyanaconda/core/regexes.py
+index 63ab668c9..ee5cc3765 100644
+--- a/pyanaconda/core/regexes.py
++++ b/pyanaconda/core/regexes.py
+@@ -191,3 +191,6 @@ ZFCP_WWPN_NUMBER = re.compile(r'^(?:0x|)[0-9A-Fa-f]{16}$')
+ 
+ # IPv6 address in dracut IP option (including the square brackets)
+ IPV6_ADDRESS_IN_DRACUT_IP_OPTION = re.compile(r'\[[^\]]+\]')
++
++# Octet of MAC address
++MAC_OCTET = re.compile(r'[a-fA-F0-9][a-fA-F0-9]')
+diff --git a/pyanaconda/network.py b/pyanaconda/network.py
+index c66f35d44..7ba821fe4 100644
+--- a/pyanaconda/network.py
++++ b/pyanaconda/network.py
+@@ -32,7 +32,7 @@ from pyanaconda.core import util, constants
+ from pyanaconda.core.i18n import _
+ from pyanaconda.core.kernel import kernel_arguments
+ from pyanaconda.core.regexes import HOSTNAME_PATTERN_WITHOUT_ANCHORS, \
+-    IPV6_ADDRESS_IN_DRACUT_IP_OPTION
++    IPV6_ADDRESS_IN_DRACUT_IP_OPTION, MAC_OCTET
+ from pyanaconda.core.configuration.anaconda import conf
+ from pyanaconda.core.constants import TIME_SOURCE_SERVER
+ from pyanaconda.modules.common.constants.services import NETWORK, TIMEZONE, STORAGE
+@@ -209,7 +209,7 @@ def hostname_from_cmdline(kernel_args):
+     """
+     # legacy hostname= option
+     hostname = kernel_args.get('hostname', "")
+-    # ip= option
++    # ip= option (man dracut.cmdline)
+     ipopts = kernel_args.get('ip')
+     # Example (2 options):
+     # ens3:dhcp 10.34.102.244::10.34.102.54:255.255.255.0:myhostname:ens9:none
+@@ -219,10 +219,13 @@ def hostname_from_cmdline(kernel_args):
+                 # Replace ipv6 addresses with empty string, example of ipv6 config:
+                 # [fd00:10:100::84:5]::[fd00:10:100::86:49]:80:myhostname:ens9:none
+                 ipopt = IPV6_ADDRESS_IN_DRACUT_IP_OPTION.sub('', ipopt)
+-            try:
++            elements = ipopt.split(':')
++            # Hostname can be defined only in option having more than 6 elements.
++            # But filter out auto ip= with mac address set by MAC_OCTET matching, eg:
++            # ip=<interface>:dhcp::52:54:00:12:34:56
++            # where the 4th element is not hostname.
++            if len(elements) > 6 and not re.match(MAC_OCTET, elements[6]):
+                 hostname = ipopt.split(':')[4]
+-            except IndexError:
+-                pass
+     return hostname
+ 
+ 
+diff --git a/tests/nosetests/pyanaconda_tests/network_test.py b/tests/nosetests/pyanaconda_tests/network_test.py
+index e7ca630a7..161e883ff 100644
+--- a/tests/nosetests/pyanaconda_tests/network_test.py
++++ b/tests/nosetests/pyanaconda_tests/network_test.py
+@@ -233,9 +233,11 @@ class NetworkTests(unittest.TestCase):
+         cmdline = {"ip": "10.34.102.244::10.34.102.54:255.255.255.0:myhostname:ens9:none",
+                    "hostname": "hostname_bootopt"}
+         self.assertEqual(network.hostname_from_cmdline(cmdline), "myhostname")
+-        cmdline = {"ip": "ens3:dhcp "}
++        cmdline = {"ip": "ens3:dhcp"}
+         self.assertEqual(network.hostname_from_cmdline(cmdline), "")
+-        cmdline = {"ip": "ens3:dhcp ",
++        cmdline = {"ip": "ens3:dhcp:1500"}
++        self.assertEqual(network.hostname_from_cmdline(cmdline), "")
++        cmdline = {"ip": "ens3:dhcp",
+                    "hostname": "hostname_bootopt"}
+         self.assertEqual(network.hostname_from_cmdline(cmdline), "hostname_bootopt")
+         # two ip configurations
+@@ -248,6 +250,9 @@ class NetworkTests(unittest.TestCase):
+         self.assertEqual(network.hostname_from_cmdline(cmdline), "myhostname")
+         cmdline = {"ip": "[fd00:10:100::84:5]::[fd00:10:100::86:49]:80::ens50:none"}
+         self.assertEqual(network.hostname_from_cmdline(cmdline), "")
+-        cmdline = {"ip": "[fd00:10:100::84:5]::[fd00:10:100::86:49]:80::ens50:none"
++        cmdline = {"ip": "[fd00:10:100::84:5]::[fd00:10:100::86:49]:80::ens50:none "
+                          "ens3:dhcp 10.34.102.244::10.34.102.54:255.255.255.0:myhostname:ens9:none"}
+         self.assertEqual(network.hostname_from_cmdline(cmdline), "myhostname")
++        # automatic ip= whith MAC address set
++        cmdline = {"ip": "ens3:dhcp::52:54:00:12:34:56"}
++        self.assertEqual(network.hostname_from_cmdline(cmdline), "")
+-- 
+2.23.0
+

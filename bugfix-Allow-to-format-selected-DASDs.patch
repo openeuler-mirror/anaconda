@@ -1,0 +1,32 @@
+From d1d43dc872aa05b7273883fe42debd55e11e6df6 Mon Sep 17 00:00:00 2001
+From: Vendula Poncova <vponcova@redhat.com>
+Date: Mon, 5 Oct 2020 18:57:24 +0200
+Subject: [PATCH] Allow to format selected DASDs
+
+TUI should allow to format selected DASDs the same way as GUI.
+
+(cherry-picked from a commit 4f1bc77)
+
+Related: rhbz#1874394
+---
+ pyanaconda/ui/tui/spokes/storage.py | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/pyanaconda/ui/tui/spokes/storage.py b/pyanaconda/ui/tui/spokes/storage.py
+index 813dbb052..4ed97d27e 100644
+--- a/pyanaconda/ui/tui/spokes/storage.py
++++ b/pyanaconda/ui/tui/spokes/storage.py
+@@ -258,6 +258,10 @@ class StorageSpoke(NormalTUISpoke):
+                         # Wait for storage.
+                         threadMgr.wait(THREAD_STORAGE)
+ 
++                        # Allow to format DASDs.
++                        self._disk_init_module.SetFormatUnrecognizedEnabled(True)
++                        self._disk_init_module.SetFormatLDLEnabled(True)
++
+                         # Get selected disks.
+                         disks = filter_disks_by_names(self._available_disks, self._selected_disks)
+ 
+-- 
+2.23.0
+
