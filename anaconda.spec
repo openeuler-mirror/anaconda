@@ -1,7 +1,7 @@
 %define _empty_manifest_terminate_build 0
 Name:    anaconda
 Version: 33.19
-Release: 19
+Release: 20
 Summary: Graphical system installer
 License: GPLv2+ and MIT
 URL:     http://fedoraproject.org/wiki/Anaconda
@@ -107,6 +107,7 @@ Patch6067:    bugfix-Fix-checking-ssl-certificate-for-metadata-1745064.patch
 Patch6068:    bugfix-Fix-error-in-initrd-shift-count-out-of-range.patch
 Patch6069:    bugfix-Fix-the-logic-for-enabling-latest-updates.patch
 Patch6070:    bugfix-Don-t-enter-spokes-after-we-leave-the-Summary-hub.patch
+Patch6071:    bugfix-do-not-mount-dbus-source.patch
 
 %define dbusver 1.2.3
 %define dnfver 3.6.0
@@ -320,6 +321,12 @@ update-desktop-database &> /dev/null || :
 %{_datadir}/gtk-doc
 
 %changelog
+* Thu Apr 29 2021 zhangrui <zhangrui182@huawei.com> - 33.19-20
+- Type:bugfix
+- ID:NA
+- SUG:NA
+- DESC:do not mount dbus sources
+
 * Mon Mar 29 2021 xuxiaolong <xuxiaolon23@huawei.com> - 33.19-19
 - Type:bugfix
 - ID:NA
