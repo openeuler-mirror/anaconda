@@ -1,7 +1,7 @@
 %define _empty_manifest_terminate_build 0
 Name:    anaconda
 Version: 33.19
-Release: 21
+Release: 22
 Summary: Graphical system installer
 License: GPLv2+ and MIT
 URL:     http://fedoraproject.org/wiki/Anaconda
@@ -109,6 +109,7 @@ Patch6069:    bugfix-Fix-the-logic-for-enabling-latest-updates.patch
 Patch6070:    bugfix-Don-t-enter-spokes-after-we-leave-the-Summary-hub.patch
 Patch6071:    bugfix-do-not-mount-dbus-source.patch
 Patch6072:    fix-xorg-timeout-and-throw-exception.patch
+Patch6073:    bugfix-Fix-issue-when-ns_info-cannot-be-retrieved-for-NVDim.patch
 
 %define dbusver 1.2.3
 %define dnfver 3.6.0
@@ -322,6 +323,12 @@ update-desktop-database &> /dev/null || :
 %{_datadir}/gtk-doc
 
 %changelog
+* Wed May 19 2021 liuxin <liuxin264@huawei.com> - 33.19-22
+- Type:bugfix
+- ID:NA
+- SUG:NA
+- DESC:Fix issue when ns_info cannot be retrieved for NVDimm namespace
+
 * Sat May 8 2021 fengtao <fengtao40@huawei.com> - 33.19-21
 - Type:bugfix
 - ID:NA
