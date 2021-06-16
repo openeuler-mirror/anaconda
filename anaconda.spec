@@ -4,7 +4,7 @@
 %endif
 Name:    anaconda
 Version: 33.19
-Release: 23
+Release: 24
 Summary: Graphical system installer
 License: GPLv2+ and MIT
 URL:     http://fedoraproject.org/wiki/Anaconda
@@ -58,6 +58,7 @@ Patch6018:    ntp-servers-improve-009-Use-the-structure-for-time-sources-in-GUI.
 Patch6019:    ntp-servers-improve-010-Add-support-for-the-timesource-kickstart-command.patch
 
 Patch9024:    Change-length-limit-of-hostname-from-255-to-64.patch
+Patch9025:    Change-topbar-background-size.patch
 
 Patch6020:    bugfix-Schedule-timed-actions-with-the-right-selector-18516.patch
 Patch6021:    bugfix-Reset-the-state-of-the-custom-partitioning-spoke.patch
@@ -329,6 +330,12 @@ update-desktop-database &> /dev/null || :
 %{_datadir}/gtk-doc
 
 %changelog
+* Wed Jun 16 2021 gaihuiying <gaihuiying1@huawei.com> - 33.19-24
+- Type:bugfix
+- ID:NA
+- SUG:NA
+- DESC:change topbar background size
+
 * Mon Jun 7 2021 zhangqiumiao <zhangqiumiao1@huawei.com> - 33.19-23
 - Type:requirement
 - ID:NA
