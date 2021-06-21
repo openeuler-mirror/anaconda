@@ -1,7 +1,10 @@
 %define _empty_manifest_terminate_build 0
+%if "0%{?_vendor}" == "0"
+%define _vendor openEuler
+%endif
 Name:    anaconda
 Version: 33.19
-Release: 23
+Release: 24
 Summary: Graphical system installer
 License: GPLv2+ and MIT
 URL:     http://fedoraproject.org/wiki/Anaconda
@@ -237,6 +240,9 @@ documentation for working with this library.
 %delete_la
 
 # install openEuler conf for anaconda
+if [ %{_vendor} != "openEuler" ]; then
+	sed -i "s#openEuler#%{_vendor}#g" %{SOURCE1}
+fi
 install -m 0755 %{SOURCE1} %{buildroot}/%{_sysconfdir}/%{name}/product.d/
 
 # Create an empty directory for addons
@@ -324,6 +330,12 @@ update-desktop-database &> /dev/null || :
 %{_datadir}/gtk-doc
 
 %changelog
+* Mon Jun 21 2021 zhangqiumiao <zhangqiumiao1@huawei.com> - 33.19-24
+- Type:requirement
+- ID:NA
+- SUG:NA
+- DESC:replace openEuler by %{_vendor}
+
 * Mon Jun 21 2021 liuxin <liuxin264@huawei.com> - 33.19-23
 - Type:bugfix
 - ID:NA
