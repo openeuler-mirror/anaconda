@@ -1,7 +1,7 @@
 %define _empty_manifest_terminate_build 0
 Name:    anaconda
 Version: 33.19
-Release: 22
+Release: 23
 Summary: Graphical system installer
 License: GPLv2+ and MIT
 URL:     http://fedoraproject.org/wiki/Anaconda
@@ -110,6 +110,7 @@ Patch6070:    bugfix-Don-t-enter-spokes-after-we-leave-the-Summary-hub.patch
 Patch6071:    bugfix-do-not-mount-dbus-source.patch
 Patch6072:    fix-xorg-timeout-and-throw-exception.patch
 Patch6073:    bugfix-Fix-issue-when-ns_info-cannot-be-retrieved-for-NVDim.patch
+Patch6074:    bugfix-Fix-SECTION-headers-in-docstrings.patch
 
 %define dbusver 1.2.3
 %define dnfver 3.6.0
@@ -323,6 +324,12 @@ update-desktop-database &> /dev/null || :
 %{_datadir}/gtk-doc
 
 %changelog
+* Mon Jun 21 2021 liuxin <liuxin264@huawei.com> - 33.19-23
+- Type:bugfix
+- ID:NA
+- SUG:NA
+- DESC:Fix section headers in docstrings
+
 * Wed May 19 2021 liuxin <liuxin264@huawei.com> - 33.19-22
 - Type:bugfix
 - ID:NA
