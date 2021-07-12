@@ -4,7 +4,7 @@
 %endif
 Name:    anaconda
 Version: 33.19
-Release: 25
+Release: 26
 Summary: Graphical system installer
 License: GPLv2+ and MIT
 URL:     http://fedoraproject.org/wiki/Anaconda
@@ -115,6 +115,7 @@ Patch6071:    bugfix-do-not-mount-dbus-source.patch
 Patch6072:    fix-xorg-timeout-and-throw-exception.patch
 Patch6073:    bugfix-Fix-issue-when-ns_info-cannot-be-retrieved-for-NVDim.patch
 Patch6074:    bugfix-Fix-SECTION-headers-in-docstrings.patch
+Patch6075:    change-inst-repo-default-value.patch
 
 %define dbusver 1.2.3
 %define dnfver 3.6.0
@@ -331,6 +332,12 @@ update-desktop-database &> /dev/null || :
 %{_datadir}/gtk-doc
 
 %changelog
+* Thu Jun 24 2021 youyifeng <ctyuncommiter05@chinatelecom.cn> - 33.19-26
+- Type:bugfix
+- ID:NA
+- SUG:NA
+- DESC:change inst.repo default value
+
 * Mon Jun 21 2021 gaihuiying <gaihuiying1@huawei.com> - 33.19-25
 - Type:bugfix
 - ID:NA
