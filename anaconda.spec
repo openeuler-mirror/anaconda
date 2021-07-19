@@ -4,7 +4,7 @@
 %endif
 Name:    anaconda
 Version: 33.19
-Release: 25
+Release: 26
 Summary: Graphical system installer
 License: GPLv2+ and MIT
 URL:     http://fedoraproject.org/wiki/Anaconda
@@ -244,6 +244,13 @@ documentation for working with this library.
 if [ %{_vendor} != "openEuler" ]; then
 	sed -i "s#openEuler#%{_vendor}#g" %{SOURCE1}
 fi
+%ifarch x86_64
+cat << END1 >> %{SOURCE1}
+
+[Storage]
+file_system_type = xfs
+END1
+%endif
 install -m 0755 %{SOURCE1} %{buildroot}/%{_sysconfdir}/%{name}/product.d/
 
 # Create an empty directory for addons
@@ -331,6 +338,12 @@ update-desktop-database &> /dev/null || :
 %{_datadir}/gtk-doc
 
 %changelog
+* Mon Jul 19 2021 zhujunhao <liuxin264@huawei.com> - 33.19-26
+- Type:bugfix
+- ID:NA
+- SUG:NA
+- DESC:set default filesystems is xfs when x86
+
 * Mon Jun 21 2021 liuxin <liuxin264@huawei.com> - 33.19-25
 - Type:bugfix
 - ID:NA
