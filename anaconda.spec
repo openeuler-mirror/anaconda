@@ -4,7 +4,7 @@
 %endif
 Name:    anaconda
 Version: 33.19
-Release: 28
+Release: 29
 Summary: Graphical system installer
 License: GPLv2+ and MIT
 URL:     http://fedoraproject.org/wiki/Anaconda
@@ -116,6 +116,7 @@ Patch6072:    fix-xorg-timeout-and-throw-exception.patch
 Patch6073:    bugfix-Fix-issue-when-ns_info-cannot-be-retrieved-for-NVDim.patch
 Patch6074:    bugfix-Fix-SECTION-headers-in-docstrings.patch
 Patch6075:    delete-datezone-map.patch
+Patch6076:    change-inst-repo-default-value.patch
 
 %define dbusver 1.2.3
 %define dnfver 3.6.0
@@ -331,6 +332,12 @@ update-desktop-database &> /dev/null || :
 %{_datadir}/gtk-doc
 
 %changelog
+* Sat Aug 7 2021 zhujunhao <zhujunhao8@huawei.com> - 33.19-29
+- Type:bugfix
+- ID:NA
+- SUG:NA
+- DESC:change inst.repo default value
+
 * Sat Aug 7 2021 zhujunhao <zhujunhao8@huawei.com> - 33.19-28
 - Type:bugfix
 - ID:NA
