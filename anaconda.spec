@@ -1,7 +1,7 @@
 %define _empty_manifest_terminate_build 0
 Name:    anaconda
 Version: 33.19
-Release: 13
+Release: 14
 Summary: Graphical system installer
 License: GPLv2+ and MIT
 URL:     http://fedoraproject.org/wiki/Anaconda
@@ -42,6 +42,7 @@ Patch6007:    fix-0-storage-devices-selected.patch
 Patch6008:    fix-remove-unknow-partition-is-sda-failed.patch
 
 Patch9024:    Change-length-limit-of-hostname-from-255-to-64.patch
+Patch9025:    delete-datezone-map.patch
 
 %define dbusver 1.2.3
 %define dnfver 3.6.0
@@ -54,7 +55,6 @@ Patch9024:    Change-length-limit-of-hostname-from-255-to-64.patch
 %define langtablever 0.0.49
 %define libarchivever 3.0.4
 %define libblockdevver 2.1
-%define libtimezonemapver 0.4.1-2
 %define libxklavierver 5.4
 %define mehver 0.23-1
 %define nmver 1.0
@@ -71,7 +71,7 @@ BuildRequires: gtk-doc gtk3-devel-docs >= %{gtk3ver} glib2-doc gobject-introspec
 BuildRequires: glade-devel libgnomekbd-devel libxklavier-devel >= %{libxklavierver} pango-devel
 BuildRequires: python3-kickstart >= %{pykickstartver} python3-devel python3-nose systemd
 BuildRequires: rpm-devel >= %{rpmver} libarchive-devel >= %{libarchivever} gdk-pixbuf2-devel
-BuildRequires: libtimezonemap-devel >= %{libtimezonemapver} libxml2
+BuildRequires: libxml2
 BuildRequires: gsettings-desktop-schemas metacity
 
 Requires: anaconda-core = %{version}-%{release}
@@ -80,7 +80,7 @@ Requires: libblockdev-plugins-all >= %{libblockdevver} realmd isomd5sum >= %{iso
 Requires: kexec-tools createrepo_c tmux gdb rsync python3-meh-gui >= %{mehver}
 Requires: adwaita-icon-theme python3-kickstart
 Requires: tigervnc-server-minimal libxklavier >= %{libxklavierver} libgnomekbd
-Requires: libtimezonemap >= %{libtimezonemapver} xz
+Requires: xz
 Requires: nm-connection-editor keybinder3 anaconda-user-help >= %{helpver} yelp system-logos
 Requires: python3 dracut >= %{dracutver} dracut-network dracut-live
 %ifarch %{ix86} x86_64
@@ -255,6 +255,12 @@ update-desktop-database &> /dev/null || :
 %{_datadir}/gtk-doc
 
 %changelog
+* Sat Aug 7 2021 zhujunhao <zhujunhao8@huawei.com> - 33.19-14
+- Type:bugfix
+- ID:NA
+- SUG:NA
+- DESC:delete date zone map
+
 * Thu Dec 10 2020 zhouyihang <zhouyihang3@huawei.com> - 33.19-13
 - Type:bugfix
 - ID:NA
