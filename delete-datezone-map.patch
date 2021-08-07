@@ -1,0 +1,132 @@
+diff -Nur anaconda-33.19.org/pyanaconda/ui/gui/spokes/datetime_spoke.glade anaconda-33.19/pyanaconda/ui/gui/spokes/datetime_spoke.glade
+--- anaconda-33.19.org/pyanaconda/ui/gui/spokes/datetime_spoke.glade	2021-08-07 16:25:21.547621965 +0800
++++ anaconda-33.19/pyanaconda/ui/gui/spokes/datetime_spoke.glade	2021-08-07 16:26:20.137758256 +0800
+@@ -3,7 +3,6 @@
+ <interface>
+   <requires lib="gtk+" version="3.12"/>
+   <requires lib="AnacondaWidgets" version="1.0"/>
+-  <requires lib="TimezoneMap" version="0.4"/>
+   <object class="GtkImage" id="addImage">
+     <property name="visible">True</property>
+     <property name="can_focus">False</property>
+@@ -548,19 +547,6 @@
+                       </packing>
+                     </child>
+                     <child>
+-                      <object class="CcTimezoneMap" id="tzmap">
+-                        <property name="visible">True</property>
+-                        <property name="can_focus">False</property>
+-                        <signal name="location-changed" handler="on_location_changed" swapped="no"/>
+-                      </object>
+-                      <packing>
+-                        <property name="expand">True</property>
+-                        <property name="fill">True</property>
+-                        <property name="padding">6</property>
+-                        <property name="position">1</property>
+-                      </packing>
+-                    </child>
+-                    <child>
+                       <object class="GtkAlignment" id="footerAlignment">
+                         <property name="visible">True</property>
+                         <property name="can_focus">False</property>
+diff -Nur anaconda-33.19.org/pyanaconda/ui/gui/spokes/datetime_spoke.py anaconda-33.19/pyanaconda/ui/gui/spokes/datetime_spoke.py
+--- anaconda-33.19.org/pyanaconda/ui/gui/spokes/datetime_spoke.py	2021-08-07 16:25:21.547621965 +0800
++++ anaconda-33.19/pyanaconda/ui/gui/spokes/datetime_spoke.py	2021-08-07 16:30:03.958279259 +0800
+@@ -53,9 +53,8 @@
+ import gi
+ gi.require_version("Gdk", "3.0")
+ gi.require_version("Gtk", "3.0")
+-gi.require_version("TimezoneMap", "1.0")
+ 
+-from gi.repository import Gdk, Gtk, TimezoneMap
++from gi.repository import Gdk, Gtk
+ 
+ log = get_module_logger(__name__)
+ 
+@@ -377,11 +376,6 @@
+     icon = "preferences-system-time-symbolic"
+     title = CN_("GUI|Spoke", "_Time & Date")
+ 
+-    # Hack to get libtimezonemap loaded for GtkBuilder
+-    # see https://bugzilla.gnome.org/show_bug.cgi?id=712184
+-    _hack = TimezoneMap.TimezoneMap()
+-    del(_hack)
+-
+     def __init__(self, *args):
+         NormalSpoke.__init__(self, *args)
+ 
+@@ -407,7 +401,6 @@
+         self._yearsStore = self.builder.get_object("years")
+         self._regionsStore = self.builder.get_object("regions")
+         self._citiesStore = self.builder.get_object("cities")
+-        self._tzmap = self.builder.get_object("tzmap")
+         self._dateBox = self.builder.get_object("dateBox")
+ 
+         # we need to know it the new value is the same as previous or not
+@@ -530,10 +523,6 @@
+             else:
+                 return _("Invalid timezone")
+         else:
+-            location = self._tzmap.get_location()
+-            if location and location.get_property("zone"):
+-                return _("%s timezone") % get_xlated_timezone(location.get_property("zone"))
+-            else:
+                 return _("Nothing selected")
+ 
+     def apply(self):
+@@ -585,7 +574,6 @@
+         kickstart_timezone = self._timezone_module.Timezone
+ 
+         if is_valid_timezone(kickstart_timezone):
+-            self._tzmap.set_timezone(kickstart_timezone)
+             time.tzset()
+ 
+         self._update_datetime()
+@@ -960,7 +948,6 @@
+         if region == "Etc":
+             # Etc timezones cannot be displayed on the map, so let's reset the
+             # location and manually set a highlight with no location pin.
+-            self._tzmap.clear_location()
+             if city in ("GMT", "UTC"):
+                 offset = 0.0
+             # The tzdb data uses POSIX-style signs for the GMT zones, which is
+@@ -971,13 +958,14 @@
+                 # Take the part after "GMT"
+                 offset = -float(city[3:])
+ 
+-            self._tzmap.set_selected_offset(offset)
+             time.tzset()
+         else:
+             # we don't want the timezone-changed signal to be emitted
+-            self._tzmap.set_timezone(timezone)
+             time.tzset()
+ 
++        self._tz = get_timezone(timezone)
++        self._update_datetime()
++
+         # update "old" values
+         self._old_city = city
+ 
+@@ -1027,22 +1015,6 @@
+         self._stop_and_maybe_start_time_updating(interval=5)
+         self._daysFilter.refilter()
+ 
+-    def on_location_changed(self, tz_map, location):
+-        if not location:
+-            return
+-
+-        timezone = location.get_property('zone')
+-
+-        # Updating the timezone will update the region/city combo boxes to match.
+-        # The on_city_changed handler will attempt to convert the timezone back
+-        # to a location and set it in the map, which we don't want, since we
+-        # already have a location. That's why we're here.
+-        with blockedHandler(self._cityCombo, self.on_city_changed):
+-            if self._set_timezone(timezone):
+-                # timezone successfully set
+-                self._tz = get_timezone(timezone)
+-                self._update_datetime()
+-
+     def on_timeformat_changed(self, button24h, *args):
+         hours = int(self._hoursLabel.get_text())
+         amPm = self._amPmLabel.get_text()
