@@ -1,7 +1,7 @@
 %define _empty_manifest_terminate_build 0
 Name:    anaconda
 Version: 33.19
-Release: 14
+Release: 15
 Summary: Graphical system installer
 License: GPLv2+ and MIT
 URL:     http://fedoraproject.org/wiki/Anaconda
@@ -43,6 +43,7 @@ Patch6008:    fix-remove-unknow-partition-is-sda-failed.patch
 
 Patch9024:    Change-length-limit-of-hostname-from-255-to-64.patch
 Patch9025:    delete-datezone-map.patch
+Patch9026:    change-inst-repo-default-value.patch
 
 %define dbusver 1.2.3
 %define dnfver 3.6.0
@@ -255,6 +256,12 @@ update-desktop-database &> /dev/null || :
 %{_datadir}/gtk-doc
 
 %changelog
+* Sat Aug 7 2021 zhujunhao <zhujunhao8@huawei.com> - 33.19-15
+- Type:bugfix
+- ID:NA
+- SUG:NA
+- DESC:change inst.repo default value
+
 * Sat Aug 7 2021 zhujunhao <zhujunhao8@huawei.com> - 33.19-14
 - Type:bugfix
 - ID:NA
