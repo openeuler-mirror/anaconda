@@ -4,7 +4,7 @@
 %endif
 Name:    anaconda
 Version: 33.19
-Release: 29
+Release: 30
 Summary: Graphical system installer
 License: GPLv2+ and MIT
 URL:     http://fedoraproject.org/wiki/Anaconda
@@ -59,6 +59,7 @@ Patch6019:    ntp-servers-improve-010-Add-support-for-the-timesource-kickstart-c
 
 Patch9024:    Change-length-limit-of-hostname-from-255-to-64.patch
 Patch9025:    Change-topbar-background-size.patch
+Patch9026:    Change-sidebar-background-size.patch
 
 Patch6020:    bugfix-Schedule-timed-actions-with-the-right-selector-18516.patch
 Patch6021:    bugfix-Reset-the-state-of-the-custom-partitioning-spoke.patch
