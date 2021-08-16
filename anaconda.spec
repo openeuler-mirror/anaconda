@@ -333,6 +333,12 @@ update-desktop-database &> /dev/null || :
 %{_datadir}/gtk-doc
 
 %changelog
+* Mon Aug 16 2021 wangce <wangce@uniontech.com> - 33.19-30
+- Type:bugfix
+- ID:NA
+- SUG:NA
+- DESC:Change sidebar background size
+
 * Sat Aug 7 2021 zhujunhao <zhujunhao8@huawei.com> - 33.19-29
 - Type:bugfix
 - ID:NA
