@@ -332,7 +332,7 @@ update-desktop-database &> /dev/null || :
 %{_datadir}/gtk-doc
 
 %changelog
-* Mon Aug 23 2021 wangce <wangce@uniontech.com> - 33.19-30
+* Mon Aug 23 2021 wangce <wangce@uniontech.com> - 33.19-28
 - Type:bugfix
 - ID:NA
 - SUG:NA
