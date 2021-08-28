@@ -4,7 +4,7 @@
 %endif
 Name:    anaconda
 Version: 33.19
-Release: 27
+Release: 28
 Summary: Graphical system installer
 License: GPLv2+ and MIT
 URL:     http://fedoraproject.org/wiki/Anaconda
@@ -117,6 +117,8 @@ Patch6073:    bugfix-Fix-issue-when-ns_info-cannot-be-retrieved-for-NVDim.patch
 Patch6074:    bugfix-Fix-SECTION-headers-in-docstrings.patch
 Patch6075:    change-inst-repo-default-value.patch
 Patch6076:    delete-datezone-map.patch
+
+Patch9026:    fix-deadlock-when-forking-in-multithread.patch
 
 %define dbusver 1.2.3
 %define dnfver 3.6.0
@@ -332,6 +334,12 @@ update-desktop-database &> /dev/null || :
 %{_datadir}/gtk-doc
 
 %changelog
+* Sat Aug 28 2021 yanan <yanan@huawei.com> - 33.19-28
+- Type:bugfix
+- CVE:NA
+- SUG:NA
+- DESC:fix deadlock when forking in multithread
+
 * Sat Aug 7 2021 zhujunhao <zhujunhao8@huawei.com> - 33.19-27
 - Type:bugfix
 - ID:NA
