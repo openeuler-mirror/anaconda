@@ -1,0 +1,152 @@
+From ed78249ad5f3bf44777d0bdd39bb3f1a2890239d Mon Sep 17 00:00:00 2001
+From: "t.feng" <fengtao40@huawei.com>
+Date: Mon, 2 Aug 2021 15:07:01 +0600
+Subject: [PATCH] fix deadlock when forking in multithread
+
+---
+ pyanaconda/core/glib.py                       | 19 +++++++++++++++++--
+ pyanaconda/payload/dnf/payload.py             | 15 +++++++++++----
+ pyanaconda/payload/dnf/utils.py               |  2 ++
+ .../ui/gui/spokes/installation_progress.py    |  4 ++++
+ 4 files changed, 34 insertions(+), 6 deletions(-)
+
+diff --git a/pyanaconda/core/glib.py b/pyanaconda/core/glib.py
+index 03c598d..e1cb8db 100644
+--- a/pyanaconda/core/glib.py
++++ b/pyanaconda/core/glib.py
+@@ -33,9 +33,10 @@ from gi.repository.GLib import markup_escape_text, format_size_full, \
+                                MainLoop, MainContext, \
+                                GError, Variant, VariantType, Bytes, \
+                                IOCondition, IOChannel, SpawnFlags, \
+-                               MAXUINT
++                               MAXUINT, Mutex
+ 
+-__all__ = ["create_main_loop", "create_new_context",
++__all__ = ["glib_mutex", "run_with_mutex",
++           "create_main_loop", "create_new_context",
+            "markup_escape_text", "format_size_full",
+            "timeout_add_seconds", "timeout_add", "idle_add",
+            "io_add_watch", "child_watch_add",
+@@ -46,6 +47,9 @@ __all__ = ["create_main_loop", "create_new_context",
+            "MAXUINT"]
+ 
+ 
++glib_mutex = Mutex()
++
++
+ def create_main_loop():
+     """Create GLib main loop.
+ 
+@@ -59,3 +63,14 @@ def create_new_context():
+ 
+     :returns: GLib.MainContext."""
+     return MainContext.new()
++
++
++def run_with_mutex(func):
++    """run in glib mutex
++    """
++    def _call_method(*args, **kwargs):
++        glib_mutex.lock()
++        func(*args, **kwargs)
++        glib_mutex.unlock()
++    return _call_method
++
+diff --git a/pyanaconda/payload/dnf/payload.py b/pyanaconda/payload/dnf/payload.py
+index 45003da..0145a62 100644
+--- a/pyanaconda/payload/dnf/payload.py
++++ b/pyanaconda/payload/dnf/payload.py
+@@ -36,6 +36,7 @@ import libdnf.repo
+ import rpm
+ import re
+ import pyanaconda.localization
++import time
+ 
+ from blivet.size import Size
+ from dnf.const import GROUP_PACKAGE_TYPES
+@@ -84,6 +85,7 @@ from pyanaconda.progress import progressQ, progress_message
+ from pyanaconda.simpleconfig import SimpleConfigFile
+ from pyanaconda.ui.lib.payload import get_payload, get_source, create_source, set_source, \
+     set_up_sources, tear_down_sources
++from pyanaconda.core.glib import glib_mutex
+ 
+ log = get_packaging_logger()
+ 
+@@ -1327,10 +1329,15 @@ class DNFPayload(Payload):
+         pre_msg = (N_("Preparing transaction from installation source"))
+         progress_message(pre_msg)
+ 
+-        queue_instance = multiprocessing.Queue()
+-        process = multiprocessing.Process(target=do_transaction,
+-                                          args=(self._base, queue_instance))
+-        process.start()
++        while True:
++            if glib_mutex.trylock():
++                queue_instance = multiprocessing.Queue()
++                process = multiprocessing.Process(target=do_transaction,
++                                                args=(self._base, queue_instance))
++                process.start()
++                glib_mutex.unlock()
++                break
++            time.sleep(0.5)
+         (token, msg) = queue_instance.get()
+         # When the installation works correctly it will get 'install' updates
+         # followed by a 'post' message and then a 'quit' message.
+diff --git a/pyanaconda/payload/dnf/utils.py b/pyanaconda/payload/dnf/utils.py
+index dfac5c9..0d7c10c 100644
+--- a/pyanaconda/payload/dnf/utils.py
++++ b/pyanaconda/payload/dnf/utils.py
+@@ -27,6 +27,7 @@ from pyanaconda.progress import progressQ
+ from pyanaconda.core import util
+ from pyanaconda.core.configuration.anaconda import conf
+ from pyanaconda.product import productName, productVersion
++from pyanaconda.core.glib import glib_mutex
+ 
+ log = get_packaging_logger()
+ 
+@@ -126,6 +127,7 @@ def do_transaction(base, queue_instance):
+     # always raise a BaseException, so presence of 'quit' without a preceeding
+     # 'post' message also indicates a problem.
+     try:
++        glib_mutex.unlock()
+         display = TransactionProgress(queue_instance)
+         base.do_transaction(display=display)
+         exit_reason = "DNF quit"
+diff --git a/pyanaconda/ui/gui/spokes/installation_progress.py b/pyanaconda/ui/gui/spokes/installation_progress.py
+index 0de742b..2ca0f67 100644
+--- a/pyanaconda/ui/gui/spokes/installation_progress.py
++++ b/pyanaconda/ui/gui/spokes/installation_progress.py
+@@ -29,6 +29,7 @@ from pykickstart.constants import KS_SHUTDOWN, KS_REBOOT
+ from pyanaconda.ui.gui.hubs.summary import SummaryHub
+ from pyanaconda.ui.gui.spokes import StandaloneSpoke
+ from pyanaconda.ui.gui.utils import gtk_call_once
++from pyanaconda.core.glib import run_with_mutex
+ 
+ log = get_module_logger(__name__)
+ 
+@@ -185,12 +186,14 @@ class ProgressSpoke(StandaloneSpoke):
+ 
+         log.debug("The installation has started.")
+ 
++    @run_with_mutex
+     def _init_progress_bar(self, steps):
+         self._totalSteps = steps
+         self._currentStep = 0
+ 
+         gtk_call_once(self._progressBar.set_fraction, 0.0)
+ 
++    @run_with_mutex
+     def _step_progress_bar(self):
+         if not self._totalSteps:
+             return
+@@ -198,6 +201,7 @@ class ProgressSpoke(StandaloneSpoke):
+         self._currentStep += 1
+         gtk_call_once(self._progressBar.set_fraction, self._currentStep/self._totalSteps)
+ 
++    @run_with_mutex
+     def _update_progress_message(self, message):
+         if not self._totalSteps:
+             return
+-- 
+2.23.0
+
