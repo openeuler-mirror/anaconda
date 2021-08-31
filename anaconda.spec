@@ -4,7 +4,7 @@
 %endif
 Name:    anaconda
 Version: 33.19
-Release: 27
+Release: 28
 Summary: Graphical system installer
 License: GPLv2+ and MIT
 URL:     http://fedoraproject.org/wiki/Anaconda
@@ -332,6 +332,12 @@ update-desktop-database &> /dev/null || :
 %{_datadir}/gtk-doc
 
 %changelog
+* Mon Aug 23 2021 wangce <wangce@uniontech.com> - 33.19-28
+- Type:bugfix
+- ID:NA
+- SUG:NA
+- DESC:Change sidebar background size
+
 * Sat Aug 7 2021 zhujunhao <zhujunhao8@huawei.com> - 33.19-27
 - Type:bugfix
 - ID:NA

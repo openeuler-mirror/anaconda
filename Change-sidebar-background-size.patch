@@ -1,0 +1,24 @@
+From 407e03ec54d6abbce265d7127bab863602e38720 Mon Sep 17 00:00:00 2001
+From: wangce <wangce@uniontech.com>
+Date: Tue, 10 Aug 2021 09:36:35 +0600
+Subject: [PATCH 2/2] Change sidebar background size
+
+---
+ data/anaconda-gtk.css | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/data/anaconda-gtk.css b/data/anaconda-gtk.css
+index 85119ea..2f6963d 100644
+--- a/data/anaconda-gtk.css
++++ b/data/anaconda-gtk.css
+@@ -107,6 +107,7 @@ infobar.error {
+     background-image: url('/usr/share/anaconda/pixmaps/sidebar-bg.png');
+     background-color: @product_bg_color;
+     background-repeat: no-repeat;
++    background-size: 100% 100%;
+ }
+ 
+ /* Add a logo to the sidebar */
+-- 
+2.23.0
+
