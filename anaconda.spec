@@ -4,7 +4,7 @@
 %endif
 Name:    anaconda
 Version: 33.19
-Release: 30
+Release: 31
 Summary: Graphical system installer
 License: GPLv2+ and MIT
 URL:     http://fedoraproject.org/wiki/Anaconda
@@ -119,6 +119,8 @@ Patch6075:    delete-datezone-map.patch
 Patch6076:    change-inst-repo-default-value.patch
 
 Patch9026:    support-use-sm3-crypt-user-password.patch
+
+Patch6077:    bugfix-Cancel-planned-manual-update-of-system-time-on-turni.patch
 
 %define dbusver 1.2.3
 %define dnfver 3.6.0
@@ -334,6 +336,12 @@ update-desktop-database &> /dev/null || :
 %{_datadir}/gtk-doc
 
 %changelog
+* Sun Nov 28 2021 liuxin <liuxin350@huawei.com> - 33.19-31
+- Type:bugfix
+- ID:NA
+- SUG:NA
+- DESC:Cancel planned manual update of system time on turning ntp on
+
 * Sat Oct 30 2021 liuxin <liuxin264@huawei.com> - 33.19-30
 - Type:requirement
 - ID:NA

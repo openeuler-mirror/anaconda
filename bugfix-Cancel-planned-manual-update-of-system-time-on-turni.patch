@@ -1,0 +1,40 @@
+From c21fd65251a0154e2816f1505910b9c99f0661be Mon Sep 17 00:00:00 2001
+From: Radek Vykydal <rvykydal@redhat.com>
+Date: Tue, 9 Nov 2021 09:33:45 +0100
+Subject: [PATCH] Cancel planned manual update of system time on turning ntp on
+
+The PR is based on a PR opened by bitcoffee who spotted the issue:
+"If we do not cancel the timer, the time may be incorrectly changed by
+the timer after the NTP service updates the time"
+---
+ pyanaconda/ui/gui/spokes/datetime_spoke.py | 14 ++++++++++++++
+ 1 file changed, 14 insertions(+)
+
+diff --git a/pyanaconda/ui/gui/spokes/datetime_spoke.py b/pyanaconda/ui/gui/spokes/datetime_spoke.py
+index 09deabb..8ebc5bb 100644
+--- a/pyanaconda/ui/gui/spokes/datetime_spoke.py
++++ b/pyanaconda/ui/gui/spokes/datetime_spoke.py
+@@ -1059,8 +1059,22 @@ class DatetimeSpoke(FirstbootSpokeMixIn, NormalSpoke):
+     def _show_no_ntp_server_warning(self):
+         self.set_warning(_("You have no working NTP server configured"))
+ 
++    def _cancel_planned_update(self):
++        """Cancel system time update planned by manual setting"""
++        # cancel system time update
++        if self._start_updating_timer:
++            self._start_updating_timer.cancel()
++            self._start_updating_timer = None
++        # re-enable UI update because it will not be done by the
++        # system time update we've just cancelled
++        if not self._update_datetime_timer:
++            self._update_datetime_timer = Timer()
++            self._update_datetime_timer.timeout_sec(1, self._update_datetime)
++
+     def on_ntp_switched(self, switch, *args):
+         if switch.get_active():
++            self._cancel_planned_update()
++
+             #turned ON
+             if not conf.system.can_set_time_synchronization:
+                 #cannot touch runtime system, not much to do here
+
