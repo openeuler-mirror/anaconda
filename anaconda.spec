@@ -4,7 +4,7 @@
 %endif
 Name:    anaconda
 Version: 33.19
-Release: 29
+Release: 30
 Summary: Graphical system installer
 License: GPLv2+ and MIT
 URL:     http://fedoraproject.org/wiki/Anaconda
@@ -146,7 +146,7 @@ BuildRequires: python3-pygments
 BuildRequires: audit-libs-devel libtool gettext-devel >= %{gettextver} gtk3-devel >= %{gtk3ver}
 BuildRequires: gtk-doc gtk3-devel-docs >= %{gtk3ver} glib2-doc gobject-introspection-devel
 BuildRequires: glade-devel libgnomekbd-devel libxklavier-devel >= %{libxklavierver} pango-devel
-BuildRequires: python3-kickstart >= %{pykickstartver} python3-devel python3-nose systemd
+BuildRequires: python3-kickstart >= %{pykickstartver} python3-devel systemd
 BuildRequires: rpm-devel >= %{rpmver} libarchive-devel >= %{libarchivever} gdk-pixbuf2-devel
 BuildRequires: libxml2
 BuildRequires: gsettings-desktop-schemas metacity
@@ -270,6 +270,10 @@ update-desktop-database &> /dev/null || :
 update-desktop-database &> /dev/null || :
 %endif
 
+#Anaconda test cases require python3-nose. However, python3-nose on 22.03 has been deleted due to aging. 
+#As a result, the anaconda lacks dependency. Now, the anaconda needs to remove the python3-nose dependency. 
+#However, the removal will affect the test cases.
+
 %files
 %defattr(-,root,root)
 %license COPYING
@@ -335,6 +339,12 @@ update-desktop-database &> /dev/null || :
 %{_datadir}/gtk-doc
 
 %changelog
+* Fri Dec 31 2021 xihaochen <xihaochen@huawei.com> - 33.19-30
+- Type:bugfix
+- CVE:NA
+- SUG:NA
+- DESC:remove python3-nose dependency
+
 * Fri Oct 29 2021 zhujunhao <zhujunhao8@huawei.com> - 33.19-29
 - Type:bugfix
 - CVE:NA
