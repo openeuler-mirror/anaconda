@@ -4,7 +4,7 @@
 %endif
 Name:    anaconda
 Version: 33.19
-Release: 30
+Release: 31
 Summary: Graphical system installer
 License: GPLv2+ and MIT
 URL:     http://fedoraproject.org/wiki/Anaconda
@@ -192,7 +192,6 @@ Requires: python3-dbus python3-pwquality python3-systemd python3-dasbus >= %{das
 Requires: cracklib-dicts python3-pytz teamd NetworkManager >= %{nmver} NetworkManager-libnm >= %{nmver}
 Requires: NetworkManager-team dhclient kbd chrony python3-ntplib systemd python3-pid
 Requires: python3-ordered-set >= 2.0.0 glibc-langpack-en dbus-daemon
-Requires: flatpak-libs
 # required because of the rescue mode and VNC question
 Requires: anaconda-tui = %{version}-%{release}
 Provides: anaconda-images = %{version}-%{release}
@@ -339,6 +338,12 @@ update-desktop-database &> /dev/null || :
 %{_datadir}/gtk-doc
 
 %changelog
+* Fri Dec 31 2021 xihaochen <xihaochen@huawei.com> - 33.19-31
+- Type:bugfix
+- CVE:NA
+- SUG:NA
+- DESC:remove flatpak dependency
+
 * Fri Dec 31 2021 xihaochen <xihaochen@huawei.com> - 33.19-30
 - Type:bugfix
 - CVE:NA
