@@ -4,7 +4,7 @@
 %endif
 Name:    anaconda
 Version: 33.19
-Release: 31
+Release: 32
 Summary: Graphical system installer
 License: GPLv2+ and MIT
 URL:     http://fedoraproject.org/wiki/Anaconda
@@ -127,7 +127,6 @@ Patch6077:    backport-fix-boot-options-generated-by-dracut-module.patch
 %define fcoeutilsver 1.0.12-3.20100323git
 %define gettextver 0.19.8
 %define gtk3ver 3.22.17
-%define helpver 22.1-1
 %define isomd5sum 1.0.10
 %define langtablever 0.0.49
 %define libarchivever 3.0.4
@@ -158,7 +157,7 @@ Requires: kexec-tools createrepo_c tmux gdb rsync python3-meh-gui >= %{mehver}
 Requires: adwaita-icon-theme python3-kickstart
 Requires: tigervnc-server-minimal libxklavier >= %{libxklavierver} libgnomekbd
 Requires: xz
-Requires: nm-connection-editor keybinder3 anaconda-user-help >= %{helpver} yelp system-logos
+Requires: nm-connection-editor keybinder3 yelp system-logos
 Requires: python3 dracut >= %{dracutver} dracut-network dracut-live
 %ifarch %{ix86} x86_64
 BuildRequires: desktop-file-utils
@@ -338,6 +337,12 @@ update-desktop-database &> /dev/null || :
 %{_datadir}/gtk-doc
 
 %changelog
+* Tue Jan 11 2022 gaihuiying <gaihuiying1@huawei.com> - 33.19-32
+- Type:bugfix
+- CVE:NA
+- SUG:NA
+- DESC:remove anaconda-user-help dependency
+
 * Fri Dec 31 2021 xihaochen <xihaochen@huawei.com> - 33.19-31
 - Type:bugfix
 - CVE:NA
