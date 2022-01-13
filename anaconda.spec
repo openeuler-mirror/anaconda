@@ -4,7 +4,7 @@
 %endif
 Name:    anaconda
 Version: 33.19
-Release: 32
+Release: 33
 Summary: Graphical system installer
 License: GPLv2+ and MIT
 URL:     http://fedoraproject.org/wiki/Anaconda
@@ -120,6 +120,7 @@ Patch6076:    delete-datezone-map.patch
 
 Patch9026:    fix-deadlock-when-forking-in-multithread.patch
 Patch6077:    backport-fix-boot-options-generated-by-dracut-module.patch
+Patch9027:    bugfix-remove-flatpack-support.patch
 
 %define dbusver 1.2.3
 %define dnfver 3.6.0
@@ -337,6 +338,12 @@ update-desktop-database &> /dev/null || :
 %{_datadir}/gtk-doc
 
 %changelog
+* Thu Jan 13 2022 gaihuiying <gaihuiying1@huawei.com> - 33.19-33
+- Type:bugfix
+- CVE:NA
+- SUG:NA
+- DESC:remove flatpak support in source code
+
 * Tue Jan 11 2022 gaihuiying <gaihuiying1@huawei.com> - 33.19-32
 - Type:bugfix
 - CVE:NA
