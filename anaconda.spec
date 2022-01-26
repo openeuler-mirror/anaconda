@@ -4,7 +4,7 @@
 %endif
 Name:    anaconda
 Version: 33.19
-Release: 36
+Release: 37
 Summary: Graphical system installer
 License: GPLv2+ and MIT
 URL:     http://fedoraproject.org/wiki/Anaconda
@@ -120,7 +120,9 @@ Patch6076:    delete-datezone-map.patch
 
 Patch6077:    backport-fix-boot-options-generated-by-dracut-module.patch
 Patch9027:    bugfix-remove-flatpack-support.patch
+Patch9028:    Change-sidebar-background-size.patch
 Patch6078:    bugfix-Cancel-planned-manual-update-of-system-time-on-turni.patch
+Patch9029:    support-use-sm3-crypt-user-password.patch
 
 %define dbusver 1.2.3
 %define dnfver 3.6.0
@@ -338,6 +340,12 @@ update-desktop-database &> /dev/null || :
 %{_datadir}/gtk-doc
 
 %changelog
+* Wed Jan 26 2022 zhujunhao <zhujunhao11@huawei.com> - 33.19-37
+- Type:bugfix
+- ID:NA
+- SUG:NA
+- DESC:support use sm3 crypt user password
+
 * Sun Jan 23 2022 liuxin <liuxin350@huawei.com> - 33.19-36
 - Type:bugfix
 - ID:NA
