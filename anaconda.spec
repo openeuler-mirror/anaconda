@@ -4,7 +4,7 @@
 %endif
 Name:    anaconda
 Version: 33.19
-Release: 37
+Release: 38
 Summary: Graphical system installer
 License: GPLv2+ and MIT
 URL:     http://fedoraproject.org/wiki/Anaconda
@@ -340,6 +340,12 @@ update-desktop-database &> /dev/null || :
 %{_datadir}/gtk-doc
 
 %changelog
+* Thu Jan 27 2022 liufushou <liufushou@live.cn> - 33.19-38
+- Type:bugfix
+- CVE:NA
+- SUG:NA
+- DESC:let networking up after reboot
+
 * Wed Jan 26 2022 zhujunhao <zhujunhao11@huawei.com> - 33.19-37
 - Type:bugfix
 - ID:NA
