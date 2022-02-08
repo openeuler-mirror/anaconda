@@ -4,7 +4,7 @@
 %endif
 Name:    anaconda
 Version: 33.19
-Release: 38
+Release: 39
 Summary: Graphical system installer
 License: GPLv2+ and MIT
 URL:     http://fedoraproject.org/wiki/Anaconda
@@ -123,6 +123,7 @@ Patch9027:    bugfix-remove-flatpack-support.patch
 Patch9028:    Change-sidebar-background-size.patch
 Patch6078:    bugfix-Cancel-planned-manual-update-of-system-time-on-turni.patch
 Patch9029:    support-use-sm3-crypt-user-password.patch
+Patch6079:    backport-remove-authconfig-support.patch
 
 %define dbusver 1.2.3
 %define dnfver 3.6.0
@@ -340,6 +341,12 @@ update-desktop-database &> /dev/null || :
 %{_datadir}/gtk-doc
 
 %changelog
+* Sun Jan 30 2022 yanan <yanan@huawei.com> - 33.19-39
+- Type:bugfix
+- CVE:NA
+- SUG:NA
+- DESC:remove authconfig support
+
 * Thu Jan 27 2022 liufushou <liufushou@live.cn> - 33.19-38
 - Type:bugfix
 - CVE:NA
