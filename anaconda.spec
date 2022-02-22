@@ -4,7 +4,7 @@
 %endif
 Name:    anaconda
 Version: 33.19
-Release: 39
+Release: 40
 Summary: Graphical system installer
 License: GPLv2+ and MIT
 URL:     http://fedoraproject.org/wiki/Anaconda
@@ -128,7 +128,6 @@ Patch6079:    backport-remove-authconfig-support.patch
 %define dbusver 1.2.3
 %define dnfver 3.6.0
 %define dracutver 034-7
-%define fcoeutilsver 1.0.12-3.20100323git
 %define gettextver 0.19.8
 %define gtk3ver 3.22.17
 %define isomd5sum 1.0.10
@@ -161,11 +160,11 @@ Requires: kexec-tools createrepo_c tmux gdb rsync python3-meh-gui >= %{mehver}
 Requires: adwaita-icon-theme python3-kickstart
 Requires: tigervnc-server-minimal libxklavier >= %{libxklavierver} libgnomekbd
 Requires: xz
-Requires: nm-connection-editor keybinder3 yelp system-logos
+Requires: nm-connection-editor keybinder3 system-logos
 Requires: python3 dracut >= %{dracutver} dracut-network dracut-live
 %ifarch %{ix86} x86_64
 BuildRequires: desktop-file-utils
-Requires: zenity fcoe-utils >= %{fcoeutilsver}
+Requires: zenity
 %endif
 
 Provides:       anaconda-gui = %{version}-%{release}
@@ -341,6 +340,12 @@ update-desktop-database &> /dev/null || :
 %{_datadir}/gtk-doc
 
 %changelog
+* Mon Feb 21 2022 gaihuiying <eaglegai@163.com> - 33.19-40
+- Type:bugfix
+- CVE:NA
+- SUG:NA
+- DESC:remove yelp and foce-utils from requires
+
 * Sun Jan 30 2022 yanan <yanan@huawei.com> - 33.19-39
 - Type:bugfix
 - CVE:NA
