@@ -4,7 +4,7 @@
 %endif
 Name:    anaconda
 Version: 33.19
-Release: 40
+Release: 41
 Summary: Graphical system installer
 License: GPLv2+ and MIT
 URL:     http://fedoraproject.org/wiki/Anaconda
@@ -159,9 +159,8 @@ Requires: libblockdev-plugins-all >= %{libblockdevver} realmd isomd5sum >= %{iso
 Requires: kexec-tools createrepo_c tmux gdb rsync python3-meh-gui >= %{mehver}
 Requires: adwaita-icon-theme python3-kickstart
 Requires: tigervnc-server-minimal libxklavier >= %{libxklavierver} libgnomekbd
-Requires: xz
 Requires: nm-connection-editor keybinder3 system-logos
-Requires: python3 dracut >= %{dracutver} dracut-network dracut-live
+Requires: python3
 %ifarch %{ix86} x86_64
 BuildRequires: desktop-file-utils
 Requires: zenity
@@ -172,9 +171,6 @@ Obsoletes:      anaconda-gui < %{version}-%{release}
 
 Provides:       anaconda-widgets = %{version}-%{release}
 Obsoletes:      anaconda-widgets < %{version}-%{release}
-
-Provides:       anaconda-dracut = %{version}-%{release}
-Obsoletes:      anaconda-dracut < %{version}-%{release} 
 
 Provides:       anaconda-install-env-deps = %{version}-%{release} 
 Obsoletes:      anaconda-install-env-deps < %{version}-%{release}
@@ -232,6 +228,19 @@ This package contains libraries and header files needed for writing the anaconda
 installer.  It also contains Python and Glade support files, as well as
 documentation for working with this library.
 
+%package dracut
+Summary: The anaconda dracut module
+Requires: dracut >= %{dracutver}
+Requires: dracut-network
+Requires: dracut-live
+Requires: xz
+Requires: python3-kickstart
+Conflicts: anaconda < %{version}-41
+ 
+%description dracut
+The 'anaconda' dracut module handles installer-specific boot tasks and
+options. This includes driver disks, kickstarts, and finding the anaconda
+runtime on NFS/HTTP/FTP servers or local disks.
 
 %prep
 %autosetup -n %{name}-%{version} -p1
@@ -282,8 +291,6 @@ update-desktop-database &> /dev/null || :
 %{_libdir}/girepository*/AnacondaWidgets*typelib
 %{python3_sitearch}/gi/overrides/*
 %{python3_sitearch}/pyanaconda/ui/gui/*
-%{_prefix}/libexec/anaconda/dd_*
-%{_prefix}/lib/dracut/modules.d/80%{name}/*
 %exclude %{python3_sitearch}/pyanaconda/ui/gui/spokes/blivet_gui.*
 
 %files core
@@ -339,7 +346,18 @@ update-desktop-database &> /dev/null || :
 %{_datadir}/glade/catalogs/AnacondaWidgets.xml
 %{_datadir}/gtk-doc
 
+%files dracut
+%dir %{_prefix}/lib/dracut/modules.d/80%{name}
+%{_prefix}/lib/dracut/modules.d/80%{name}/*
+%{_prefix}/libexec/anaconda/dd_*
+
 %changelog
+* Sat Mar 05 2022 gaihuiying <eaglegai@163.com> - 33.19-41
+- Type:bugfix
+- CVE:NA
+- SUG:NA
+- DESC:separate anaconda-dracut
+
 * Mon Feb 21 2022 gaihuiying <eaglegai@163.com> - 33.19-40
 - Type:bugfix
 - CVE:NA
