@@ -4,7 +4,7 @@
 %endif
 Name:    anaconda
 Version: 33.19
-Release: 41
+Release: 42
 Summary: Graphical system installer
 License: GPLv2+ and MIT
 URL:     http://fedoraproject.org/wiki/Anaconda
@@ -124,6 +124,7 @@ Patch9028:    Change-sidebar-background-size.patch
 Patch6078:    bugfix-Cancel-planned-manual-update-of-system-time-on-turni.patch
 Patch9029:    support-use-sm3-crypt-user-password.patch
 Patch6079:    backport-remove-authconfig-support.patch
+Patch6080:    backport-change-the-grub2-user-cfg-permission-from-0700-to-0600.patch
 
 %define dbusver 1.2.3
 %define dnfver 3.6.0
@@ -352,6 +353,12 @@ update-desktop-database &> /dev/null || :
 %{_prefix}/libexec/anaconda/dd_*
 
 %changelog
+* Tue Mar 22 2022 xihaochen <xihaochen@h-partners.com> - 33.19-42
+- Type:bugfix
+- CVE:NA
+- SUG:NA
+- DESC:change the grub2 user.cfg permission from 0700 to 0600
+
 * Sat Mar 05 2022 gaihuiying <eaglegai@163.com> - 33.19-41
 - Type:bugfix
 - CVE:NA
