@@ -1,0 +1,22 @@
+From 7db645b89c3c68fbd116dbb8c6e6c1b4ab8eeb07 Mon Sep 17 00:00:00 2001
+From: bitcoffee <854182924@qq.com>
+Date: Tue, 2 Mar 2021 16:11:35 +0800
+Subject: [PATCH] change the grub2 user.cfg permission from 0600 to 0700
+
+---
+ pyanaconda/modules/storage/bootloader/grub2.py | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/pyanaconda/modules/storage/bootloader/grub2.py b/pyanaconda/modules/storage/bootloader/grub2.py
+index add7dc97086..44b08e4dec9 100644
+--- a/pyanaconda/modules/storage/bootloader/grub2.py
++++ b/pyanaconda/modules/storage/bootloader/grub2.py
+@@ -310,7 +310,7 @@ def write_password_config(self):
+             return
+ 
+         users_file = "%s%s/%s" % (conf.target.system_root, self.config_dir, self._passwd_file)
+-        header = util.open_with_perm(users_file, "w", 0o700)
++        header = util.open_with_perm(users_file, "w", 0o600)
+         # XXX FIXME: document somewhere that the username is "root"
+         self._encrypt_password()
+         password_line = "GRUB2_PASSWORD=" + self.encrypted_password
