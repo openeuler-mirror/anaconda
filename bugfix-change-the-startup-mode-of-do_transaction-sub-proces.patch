@@ -1,0 +1,145 @@
+From a8379c76d391c8fdf47cdc141a8f24e129cf9e45 Mon Sep 17 00:00:00 2001
+From: Qiumiao Zhang <zhangqiumiao1@huawei.com>
+Date: Fri, 10 Dec 2021 22:35:45 -0500
+Subject: [PATCH] change the startup mode of do_transaction sub proces
+
+---
+ pyanaconda/payload/dnf/payload.py | 33 ++++++++++++++++--
+ pyanaconda/payload/dnf/utils.py   | 58 ++++++++++++++++++++++++++++++-
+ 2 files changed, 87 insertions(+), 4 deletions(-)
+
+diff --git a/pyanaconda/payload/dnf/payload.py b/pyanaconda/payload/dnf/payload.py
+index 2a4b295..32ec971 100644
+--- a/pyanaconda/payload/dnf/payload.py
++++ b/pyanaconda/payload/dnf/payload.py
+@@ -1326,9 +1326,36 @@ class DNFPayload(Payload):
+         pre_msg = (N_("Preparing transaction from installation source"))
+         progress_message(pre_msg)
+ 
+-        queue_instance = multiprocessing.Queue()
+-        process = multiprocessing.Process(target=do_transaction,
+-                                          args=(self._base, queue_instance))
++        repos = dict()
++        for repo in self._base.repos.iter_enabled():
++            t_repo = dict()
++            repo_agrs = dict()
++            t_repo['baseurl']  = list(repo.baseurl)
++            repo_agrs['sslverify'] = repo.sslverify
++            repo_agrs['proxy'] = repo.proxy
++            t_repo['repo_agrs'] = repo_agrs
++            repos[repo.id] = t_repo
++
++        pkgs_list = list()
++        for pkg in pkgs_to_download:
++            pkgs_list.append(pkg.name)
++
++        ctx = multiprocessing.get_context('spawn')
++        queue_instance = ctx.Queue()
++        process = ctx.Process(target=do_transaction,
++                              args=(queue_instance, repos,
++                                    self._base.conf.releasever,
++                                    self._base.conf.installroot,
++                                    self._base.conf.substitutions,
++                                    self._base.conf.multilib_policy,
++                                    self._base.conf.timeout,
++                                    self._base.conf.retries,
++                                    self._download_location,
++                                    self._base.conf.proxy,
++                                    self._base.conf.proxy_username,
++                                    self._base.conf.proxy_password,
++                                    pkgs_list))
++
+         process.start()
+         (token, msg) = queue_instance.get()
+         # When the installation works correctly it will get 'install' updates
+diff --git a/pyanaconda/payload/dnf/utils.py b/pyanaconda/payload/dnf/utils.py
+index dfac5c9..d716c08 100644
+--- a/pyanaconda/payload/dnf/utils.py
++++ b/pyanaconda/payload/dnf/utils.py
+@@ -18,6 +18,7 @@
+ import os
+ import operator
+ import time
++import dnf
+ 
+ from blivet.size import Size
+ 
+@@ -27,6 +28,7 @@ from pyanaconda.progress import progressQ
+ from pyanaconda.core import util
+ from pyanaconda.core.configuration.anaconda import conf
+ from pyanaconda.product import productName, productVersion
++from pyanaconda.flags import flags
+ 
+ log = get_packaging_logger()
+ 
+@@ -121,12 +123,66 @@ def pick_mount_point(df, download_size, install_size, download_only):
+         return sorted_mpoints[0][0]
+ 
+ 
+-def do_transaction(base, queue_instance):
++def update_conf(conf, substitutions, releasever, installroot, multilib_policy, timeout, retries):
++    conf.cachedir = DNF_CACHE_DIR
++    conf.pluginconfpath = DNF_PLUGINCONF_DIR
++    conf.logdir = '/tmp/'
++    # enable depsolver debugging if in debug mode
++    conf.debug_solver = flags.debug
++
++    conf.substitutions = substitutions
++    conf.releasever = releasever
++    conf.installroot = installroot
++    conf.prepend_installroot('persistdir')
++    conf.multilib_policy = multilib_policy
++    conf.timeout = timeout
++    conf.retries = retries
++
++    conf.substitutions.update_from_etc(conf.installroot)
++
++    conf.reposdir = REPO_DIRS
++
++
++def update_proxy(conf, proxy, proxy_username, proxy_password):
++    conf.proxy = proxy
++    conf.proxy_username = proxy_username
++    conf.proxy_password = proxy_password
++
++
++def update_depdency(base, include_list):
++    base.fill_sack()
++    base.read_comps()
++    base.install_specs(install=include_list, exclude=None)
++    base.resolve()
++
++
++def do_transaction(queue_instance, repos, releasever, installroot, substitutions,
++                   multilib_policy, timeout, retries, pkgdir, proxy,
++                   proxy_username, proxy_password, include_list):
+     # Execute the DNF transaction and catch any errors. An error doesn't
+     # always raise a BaseException, so presence of 'quit' without a preceeding
+     # 'post' message also indicates a problem.
+     try:
+         display = TransactionProgress(queue_instance)
++        # We create new dnf base obj, and update it from parent process
++        base = dnf.Base()
++        conf = base.conf
++
++        update_conf(conf, substitutions, releasever, installroot, multilib_policy, timeout, retries)
++        update_proxy(conf, proxy, proxy_username, proxy_password)
++
++        queue_instance.put(('log', 'start to setup repo.'))
++        for (key, repo) in repos.items():
++            base.repos.add_new_repo(key, conf, repo['baseurl'], **repo['repo_agrs'])
++            base.repos[key].enable()
++
++        for repo in base.repos.iter_enabled():
++            repo.pkgdir = pkgdir
++
++        queue_instance.put(('log', 'start to update depdency.'))
++        update_depdency(base, include_list)
++
++        queue_instance.put(('log', 'start to transaction.'))
+         base.do_transaction(display=display)
+         exit_reason = "DNF quit"
+     except BaseException as e:  # pylint: disable=broad-except
+-- 
+2.19.1
+

@@ -1,15 +1,14 @@
 %define _empty_manifest_terminate_build 0
-%if "0%{?_vendor}" == "0"
-%define _vendor openEuler
-%endif
 Name:    anaconda
 Version: 33.19
-Release: 42
+Release: 43
 Summary: Graphical system installer
 License: GPLv2+ and MIT
 URL:     http://fedoraproject.org/wiki/Anaconda
 Source0: https://github.com/rhinstaller/anaconda/archive/%{name}-%{version}.tar.bz2
 Source1: openeuler.conf
+Source2: euleros.conf
+Source3: hce.conf
 
 Patch6000:    Fix-hiding-of-network-device-activation-switch.patch
 
@@ -27,9 +26,7 @@ Patch9011:    disable-product-name-in-welcome-is-uppercase.patch
 Patch9012:    modify-default-timezone.patch
 Patch9013:    modify-network-hostname-dot-illegal.patch
 Patch9014:    disable-ssh-login-checkbox.patch
-Patch9015:    bugfix-add-kdump-parameter-into-kernel-cmdline.patch
 Patch9016:    bugfix-fix-password-policy.patch
-Patch9017:    add-boot-args-for-smmu-and-video.patch
 Patch9018:    disable-disk-encryption.patch
 Patch9019:    bugfix-set-up-LD_PRELOAD-for-the-Storage-and-Services-module.patch
 Patch9020:    bugfix-Propagate-a-lazy-proxy-of-the-storage-model.patch
@@ -125,6 +122,8 @@ Patch6078:    bugfix-Cancel-planned-manual-update-of-system-time-on-turni.patch
 Patch9029:    support-use-sm3-crypt-user-password.patch
 Patch6079:    backport-remove-authconfig-support.patch
 Patch6080:    backport-change-the-grub2-user-cfg-permission-from-0700-to-0600.patch
+Patch6081:    bugfix-change-the-startup-mode-of-do_transaction-sub-proces.patch
+Patch6082:    Support-configuration-of-additional-boot-arguments.patch
 
 %define dbusver 1.2.3
 %define dnfver 3.6.0
@@ -256,10 +255,21 @@ runtime on NFS/HTTP/FTP servers or local disks.
 %delete_la
 
 # install openEuler conf for anaconda
-if [ %{_vendor} != "openEuler" ]; then
-	sed -i "s#openEuler#%{_vendor}#g" %{SOURCE1}
-fi
-install -m 0755 %{SOURCE1} %{buildroot}/%{_sysconfdir}/%{name}/product.d/
+%ifarch x86_64
+sed -i "/^additional_arguments =*/ s/$/ crashkernel=512M/" %{SOURCE1}
+sed -i "/^additional_arguments =*/ s/$/ panic=3 nmi_watchdog=1/" %{SOURCE2}
+sed -i "/^additional_arguments =*/ s/$/ panic=3 nmi_watchdog=1/" %{SOURCE3}
+%endif
+
+%ifarch aarch64
+sed -i "/^additional_arguments =*/ s/$/ crashkernel=1024M,high smmu.bypassdev=0x1000:0x17 smmu.bypassdev=0x1000:0x15/" %{SOURCE1}
+sed -i "/^additional_arguments =*/ s/$/ panic=1 vga=0x317 nohz=off smmu.bypassdev=0x1000:0x17 smmu.bypassdev=0x1000:0x15/" %{SOURCE2}
+sed -i "/^additional_arguments =*/ s/$/ panic=1 vga=0x317 nohz=off smmu.bypassdev=0x1000:0x17 smmu.bypassdev=0x1000:0x15/" %{SOURCE3}
+%endif
+install -m 0644 %{SOURCE1} %{buildroot}/%{_sysconfdir}/%{name}/product.d/
+install -m 0644 %{SOURCE2} %{buildroot}/%{_sysconfdir}/%{name}/product.d/
+install -m 0644 %{SOURCE3} %{buildroot}/%{_sysconfdir}/%{name}/product.d/
+
 
 # Create an empty directory for addons
 install -d -m 0755 %{buildroot}%{_datadir}/anaconda/addons
@@ -353,11 +363,18 @@ update-desktop-database &> /dev/null || :
 %{_prefix}/libexec/anaconda/dd_*
 
 %changelog
-* Tue Mar 22 2022 xihaochen <xihaochen@h-partners.com> - 33.19-42
+* Fri Apr 8 2022 zhangqiumiao <zhangqiumiao1@huawei.com> - 33.19-43
 - Type:bugfix
 - CVE:NA
 - SUG:NA
 - DESC:change the grub2 user.cfg permission from 0700 to 0600
+
+* Thu Apr 7 2022 zhangqiumiao <zhangqiumiao1@huawei.com> - 33.19-42
+- Type:bugfix
+- CVE:NA
+- SUG:NA
+- DESC:add support for configuration of additional boot arguments
+       change the startup mode of do_transaction sub process to spawn
 
 * Sat Mar 05 2022 gaihuiying <eaglegai@163.com> - 33.19-41
 - Type:bugfix

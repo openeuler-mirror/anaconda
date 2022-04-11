@@ -1,0 +1,67 @@
+From 8f6a97734a9ecb63320d73ec42efd6f4c03eac5b Mon Sep 17 00:00:00 2001
+From: Qiumiao Zhang <zhangqiumiao1@huawei.com>
+Date: Thu, 7 Apr 2022 03:41:52 -0400
+Subject: [PATCH] Support configuration of additional boot arguments
+
+---
+ data/anaconda.conf                            | 3 +++
+ pyanaconda/core/configuration/bootloader.py   | 8 ++++++++
+ pyanaconda/modules/storage/bootloader/base.py | 5 +++++
+ 3 files changed, 16 insertions(+)
+
+diff --git a/data/anaconda.conf b/data/anaconda.conf
+index c622700..3e63c50 100644
+--- a/data/anaconda.conf
++++ b/data/anaconda.conf
+@@ -134,6 +134,9 @@ preserved_arguments =
+      biosdevname ipv6.disable net.ifnames net.ifnames.prefix
+      nosmt
+ 
++# Arguments added by default.
++additional_arguments =
++
+ 
+ [Storage]
+ # Enable dmraid usage during the installation.
+diff --git a/pyanaconda/core/configuration/bootloader.py b/pyanaconda/core/configuration/bootloader.py
+index 6746e45..7b782d3 100644
+--- a/pyanaconda/core/configuration/bootloader.py
++++ b/pyanaconda/core/configuration/bootloader.py
+@@ -69,3 +69,11 @@ class BootloaderSection(Section):
+         :return: a list of kernel arguments
+         """
+         return self._get_option("preserved_arguments", str).split()
++
++    @property
++    def additional_arguments(self):
++        """Arguments added by default.
++
++        :return: a list of kernel arguments
++        """
++        return self._get_option("additional_arguments", str).split()
+diff --git a/pyanaconda/modules/storage/bootloader/base.py b/pyanaconda/modules/storage/bootloader/base.py
+index a45a530..db98693 100644
+--- a/pyanaconda/modules/storage/bootloader/base.py
++++ b/pyanaconda/modules/storage/bootloader/base.py
+@@ -707,6 +707,7 @@ class BootLoader(object):
+         self._set_extra_boot_args()
+         self._set_storage_boot_args(storage)
+         self._preserve_some_boot_args()
++        self._add_additional_boot_args()
+         self._set_graphical_boot_args()
+         self._set_security_boot_args()
+ 
+@@ -843,6 +844,10 @@ class BootLoader(object):
+ 
+             self.boot_args.add(new_arg)
+ 
++    def _add_additional_boot_args(self):
++        for opt in conf.bootloader.additional_arguments:
++            self.boot_args.add(opt)
++
+     def _set_graphical_boot_args(self):
+         """Set up the graphical boot."""
+         args = []
+-- 
+2.19.1
+
