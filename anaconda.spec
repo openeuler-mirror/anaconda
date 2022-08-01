@@ -4,7 +4,7 @@
 %endif
 Name:    anaconda
 Version: 33.19
-Release: 31
+Release: 32
 Summary: Graphical system installer
 License: GPLv2+ and MIT
 URL:     http://fedoraproject.org/wiki/Anaconda
@@ -206,9 +206,7 @@ Obsoletes: booty <= 0.107-1
 # that doesn't work with btrfs subvolumes correctly...
 Conflicts: grubby < 8.40-10
 
-%ifarch %{ix86} x86_64
 Requires: usermode
-%endif
 
 %description core
 The anaconda-core package contains the program which was used to install your
@@ -336,6 +334,12 @@ update-desktop-database &> /dev/null || :
 %{_datadir}/gtk-doc
 
 %changelog
+* Fri Jul 29 2022 sunhai <sunhai10@huawei.com> - 33.19-32
+- Type:bugfix
+- ID:NA
+- SUG:NA
+- DESC:fix empty folder '/usr/bin/liveinst' in arm environmnet
+
 * Sun Nov 28 2021 liuxin <liuxin350@huawei.com> - 33.19-31
 - Type:bugfix
 - ID:NA
