@@ -4,7 +4,7 @@
 %endif
 Name:    anaconda
 Version: 33.19
-Release: 29
+Release: 30
 Summary: Graphical system installer
 License: GPLv2+ and MIT
 URL:     http://fedoraproject.org/wiki/Anaconda
@@ -117,6 +117,7 @@ Patch6073:    bugfix-Fix-issue-when-ns_info-cannot-be-retrieved-for-NVDim.patch
 Patch6074:    bugfix-Fix-SECTION-headers-in-docstrings.patch
 Patch6075:    delete-datezone-map.patch
 Patch6076:    change-inst-repo-default-value.patch
+Patch6077:    revert-Set-default-entry-to-the-BLS-id-instead-of-th.patch
 
 %define dbusver 1.2.3
 %define dnfver 3.6.0
@@ -332,6 +333,12 @@ update-desktop-database &> /dev/null || :
 %{_datadir}/gtk-doc
 
 %changelog
+* Fri Aug 5 2022 wanglu <wanglu210@huawei.com> - 33.19-30
+- Type:bugfix
+- ID:NA
+- SUG:NA
+- DESC:revert "Set default entry to the BLS id instead of the entry index"
+
 * Sat Aug 7 2021 zhujunhao <zhujunhao8@huawei.com> - 33.19-29
 - Type:bugfix
 - ID:NA
