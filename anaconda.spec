@@ -4,7 +4,7 @@
 %endif
 Name:    anaconda
 Version: 33.19
-Release: 32
+Release: 33
 Summary: Graphical system installer
 License: GPLv2+ and MIT
 URL:     http://fedoraproject.org/wiki/Anaconda
@@ -121,6 +121,7 @@ Patch6076:    change-inst-repo-default-value.patch
 Patch9026:    support-use-sm3-crypt-user-password.patch
 
 Patch6077:    bugfix-Cancel-planned-manual-update-of-system-time-on-turni.patch
+Patch6078:    revert-Set-default-entry-to-the-BLS-id-instead-of-th.patch
 
 %define dbusver 1.2.3
 %define dnfver 3.6.0
@@ -334,6 +335,12 @@ update-desktop-database &> /dev/null || :
 %{_datadir}/gtk-doc
 
 %changelog
+* Fri Aug 5 2022 wanglu <wanglu210@huawei.com> - 33.19-33
+- Type:bugfix
+- ID:NA
+- SUG:NA
+- DESC:revert "Set default entry to the BLS id instead of the entry index"
+
 * Fri Jul 29 2022 sunhai <sunhai10@huawei.com> - 33.19-32
 - Type:bugfix
 - ID:NA
