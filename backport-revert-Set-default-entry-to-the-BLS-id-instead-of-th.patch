@@ -1,0 +1,47 @@
+From 018ab707bd2af446f6e6bd1c8e9384178333c0b9 Mon Sep 17 00:00:00 2001
+From: Javier Martinez Canillas <javierm@redhat.com>
+Date: Thu, 4 Aug 2022 19:33:40 +0800
+Subject: [PATCH] revert "Set default entry to the BLS id instead of the entry index"
+
+revert the patch of "Set default entry to the BLS id instead of the entry index"
+Reference:https://github.com/rhinstaller/anaconda/commit/a252e4424bd51d6236d3b7b8e3840d8ca0af90a2
+Conflict:https://github.com/rhinstaller/anaconda/commit/a252e4424bd51d6236d3b7b8e3840d8ca0af90a2
+
+---
+ .../modules/storage/bootloader/grub2.py       | 20 +++++++++----------
+ 1 file changed, 10 insertions(+), 10 deletions(-)
+
+diff --git a/pyanaconda/modules/storage/bootloader/grub2.py b/pyanaconda/modules/storage/bootloader/grub2.py
+index 3209ab7..6a6441b 100644
+--- a/pyanaconda/modules/storage/bootloader/grub2.py
++++ b/pyanaconda/modules/storage/bootloader/grub2.py
+@@ -335,16 +335,16 @@ class GRUB2(BootLoader):
+ 
+         # make sure the default entry is the OS we are installing
+         if self.default is not None:
+-            machine_id_path = conf.target.system_root + "/etc/machine-id"
+-            if not os.access(machine_id_path, os.R_OK):
+-                log.error("failed to read machine-id, default entry not set")
+-                return
+-
+-            with open(machine_id_path, "r") as fd:
+-                machine_id = fd.readline().strip()
+-
+-            default_entry = "%s-%s" % (machine_id, self.default.version)
+-            rc = util.execInSysroot("grub2-set-default", [default_entry])
++            #find the index of the default image
++            try:
++                default_index = self.images.index(self.default)
++            except VauleError:
++                # pylint: disable=no-member
++                log.warning("Failed to find default image (%s), defaulting to 0",
++                            self.default.label)
++                default_index = 0
++
++            rc = util.exeInSysroot("grub2-set-default", [str(default_index)])
+             if rc:
+                 log.error("failed to set default menu entry to %s", productName)
+ 
+-- 
+2.27.0
+
