@@ -1,7 +1,7 @@
 %define _empty_manifest_terminate_build 0
 Name:    anaconda
 Version: 33.19
-Release: 44
+Release: 45
 Summary: Graphical system installer
 License: GPLv2+ and MIT
 URL:     http://fedoraproject.org/wiki/Anaconda
@@ -365,6 +365,12 @@ update-desktop-database &> /dev/null || :
 %{_prefix}/libexec/anaconda/dd_*
 
 %changelog
+* Mon Aug 8 2022 wanglu <wanglu210@huawei.com> - 33.19-45
+- Type:bugfix
+- CVE:NA
+- SUG:NA
+- DESC:fix a mistake about revert "Set default entry to the BLS id instead of the entry index"
+
 * Thu Aug 4 2022 wanglu <wanglu210@huawei.com> - 33.19-44
 - Type:bugfix
 - CVE:NA
