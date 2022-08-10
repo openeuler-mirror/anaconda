@@ -29,16 +29,16 @@ index 3209ab7..6a6441b 100644
 -
 -            default_entry = "%s-%s" % (machine_id, self.default.version)
 -            rc = util.execInSysroot("grub2-set-default", [default_entry])
-+            #find the index of the default image
++            # find the index of the default image
 +            try:
 +                default_index = self.images.index(self.default)
-+            except VauleError:
++            except ValueError:
 +                # pylint: disable=no-member
 +                log.warning("Failed to find default image (%s), defaulting to 0",
 +                            self.default.label)
 +                default_index = 0
 +
-+            rc = util.exeInSysroot("grub2-set-default", [str(default_index)])
++            rc = util.execInSysroot("grub2-set-default", [str(default_index)])
              if rc:
                  log.error("failed to set default menu entry to %s", productName)
  
