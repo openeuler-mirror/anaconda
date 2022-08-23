@@ -4,7 +4,7 @@
 %endif
 Name:    anaconda
 Version: 33.19
-Release: 33
+Release: 34
 Summary: Graphical system installer
 License: GPLv2+ and MIT
 URL:     http://fedoraproject.org/wiki/Anaconda
@@ -122,6 +122,7 @@ Patch9026:    support-use-sm3-crypt-user-password.patch
 
 Patch6077:    bugfix-Cancel-planned-manual-update-of-system-time-on-turni.patch
 Patch6078:    revert-Set-default-entry-to-the-BLS-id-instead-of-th.patch
+Patch6079:    bugfix-Solve-the-problem-that-the-circular-loading-progress-bar-does-not-rotate.patch
 
 %define dbusver 1.2.3
 %define dnfver 3.6.0
@@ -335,6 +336,12 @@ update-desktop-database &> /dev/null || :
 %{_datadir}/gtk-doc
 
 %changelog
+* Tue Aug 23 2022 yueyuankun <yueyuankun@kylinos.cn> - 33.19-34
+- Type:bugfix
+- ID:NA
+- SUG:NA
+- DESC:Solve the problem that sometimes the circular loading progress bar does not rotate
+
 * Fri Aug 5 2022 wanglu <wanglu210@huawei.com> - 33.19-33
 - Type:bugfix
 - ID:NA
