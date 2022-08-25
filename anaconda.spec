@@ -365,7 +365,7 @@ update-desktop-database &> /dev/null || :
 %{_prefix}/libexec/anaconda/dd_*
 
 %changelog
-* Tue Aug 24 2022 zhangqiumiao <zhangqiumiao1@huawei.com> - 33.19-46
+* Wed Aug 24 2022 zhangqiumiao <zhangqiumiao1@huawei.com> - 33.19-46
 - Type:bugfix
 - CVE:NA
 - SUG:NA
