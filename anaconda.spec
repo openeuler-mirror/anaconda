@@ -372,7 +372,7 @@ update-desktop-database &> /dev/null || :
 - SUG:NA
 - DESC:solve the problem that the circular loading progress bar does not rotate
 
-* Tue Aug 24 2022 zhangqiumiao <zhangqiumiao1@huawei.com> - 33.19-46
+* Wed Aug 24 2022 zhangqiumiao <zhangqiumiao1@huawei.com> - 33.19-46
 - Type:bugfix
 - CVE:NA
 - SUG:NA
