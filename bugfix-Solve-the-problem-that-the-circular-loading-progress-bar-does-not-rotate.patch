@@ -1,0 +1,25 @@
+From ccc28e983cd2c1f1f02fd00b9b1659fb572bac1b Mon Sep 17 00:00:00 2001
+From: yueyuankun <yueyuankun@kylinos.cn>
+Date: Tue, 23 Aug 2022 15:53:18 +0800
+Subject: [PATCH] Solve the problem that sometimes the circular
+ loading progress bar does not rotate
+
+---
+ pyanaconda/ui/gui/spokes/installation_progress.py | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/pyanaconda/ui/gui/spokes/installation_progress.py b/pyanaconda/ui/gui/spokes/installation_progress.py
+index 0de742b..5ed3424 100644
+--- a/pyanaconda/ui/gui/spokes/installation_progress.py
++++ b/pyanaconda/ui/gui/spokes/installation_progress.py
+@@ -85,6 +85,7 @@ class ProgressSpoke(StandaloneSpoke):
+ 
+             if code == progressQ.PROGRESS_CODE_INIT:
+                 self._init_progress_bar(args[0])
++                gtk_call_once(self._spinner.start)
+             elif code == progressQ.PROGRESS_CODE_STEP:
+                 self._step_progress_bar()
+             elif code == progressQ.PROGRESS_CODE_MESSAGE:
+-- 
+2.27.0
+
