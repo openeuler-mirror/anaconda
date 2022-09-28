@@ -1,7 +1,7 @@
 %define _empty_manifest_terminate_build 0
 Name:    anaconda
 Version: 33.19
-Release: 46
+Release: 47
 Summary: Graphical system installer
 License: GPLv2+ and MIT
 URL:     http://fedoraproject.org/wiki/Anaconda
@@ -126,6 +126,7 @@ Patch6081:    bugfix-change-the-startup-mode-of-do_transaction-sub-proces.patch
 Patch6082:    Support-configuration-of-additional-boot-arguments.patch
 
 Patch6083:    backport-revert-Set-default-entry-to-the-BLS-id-instead-of-th.patch
+Patch6084:    bugfix-Solve-the-problem-that-the-circular-loading-progress-bar-does-not-rotate.patch
 
 %define dbusver 1.2.3
 %define dnfver 3.6.0
@@ -365,6 +366,12 @@ update-desktop-database &> /dev/null || :
 %{_prefix}/libexec/anaconda/dd_*
 
 %changelog
+* Wed Sep 21 2022 sunhai <sunhai10@huawei.com> - 33.19-47
+- Type:bugfix
+- CVE:NA
+- SUG:NA
+- DESC:solve the problem that the circular loading progress bar does not rotate
+
 * Tue Aug 23 2022 zhangqiumiao <zhangqiumiao1@huawei.com> - 33.19-46
 - Type:bugfix
 - CVE:NA
