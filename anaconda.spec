@@ -1,7 +1,7 @@
 %define _empty_manifest_terminate_build 0
 Name:    anaconda
 Version: 33.19
-Release: 47
+Release: 48
 Summary: Graphical system installer
 License: GPLv2+ and MIT
 URL:     http://fedoraproject.org/wiki/Anaconda
@@ -127,6 +127,9 @@ Patch6082:    Support-configuration-of-additional-boot-arguments.patch
 
 Patch6083:    backport-revert-Set-default-entry-to-the-BLS-id-instead-of-th.patch
 Patch6084:    bugfix-Solve-the-problem-that-the-circular-loading-progress-bar-does-not-rotate.patch
+%ifarch sw_64
+Patch6085:    anaconda-33.19.sw.patch
+%endif
 
 %define dbusver 1.2.3
 %define dnfver 3.6.0
@@ -366,6 +369,12 @@ update-desktop-database &> /dev/null || :
 %{_prefix}/libexec/anaconda/dd_*
 
 %changelog
+* Tue Oct 18 2022 wuzx<wuzx1226@qq.com> - 33.19-48
+- Type:feature
+- CVE:NA
+- SUG:NA
+- DESC:Add sw64 architecture
+
 * Wed Sep 21 2022 sunhai <sunhai10@huawei.com> - 33.19-47
 - Type:bugfix
 - CVE:NA
