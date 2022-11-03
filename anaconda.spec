@@ -1,7 +1,7 @@
 %define _empty_manifest_terminate_build 0
 Name:    anaconda
 Version: 33.19
-Release: 48
+Release: 49
 Summary: Graphical system installer
 License: GPLv2+ and MIT
 URL:     http://fedoraproject.org/wiki/Anaconda
@@ -129,6 +129,9 @@ Patch6083:    backport-revert-Set-default-entry-to-the-BLS-id-instead-of-th.patc
 Patch6084:    bugfix-Solve-the-problem-that-the-circular-loading-progress-bar-does-not-rotate.patch
 %ifarch sw_64
 Patch6085:    anaconda-33.19.sw.patch
+%endif
+%ifarch loongarch64
+Patch6086:    0001-add-loongarch-support-for-anaconda-33.19.patch
 %endif
 
 %define dbusver 1.2.3
@@ -369,6 +372,11 @@ update-desktop-database &> /dev/null || :
 %{_prefix}/libexec/anaconda/dd_*
 
 %changelog
+* Mon Mar 28 2022 Wenlong Zhang <zhangwenlong@loongson.cn> - 33.19-49
+- ID:NA
+- SUG:NA
+- DESC: add loongarch support for anaconda
+
 * Tue Oct 18 2022 wuzx<wuzx1226@qq.com> - 33.19-48
 - Type:feature
 - CVE:NA

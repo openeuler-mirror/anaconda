@@ -1,0 +1,271 @@
+From 32a54b5068c082a09683bfa81ac43b1b7b82fb8b Mon Sep 17 00:00:00 2001
+From: Wenlong Zhang <zhangwenlong@loongson.cn>
+Date: Tue, 18 Oct 2022 18:51:31 +0000
+Subject: [PATCH 6/7] install: add loongarch platform support
+
+---
+ pyanaconda/modules/storage/bootloader/base.py |  9 +-
+ pyanaconda/modules/storage/bootloader/efi.py  | 28 +++++-
+ .../modules/storage/bootloader/factory.py     |  7 ++
+ .../modules/storage/bootloader/grub2.py       |  1 +
+ pyanaconda/modules/storage/bootloader/pmon.py | 87 +++++++++++++++++++
+ .../modules/storage/devicetree/fsset.py       |  6 +-
+ pyanaconda/modules/storage/platform.py        |  9 ++
+ 7 files changed, 142 insertions(+), 5 deletions(-)
+ create mode 100644 pyanaconda/modules/storage/bootloader/pmon.py
+
+diff --git a/pyanaconda/modules/storage/bootloader/base.py b/pyanaconda/modules/storage/bootloader/base.py
+index 16a4df3..34bfae2 100644
+--- a/pyanaconda/modules/storage/bootloader/base.py
++++ b/pyanaconda/modules/storage/bootloader/base.py
+@@ -731,11 +731,14 @@ class BootLoader(object):
+         swap_devices = storage.fsset.swap_devices
+         dracut_devices.extend(swap_devices)
+ 
+-        # Add resume= option to enable hibernation on x86.
++        # Add resume= option to enable hibernation on x86 and loongarch.
+         # Choose the largest swap device for that.
+-        if blivet.arch.is_x86() and swap_devices:
++        if (blivet.arch.is_x86() or blivet.arch.is_loongarch()) and swap_devices:
+             resume_device = max(swap_devices, key=lambda x: x.size)
+-            self.boot_args.add("resume=%s" % resume_device.fstab_spec)
++            if not blivet.arch.is_efi() and blivet.arch.is_loongarch():
++                self.boot_args.add("resume=%s" % resume_device.path)
++            else:
++                self.boot_args.add("resume=%s" % resume_device.fstab_spec)
+ 
+         # Does /usr have its own device? If so, we need to tell dracut
+         usr_device = storage.mountpoints.get("/usr")
+diff --git a/pyanaconda/modules/storage/bootloader/efi.py b/pyanaconda/modules/storage/bootloader/efi.py
+index d8b7f10..1aed536 100644
+--- a/pyanaconda/modules/storage/bootloader/efi.py
++++ b/pyanaconda/modules/storage/bootloader/efi.py
+@@ -28,7 +28,7 @@ from pyanaconda.product import productName
+ from pyanaconda.anaconda_loggers import get_module_logger
+ log = get_module_logger(__name__)
+ 
+-__all__ = ["EFIBase", "EFIGRUB", "Aarch64EFIGRUB", "ArmEFIGRUB", "MacEFIGRUB"]
++__all__ = ["EFIBase", "EFIGRUB", "Aarch64EFIGRUB", "ArmEFIGRUB", "MacEFIGRUB", "LOONGARCHEFIGRUB"]
+ 
+ 
+ class EFIBase(object):
+@@ -167,7 +167,33 @@ class Aarch64EFIGRUB(EFIGRUB):
+     def __init__(self):
+         super().__init__()
+         self._packages64 = ["grub2-efi-aa64", "shim-aa64"]
++class LOONGARCHEFIGRUB(EFIGRUB):
++    _efi_binary = "grubloongarch64.efi"
++    stage2_is_valid_stage1 = False
++    stage2_bootable = False
++
++    def __init__(self):
++        super().__init__()
++        self._packages64 = ["grub2-efi-loongarch64"]
+ 
++    def remove_efi_boot_target(self):
++        return
++
++    def _add_single_efi_boot_target(self, partition):
++        boot_disk = partition.disk
++        boot_part_num = str(partition.parted_partition.number)
++
++        rc = util.execInSysroot("cp", ["-a", "/boot/efi/EFI/openEuler/" + self._efi_binary, "/boot/efi/EFI/BOOT/" + "BOOTLOONGARCH64.EFI"])
++        if rc:
++            raise BootLoaderError("Failed to set new efi boot target. This is most "
++                                  "likely a kernel or firmware bug.")
++
++    def add_efi_boot_target(self):
++        if self.stage1_device.type == "partition":  # pylint: disable=no-member
++           self._add_single_efi_boot_target(self.stage1_device)  # pylint: disable=no-member
++        elif self.stage1_device.type == "mdarray":  # pylint: disable=no-member
++           for parent in self.stage1_device.parents:  # pylint: disable=no-member
++                self._add_single_efi_boot_target(parent)
+ 
+ class ArmEFIGRUB(EFIGRUB):
+     _serial_consoles = ["ttyAMA", "ttyS"]
+diff --git a/pyanaconda/modules/storage/bootloader/factory.py b/pyanaconda/modules/storage/bootloader/factory.py
+index 8aa3afb..b5b8b59 100644
+--- a/pyanaconda/modules/storage/bootloader/factory.py
++++ b/pyanaconda/modules/storage/bootloader/factory.py
+@@ -137,6 +137,13 @@ class BootLoaderFactory(object):
+         if platform_class is platform.Aarch64EFI:
+             from pyanaconda.modules.storage.bootloader.efi import Aarch64EFIGRUB
+             return Aarch64EFIGRUB
++        if platform_class is platform.LOONGARCHEFI:
++            from pyanaconda.modules.storage.bootloader.efi import LOONGARCHEFIGRUB
++            return LOONGARCHEFIGRUB
++
++        if platform_class is platform.LOONGARCHLEGACY:
++            from pyanaconda.modules.storage.bootloader.pmon import LOONGARCHPMON
++            return LOONGARCHPMON
+ 
+         if platform_class is platform.ARM:
+             from pyanaconda.modules.storage.bootloader.extlinux import EXTLINUX
+diff --git a/pyanaconda/modules/storage/bootloader/grub2.py b/pyanaconda/modules/storage/bootloader/grub2.py
+index 51f7c74..57cfd95 100644
+--- a/pyanaconda/modules/storage/bootloader/grub2.py
++++ b/pyanaconda/modules/storage/bootloader/grub2.py
+@@ -257,6 +257,7 @@ class GRUB2(BootLoader):
+         defaults.write("GRUB_DISTRIBUTOR=\"$(sed 's, release .*$,,g' /etc/system-release)\"\n")
+         defaults.write("GRUB_DEFAULT=saved\n")
+         defaults.write("GRUB_DISABLE_SUBMENU=true\n")
++        defaults.write("GRUB_CMDLINE_LINUX_DEFAULT=' rhgb quiet '\n")
+         if self.console and self.has_serial_console:
+             defaults.write("GRUB_TERMINAL=\"serial console\"\n")
+             defaults.write("GRUB_SERIAL_COMMAND=\"%s\"\n" % self.serial_command)
+diff --git a/pyanaconda/modules/storage/bootloader/pmon.py b/pyanaconda/modules/storage/bootloader/pmon.py
+new file mode 100644
+index 0000000..7e02f61
+--- /dev/null
++++ b/pyanaconda/modules/storage/bootloader/pmon.py
+@@ -0,0 +1,87 @@
++#
++# Writer: Sun Haiyong (youbest@sina.com)
++#
++import os
++
++from pyanaconda.modules.storage.bootloader.base import BootLoader, Arguments, BootLoaderError
++from pyanaconda.core import util
++from pyanaconda.core.configuration.anaconda import conf
++from pyanaconda.product import productName
++
++from pyanaconda.anaconda_loggers import get_module_logger
++log = get_module_logger(__name__)
++
++__all__ = ["PMON", "LOONGARCHPMON"]
++
++
++class PMON(BootLoader):
++    name = "PMON"
++    _config_file = "boot.cfg"
++    _config_dir = "/boot"
++
++    stage2_format_types = ["ext3", "ext2"]
++    stage2_device_types = ["partition"]
++#    stage2_bootable = True
++
++    @property
++    def config_file(self):
++        return "%s/%s" % (self._config_dir, self._config_file)
++
++    @property
++    def boot_prefix(self):
++        """ Prefix, if any, to paths in /boot. """
++        if self.stage2_device.format.mountpoint == "/":
++            prefix = "/boot"
++        else:
++            prefix = ""
++
++        return prefix
++
++    def write_config_console(self, config):
++        if not self.console:
++            return
++
++        console_arg = "console=%s" % self.console
++        if self.console_options:
++            console_arg += ",%s" % self.console_options
++        self.boot_args.add(console_arg)
++
++    def write_config_images(self, config):
++        self.write_config_console(config)
++        for image in self.images:
++            args = Arguments()
++            args.update(["root=%s" % image.device.path, "ro"])
++            args.update(self.boot_args)
++            log.info("bootloader.py: used boot args: %s ", args)
++
++            # extlinux labels cannot have spaces
++            label = "%s(%s)" % (self.image_label(image), image.version)
++            label = label.replace(" ", "")
++            stanza = ("title %(label)s\n"
++                      "\tkernel /dev/fs/ext2@wd0%(boot_prefix)s/%(kernel)s\n"
++                      "\tinitrd /dev/fs/ext2@wd0%(boot_prefix)s/%(initrd)s\n"
++                      "\targs %(args)s\n\n"
++                      % {"label": label,
++                         "kernel": image.kernel,
++                         "initrd": image.initrd,
++                         "args": args,
++                         "boot_prefix": self.boot_prefix})
++            config.write(stanza)
++
++    def write_config_header(self, config):
++        header = ("timeout %(timeout)d\n"
++                  "showmenu 1\n"
++                  % {"timeout": self.timeout})
++        config.write(header)
++        if self.default is not None:
++            config.write("default 0\n\n")
++
++    def install(self, args=None):
++        """installation should be a no-op, just writing the config is sufficient for the
++        firmware's bootloader (petitboot)
++        """
++        pass
++
++
++class LOONGARCHPMON(PMON):
++    """ LOONGARCHPMON """
+diff --git a/pyanaconda/modules/storage/devicetree/fsset.py b/pyanaconda/modules/storage/devicetree/fsset.py
+index 00aef10..ab7cd6f 100644
+--- a/pyanaconda/modules/storage/devicetree/fsset.py
++++ b/pyanaconda/modules/storage/devicetree/fsset.py
+@@ -24,6 +24,7 @@ import gi
+ gi.require_version("BlockDev", "2.0")
+ from gi.repository import BlockDev as blockdev
+ 
++from blivet import arch
+ from blivet.devices import NoDevice, DirectoryDevice, NFSDevice, FileDevice, MDRaidArrayDevice, \
+     NetworkStorageDevice, OpticalDevice
+ from blivet.errors import UnrecognizedFSTabEntryError, FSTabTypeMismatchError
+@@ -764,7 +765,10 @@ class FSSet(object):
+                     break
+             if device.encrypted:
+                 options += ",x-systemd.device-timeout=0"
+-            devspec = device.fstab_spec
++            if not arch.is_efi() and arch.is_loongarch():
++                devspec = device.path
++            else:
++                devspec = device.fstab_spec
+             dump = device.format.dump
+             if device.format.check and mountpoint == "/":
+                 passno = 1
+diff --git a/pyanaconda/modules/storage/platform.py b/pyanaconda/modules/storage/platform.py
+index 1023c93..9b730c1 100644
+--- a/pyanaconda/modules/storage/platform.py
++++ b/pyanaconda/modules/storage/platform.py
+@@ -181,10 +181,15 @@ class MacEFI(EFI):
+ class Aarch64EFI(EFI):
+     _non_linux_format_types = ["vfat", "ntfs"]
+ 
++class LOONGARCHEFI(EFI):
++    _non_linux_format_types = ["vfat", "ntfs"]
+ 
+ class ArmEFI(EFI):
+     _non_linux_format_types = ["vfat", "ntfs"]
+ 
++class LOONGARCHLEGACY(Platform):
++    _boot_stage1_device_types = ["partition"]
++    _boot_descriptions = {"partition": Platform._boot_partition_description}
+ 
+ class PPC(Platform):
+     _ppc_machine = arch.get_ppc_machine()
+@@ -288,12 +293,16 @@ def get_platform():
+             return Aarch64EFI()
+         elif arch.is_arm():
+             return ArmEFI()
++        elif arch.is_loongarch():
++            return LOONGARCHEFI()
+         else:
+             return EFI()
+     elif arch.is_x86():
+         return X86()
+     elif arch.is_arm():
+         return ARM()
++    elif arch.is_loongarch():
++        return LOONGARCHLEGACY()
+     else:
+         raise SystemError("Could not determine system architecture.")
+ 
+-- 
+2.27.0
