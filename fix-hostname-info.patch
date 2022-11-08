@@ -1,44 +1,56 @@
-From 8ecae3e85d9eeedb131dbc026dcdf5bba95cdb15 Mon Sep 17 00:00:00 2001
+From cc1706cdbcabab80ab867c2a8f5a517884faa048 Mon Sep 17 00:00:00 2001
 From: t_feng <fengtao40@huawei.com>
 Date: Thu, 18 Jun 2020 17:13:47 +0800
 Subject: [PATCH] fix hostname info
 
 ---
- po/zh_CN.po           | 6 +++---
- pyanaconda/network.py | 4 ++--
- 2 files changed, 5 insertions(+), 5 deletions(-)
+ po/zh_CN.po                | 5 +++--
+ pyanaconda/core/regexes.py | 2 +-
+ pyanaconda/network.py      | 3 ++-
+ 3 files changed, 6 insertions(+), 4 deletions(-)
 
 diff --git a/po/zh_CN.po b/po/zh_CN.po
-index 0a4d1cd..be8cefe 100644
+index e31f0b2..c02ce1e 100644
 --- a/po/zh_CN.po
 +++ b/po/zh_CN.po
-@@ -2365,11 +2365,11 @@ msgstr "本地主机名绝不能以句号\".\"结尾。"
- #: pyanaconda/network.py:119
+@@ -4090,10 +4090,11 @@ msgstr "本地主机名不能以英文句号“.”结尾。"
  msgid ""
  "Host names can only contain the characters 'a-z', 'A-Z', '0-9', '-', or '.', "
--"parts between periods must contain something and cannot start or end with "
+ "parts between periods must contain something and cannot start or end with "
 -"'-'."
 +"parts between periods must contain something being 63 or fewer "
-+"characters and cannot start or end with '-'."
++"characters and cannot start or end with '.' and '-'."
  msgstr ""
- "主机名只能包含 'a-z', 'A-Z', '0-9', '-'（英文减号）, 或者 '.'（英文点号），其"
--"中两个点号中不能为空且不能以'-'开头或结尾。"
-+"中两个点号中不能为空，必须少于64个字符且不能以'-'开头或结尾。"
+ "主机名只能包含 'a-z'、'A-Z'、 '0-9'、 '-'（英文减号），或者 '.'（英文点号），"
+-"其中两个点号中不能为空且不能以 '-' 开头或结尾。"
++"其中两个点号中不能为空，必须少于64个字符且不能以'.'和'-'开头或结尾。"
  
- #: pyanaconda/network.py:465
+ #: pyanaconda/network.py:457
  msgid "Status not available"
+diff --git a/pyanaconda/core/regexes.py b/pyanaconda/core/regexes.py
+index cc00702..388d1ff 100644
+--- a/pyanaconda/core/regexes.py
++++ b/pyanaconda/core/regexes.py
+@@ -103,7 +103,7 @@ IPV4_NETMASK_WITH_ANCHORS = re.compile("^" + IPV4_NETMASK_WITHOUT_ANCHORS + "$")
+ # with a period, but it can end with one.
+ # This regex uses negative lookahead and lookback assertions to enforce the
+ # hyphen rules and make it way more confusing
+-HOSTNAME_PATTERN_WITHOUT_ANCHORS = r'(?:(?!-)[A-Za-z0-9-]{1,63}(?<!-)(?:\.(?!-)[A-Za-z0-9-]{1,63}(?<!-))*\.?)'
++HOSTNAME_PATTERN_WITHOUT_ANCHORS = r'(?:(?!-)[A-Za-z0-9-]{1,63}(?<!-)(?:\.(?!-)[A-Za-z0-9-]{1,63}(?<!-))*)'
+ 
+ # URL Hostname
+ # This matches any hostname, IPv4 literal or properly encased IPv6 literal
 diff --git a/pyanaconda/network.py b/pyanaconda/network.py
-index f8e9b19..127a1bd 100644
+index 38fe957..c52cf1d 100644
 --- a/pyanaconda/network.py
 +++ b/pyanaconda/network.py
-@@ -118,8 +118,8 @@ def is_valid_hostname(hostname, local=False):
-     if not re.match('^' + HOSTNAME_PATTERN_WITHOUT_ANCHORS + '$', hostname):
+@@ -115,7 +115,8 @@ def is_valid_hostname(hostname, local=False):
          return (False, _("Host names can only contain the characters 'a-z', "
                           "'A-Z', '0-9', '-', or '.', parts between periods "
--                         "must contain something and cannot start or end with "
+                          "must contain something and cannot start or end with "
 -                         "'-'."))
 +                         "must contain something being 63 or fewer "
-+                         "characters and cannot start or end with '-'."))
++                         "characters and cannot start or end with '.' and '-'."))
  
      return (True, "")
  
