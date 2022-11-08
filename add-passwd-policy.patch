@@ -1,29 +1,45 @@
-From e8ce5155f21af58e119c61e10895fcb5d8c21995 Mon Sep 17 00:00:00 2001
-From: t_feng <fengtao40@huawei.com>
-Date: Thu, 18 Jun 2020 17:00:13 +0800
+From 3562cad5ea86afc5d2ce0ead649e64cf13e39128 Mon Sep 17 00:00:00 2001
+From: sun_hai_10 <sunhai10@huawei.com>
+Date: Mon, 7 Nov 2022 14:48:28 +0800
 Subject: [PATCH] add passwd policy
 
 ---
- data/interactive-defaults.ks | 6 +++---
- 1 file changed, 3 insertions(+), 3 deletions(-)
+ data/anaconda.conf           | 6 +++---
+ pyanaconda/input_checking.py | 4 ++++
+ 2 files changed, 7 insertions(+), 3 deletions(-)
 
-diff --git a/data/interactive-defaults.ks b/data/interactive-defaults.ks
-index a906c8c..0177cf9 100644
---- a/data/interactive-defaults.ks
-+++ b/data/interactive-defaults.ks
-@@ -4,9 +4,9 @@ firstboot --enable
+diff --git a/data/anaconda.conf b/data/anaconda.conf
+index 703114a..07e500f 100644
+--- a/data/anaconda.conf
++++ b/data/anaconda.conf
+@@ -308,9 +308,9 @@ can_change_users = False
+ #   strict            Require the minimum quality.
+ #
+ password_policies =
+-    root (quality 1, length 6)
+-    user (quality 1, length 6, empty)
+-    luks (quality 1, length 6)
++    root (quality 1, length 8, strict)
++    user (quality 1, length 8, empty, strict)
++    luks (quality 1, length 8, strict)
  
- %anaconda
- # Default password policies
--pwpolicy root --notstrict --minlen=6 --minquality=1 --nochanges --notempty
--pwpolicy user --notstrict --minlen=6 --minquality=1 --nochanges --emptyok
--pwpolicy luks --notstrict --minlen=6 --minquality=1 --nochanges --notempty
-+pwpolicy root --notstrict --minlen=8 --minquality=1 --nochanges --notempty
-+pwpolicy user --notstrict --minlen=8 --minquality=1 --nochanges --emptyok
-+pwpolicy luks --notstrict --minlen=8 --minquality=1 --nochanges --notempty
- # NOTE: This applies only to *fully* interactive installations, partial kickstart
- #       installations use defaults specified in pyanaconda/pwpolicy.py.
- #       Automated kickstart installs simply ignore the password policy as the policy
+ 
+ [License]
+diff --git a/pyanaconda/input_checking.py b/pyanaconda/input_checking.py
+index 4482b26..4bed6c1 100644
+--- a/pyanaconda/input_checking.py
++++ b/pyanaconda/input_checking.py
+@@ -421,6 +421,10 @@ class PasswordValidityCheck(InputCheck):
+             pw_score = 4
+             status_text = _(constants.SecretStatus.STRONG.value)
+ 
++        #disable set password without confirnation
++        if not error_message and not check_request.password_confirmation:
++            error_message = _(constants.SECRET_CONFIRM_ERROR_GUI[check_request.secret_type])
++
+         # the policy influences the overall success of the check
+         # - score 0 & strict == True -> success = False
+         # - score 0 & strict == False -> success = True
 -- 
 2.23.0
 
