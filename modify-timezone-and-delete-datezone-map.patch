@@ -1,18 +1,60 @@
-diff -Nur anaconda-33.19.org/pyanaconda/ui/gui/spokes/datetime_spoke.glade anaconda-33.19/pyanaconda/ui/gui/spokes/datetime_spoke.glade
---- anaconda-33.19.org/pyanaconda/ui/gui/spokes/datetime_spoke.glade	2021-08-07 16:25:21.547621965 +0800
-+++ anaconda-33.19/pyanaconda/ui/gui/spokes/datetime_spoke.glade	2021-08-07 16:26:20.137758256 +0800
+From 303b072992542dfa9a7e2b2a9dc99120564a3f07 Mon Sep 17 00:00:00 2001
+From: sun_hai_10 <sunhai10@huawei.com>
+Date: Mon, 7 Nov 2022 14:23:04 +0800
+Subject: [PATCH] modify timezone and delete datezone map
+
+---
+ pyanaconda/modules/timezone/installation.py   |  4 +-
+ pyanaconda/modules/timezone/timezone.py       |  2 +-
+ pyanaconda/ui/gui/spokes/datetime_spoke.glade | 14 -------
+ pyanaconda/ui/gui/spokes/datetime_spoke.py    | 38 +++----------------
+ 4 files changed, 8 insertions(+), 50 deletions(-)
+
+diff --git a/pyanaconda/modules/timezone/installation.py b/pyanaconda/modules/timezone/installation.py
+index 08e24c0..f11874f 100644
+--- a/pyanaconda/modules/timezone/installation.py
++++ b/pyanaconda/modules/timezone/installation.py
+@@ -63,8 +63,8 @@ class ConfigureTimezoneTask(Task):
+         if not is_valid_timezone(self._timezone):
+             # this should never happen, but for pity's sake
+             log.warning("Timezone %s set in kickstart is not valid, "
+-                        "falling back to default (America/New_York).", self._timezone)
+-            self._timezone = "America/New_York"
++                        "falling back to default (Asia/Shanghai).", self._timezone)
++            self._timezone = "Asia/Shanghai"
+ 
+     def _make_timezone_symlink(self):
+         """Create the symlink that actually defines timezone."""
+diff --git a/pyanaconda/modules/timezone/timezone.py b/pyanaconda/modules/timezone/timezone.py
+index b5d5f7b..2a328a3 100644
+--- a/pyanaconda/modules/timezone/timezone.py
++++ b/pyanaconda/modules/timezone/timezone.py
+@@ -44,7 +44,7 @@ class TimezoneService(KickstartService):
+     def __init__(self):
+         super().__init__()
+         self.timezone_changed = Signal()
+-        self._timezone = "America/New_York"
++        self._timezone = "Asia/Shanghai"
+ 
+         self.is_utc_changed = Signal()
+         self._is_utc = False
+diff --git a/pyanaconda/ui/gui/spokes/datetime_spoke.glade b/pyanaconda/ui/gui/spokes/datetime_spoke.glade
+index 188f93b..aa468d9 100644
+--- a/pyanaconda/ui/gui/spokes/datetime_spoke.glade
++++ b/pyanaconda/ui/gui/spokes/datetime_spoke.glade
 @@ -3,7 +3,6 @@
  <interface>
    <requires lib="gtk+" version="3.12"/>
    <requires lib="AnacondaWidgets" version="1.0"/>
 -  <requires lib="TimezoneMap" version="0.4"/>
-   <object class="GtkImage" id="addImage">
-     <property name="visible">True</property>
-     <property name="can_focus">False</property>
-@@ -548,19 +547,6 @@
+   <object class="GtkListStore" id="cities">
+     <columns>
+       <!-- column-name name -->
+@@ -314,19 +313,6 @@
+                         <property name="position">0</property>
                        </packing>
                      </child>
-                     <child>
+-                    <child>
 -                      <object class="CcTimezoneMap" id="tzmap">
 -                        <property name="visible">True</property>
 -                        <property name="can_focus">False</property>
@@ -25,14 +67,14 @@ diff -Nur anaconda-33.19.org/pyanaconda/ui/gui/spokes/datetime_spoke.glade anaco
 -                        <property name="position">1</property>
 -                      </packing>
 -                    </child>
--                    <child>
+                     <child>
                        <object class="GtkAlignment" id="footerAlignment">
                          <property name="visible">True</property>
-                         <property name="can_focus">False</property>
-diff -Nur anaconda-33.19.org/pyanaconda/ui/gui/spokes/datetime_spoke.py anaconda-33.19/pyanaconda/ui/gui/spokes/datetime_spoke.py
---- anaconda-33.19.org/pyanaconda/ui/gui/spokes/datetime_spoke.py	2021-08-07 16:25:21.547621965 +0800
-+++ anaconda-33.19/pyanaconda/ui/gui/spokes/datetime_spoke.py	2021-08-07 16:30:03.958279259 +0800
-@@ -53,9 +53,8 @@
+diff --git a/pyanaconda/ui/gui/spokes/datetime_spoke.py b/pyanaconda/ui/gui/spokes/datetime_spoke.py
+index b21bbc3..c8416b4 100644
+--- a/pyanaconda/ui/gui/spokes/datetime_spoke.py
++++ b/pyanaconda/ui/gui/spokes/datetime_spoke.py
+@@ -50,15 +50,14 @@ from pyanaconda.threading import threadMgr, AnacondaThread
  import gi
  gi.require_version("Gdk", "3.0")
  gi.require_version("Gtk", "3.0")
@@ -43,7 +85,14 @@ diff -Nur anaconda-33.19.org/pyanaconda/ui/gui/spokes/datetime_spoke.py anaconda
  
  log = get_module_logger(__name__)
  
-@@ -377,11 +376,6 @@
+ __all__ = ["DatetimeSpoke"]
+
+-DEFAULT_TZ = "America/New_York"
++DEFAULT_TZ = "Asia/Shanghai"
+
+ SPLIT_NUMBER_SUFFIX_RE = re.compile(r'([^0-9]*)([-+])([0-9]+)')
+ 
+@@ -168,11 +167,6 @@ class DatetimeSpoke(FirstbootSpokeMixIn, NormalSpoke):
      icon = "preferences-system-time-symbolic"
      title = CN_("GUI|Spoke", "_Time & Date")
  
@@ -52,10 +101,10 @@ diff -Nur anaconda-33.19.org/pyanaconda/ui/gui/spokes/datetime_spoke.py anaconda
 -    _hack = TimezoneMap.TimezoneMap()
 -    del(_hack)
 -
-     def __init__(self, *args):
-         NormalSpoke.__init__(self, *args)
- 
-@@ -407,7 +401,6 @@
+     @staticmethod
+     def get_screen_id():
+         """Return a unique id of this UI screen."""
+@@ -211,7 +205,6 @@ class DatetimeSpoke(FirstbootSpokeMixIn, NormalSpoke):
          self._yearsStore = self.builder.get_object("years")
          self._regionsStore = self.builder.get_object("regions")
          self._citiesStore = self.builder.get_object("cities")
@@ -63,7 +112,7 @@ diff -Nur anaconda-33.19.org/pyanaconda/ui/gui/spokes/datetime_spoke.py anaconda
          self._dateBox = self.builder.get_object("dateBox")
  
          # we need to know it the new value is the same as previous or not
-@@ -530,10 +523,6 @@
+@@ -334,10 +327,6 @@ class DatetimeSpoke(FirstbootSpokeMixIn, NormalSpoke):
              else:
                  return _("Invalid timezone")
          else:
@@ -74,7 +123,7 @@ diff -Nur anaconda-33.19.org/pyanaconda/ui/gui/spokes/datetime_spoke.py anaconda
                  return _("Nothing selected")
  
      def apply(self):
-@@ -585,7 +574,6 @@
+@@ -389,7 +378,6 @@ class DatetimeSpoke(FirstbootSpokeMixIn, NormalSpoke):
          kickstart_timezone = self._timezone_module.Timezone
  
          if is_valid_timezone(kickstart_timezone):
@@ -82,17 +131,17 @@ diff -Nur anaconda-33.19.org/pyanaconda/ui/gui/spokes/datetime_spoke.py anaconda
              time.tzset()
  
          self._update_datetime()
-@@ -960,7 +948,6 @@
+@@ -766,7 +754,6 @@ class DatetimeSpoke(FirstbootSpokeMixIn, NormalSpoke):
          if region == "Etc":
              # Etc timezones cannot be displayed on the map, so let's reset the
              # location and manually set a highlight with no location pin.
 -            self._tzmap.clear_location()
-             if city in ("GMT", "UTC"):
+             # Some time zones are just the same default.
+             if city in ("GMT", "UTC", "UCT", "Greenwich", "Universal", "Zulu"):
                  offset = 0.0
-             # The tzdb data uses POSIX-style signs for the GMT zones, which is
-@@ -971,13 +958,14 @@
-                 # Take the part after "GMT"
-                 offset = -float(city[3:])
+@@ -780,13 +767,14 @@ class DatetimeSpoke(FirstbootSpokeMixIn, NormalSpoke):
+             else:
+                 log.warning("Unknown time zone selected in GUI: Etc/%s", city)
  
 -            self._tzmap.set_selected_offset(offset)
              time.tzset()
@@ -107,7 +156,7 @@ diff -Nur anaconda-33.19.org/pyanaconda/ui/gui/spokes/datetime_spoke.py anaconda
          # update "old" values
          self._old_city = city
  
-@@ -1027,22 +1015,6 @@
+@@ -836,22 +824,6 @@ class DatetimeSpoke(FirstbootSpokeMixIn, NormalSpoke):
          self._stop_and_maybe_start_time_updating(interval=5)
          self._daysFilter.refilter()
  
@@ -130,3 +179,6 @@ diff -Nur anaconda-33.19.org/pyanaconda/ui/gui/spokes/datetime_spoke.py anaconda
      def on_timeformat_changed(self, button24h, *args):
          hours = int(self._hoursLabel.get_text())
          amPm = self._amPmLabel.get_text()
+-- 
+2.23.0
+
