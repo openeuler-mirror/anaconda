@@ -1,0 +1,24 @@
+From d8f6a8f3e50ea99ed0c9b37da0e3803be7678693 Mon Sep 17 00:00:00 2001
+From: sun_hai_10 <sunhai10@huawei.com>
+Date: Fri, 11 Nov 2022 10:39:28 +0800
+Subject: [PATCH] with use local kickstart version
+
+---
+ pyanaconda/core/kickstart/version.py | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/pyanaconda/core/kickstart/version.py b/pyanaconda/core/kickstart/version.py
+index 4170214..df743a6 100644
+--- a/pyanaconda/core/kickstart/version.py
++++ b/pyanaconda/core/kickstart/version.py
+@@ -18,6 +18,6 @@
+ # Red Hat, Inc.
+ #
+ 
+-from pykickstart.version import F36 as VERSION
++from pykickstart.version import DEVEL as VERSION
+ 
+ __all__ = ["VERSION"]
+-- 
+2.23.0
+
