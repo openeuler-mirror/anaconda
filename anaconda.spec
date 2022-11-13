@@ -1,7 +1,7 @@
 %define _empty_manifest_terminate_build 0
 Name:    anaconda
 Version: 33.19
-Release: 49
+Release: 50
 Summary: Graphical system installer
 License: GPLv2+ and MIT
 URL:     http://fedoraproject.org/wiki/Anaconda
@@ -126,13 +126,16 @@ Patch6081:    bugfix-change-the-startup-mode-of-do_transaction-sub-proces.patch
 Patch6082:    Support-configuration-of-additional-boot-arguments.patch
 
 Patch6083:    backport-revert-Set-default-entry-to-the-BLS-id-instead-of-th.patch
-Patch6084:    bugfix-Solve-the-problem-that-the-circular-loading-progress-bar-does-not-rotate.patch
+Patch9030:    bugfix-Solve-the-problem-that-the-circular-loading-progress-bar-does-not-rotate.patch
 %ifarch sw_64
 Patch6085:    anaconda-33.19.sw.patch
 %endif
 %ifarch loongarch64
 Patch6086:    0001-add-loongarch-support-for-anaconda-33.19.patch
 %endif
+
+Patch6087:    backport-Round-the-required-device-size-up.patch
+Patch6088:    backport-Run-restorecon-in-chroot-when-handling-home-dirs.patch
 
 %define dbusver 1.2.3
 %define dnfver 3.6.0
@@ -372,6 +375,13 @@ update-desktop-database &> /dev/null || :
 %{_prefix}/libexec/anaconda/dd_*
 
 %changelog
+* Sun Nov 13 2022 sunhai <sunhai10@huawei.com> - 33.19-50
+- Type:bugfix
+- CVE:NA
+- SUG:NA
+- DESC:round the required device size up
+       run restorecon in chroot when handling home dirs
+
 * Mon Mar 28 2022 Wenlong Zhang <zhangwenlong@loongson.cn> - 33.19-49
 - ID:NA
 - SUG:NA
