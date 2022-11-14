@@ -1,0 +1,176 @@
+From c74987064ffbfcf82fccc4aeccb21a66009d0320 Mon Sep 17 00:00:00 2001
+From: Vladimir Slavik <vslavik@redhat.com>
+Date: Tue, 19 Apr 2022 18:19:04 +0200
+Subject: [PATCH] Run restorecon in chroot when handling home dirs
+
+Running restorecon needs chroot to sysroot so as to have correct absolute
+paths. At the point when users are handled, payload has been already
+installed, so the SELinux policy is already present.
+
+This is achieved by using a new restorecon utility function instead of running
+restorecon directly with execWithRedirect. The helper can set root correctly.
+It is also backported 1:1 from upstream and thus retains the "array of str"
+parameter from upstream, even if it is not used with more than one path on
+this branch.
+
+Resolves: rhbz#2069305
+
+(cherry picked from commit a7a0713407baade6871486f7daf37863f4515c20)
+(cherry picked from commit b511e61d7e5d46e79f133f767ded6f399bab9136)
+
+(cherry picked from commit 65025ad94bb5c11005eda0fba3419563acf8c461)
+(cherry picked from commit 3197d194a591fc21c2894b2da1137c425d2a7347)
+
+Reference:https://github.com/rhinstaller/anaconda/pull/4129/files
+Conflict:NA
+---
+ pyanaconda/core/users.py                      |  9 ++++++--
+ pyanaconda/core/util.py                       | 23 +++++++++++++++++++
+ .../pyanaconda_tests/user_create_test.py      | 21 +++++++++++++++--
+ tests/nosetests/pyanaconda_tests/util_test.py | 23 +++++++++++++++++++
+ 4 files changed, 72 insertions(+), 4 deletions(-)
+
+diff --git a/pyanaconda/core/users.py b/pyanaconda/core/users.py
+index fdb75fe..74d02cf 100644
+--- a/pyanaconda/core/users.py
++++ b/pyanaconda/core/users.py
+@@ -426,7 +426,7 @@ def create_user(username, password=False, is_crypted=False, lock=False,
+             util.chown_dir_tree(root + homedir,
+                                 int(pwent[2]), int(pwent[3]),
+                                 orig_uid, orig_gid)
+-            util.execWithRedirect("restorecon", ["-r", root + homedir])
++            util.restorecon([homedir], root=root)
+         except OSError as e:
+             log.critical("Unable to change owner of existing home directory: %s", e.strerror)
+             raise
+@@ -525,7 +525,12 @@ def set_user_ssh_key(username, key, root=None):
+     with util.open_with_perm(authfile, "a", 0o600) as f:
+         f.write(key + "\n")
+ 
++    if root and sshdir.startswith(root):
++        restore_dir = sshdir[len(root):]
++    else:
++        restore_dir = sshdir
++
+     # Only change ownership if we created it
+     if not authfile_existed:
+         os.chown(authfile, int(uid), int(gid))
+-        util.execWithRedirect("restorecon", ["-r", sshdir])
++        util.restorecon([restore_dir], root=root)
+diff --git a/pyanaconda/core/util.py b/pyanaconda/core/util.py
+index 3013cd8..e8925bc 100644
+--- a/pyanaconda/core/util.py
++++ b/pyanaconda/core/util.py
+@@ -1469,6 +1469,29 @@ def is_smt_enabled():
+         return False
+ 
+ 
++def restorecon(paths, root, skip_nonexistent=False):
++    """Try to restore contexts for a list of paths.
++
++    Do not fail if the program does not exist because it was not in the payload, just say so.
++
++    :param [str] paths: list of paths to restore
++    :param str root: root to run in; mandatory because we restore contexts only on the new system
++    :param bool skip_nonexistent: optionally, do not fail if some of the paths do not exist
++    :return bool: did anything run at all
++    """
++    if skip_nonexistent:
++        opts = ["-ir"]
++    else:
++        opts = ["-r"]
++
++    try:
++        execWithRedirect("restorecon", opts + paths, root=root)
++    except FileNotFoundError:
++        return False
++    else:
++        return True
++
++
+ class LazyObject(object):
+     """The lazy object."""
+ 
+diff --git a/tests/nosetests/pyanaconda_tests/user_create_test.py b/tests/nosetests/pyanaconda_tests/user_create_test.py
+index 2e82bbe..3af81ec 100644
+--- a/tests/nosetests/pyanaconda_tests/user_create_test.py
++++ b/tests/nosetests/pyanaconda_tests/user_create_test.py
+@@ -19,6 +19,7 @@
+ 
+ from pyanaconda.core import users
+ import unittest
++from unittest.mock import patch
+ import tempfile
+ import shutil
+ import os
+@@ -276,7 +277,13 @@ class UserCreateTest(unittest.TestCase):
+         keydata = "THIS IS TOTALLY A SSH KEY"
+ 
+         users.create_user("test_user", homedir="/home/test_user", root=self.tmpdir)
+-        users.set_user_ssh_key("test_user", keydata, root=self.tmpdir)
++        with patch("pyanaconda.core.users.util.restorecon") as restorecon_mock:
++            users.set_user_ssh_key("test_user", keydata, root=self.tmpdir)
++
++        restorecon_mock.assert_called_once_with(
++            ["/home/test_user/.ssh"],
++            root=self.tmpdir
++        )
+ 
+         keyfile = self.tmpdir + "/home/test_user/.ssh/authorized_keys"
+         self.assertTrue(os.path.isfile(keyfile))
+@@ -318,7 +325,17 @@ class UserCreateTest(unittest.TestCase):
+         os.makedirs(self.tmpdir + "/home/test_user")
+         os.chown(self.tmpdir + "/home/test_user", 500, 500)
+ 
+-        users.create_user("test_user", homedir="/home/test_user", uid=1000, gid=1000, root=self.tmpdir)
++        with patch("pyanaconda.core.util.restorecon") as restorecon_mock:
++            users.create_user(
++                "test_user",
++                homedir="/home/test_user",
++                uid=1000,
++                gid=1000,
++                root=self.tmpdir
++            )
++
++        restorecon_mock.assert_called_once_with(["/home/test_user"], root=self.tmpdir)
++
+         passwd_fields = self._readFields("/etc/passwd", "test_user")
+         self.assertIsNotNone(passwd_fields)
+         self.assertEqual(passwd_fields[2], "1000")
+diff --git a/tests/nosetests/pyanaconda_tests/util_test.py b/tests/nosetests/pyanaconda_tests/util_test.py
+index ab22033..8420772 100644
+--- a/tests/nosetests/pyanaconda_tests/util_test.py
++++ b/tests/nosetests/pyanaconda_tests/util_test.py
+@@ -830,6 +830,29 @@ class MiscTests(unittest.TestCase):
+         self.assertEqual(get_anaconda_version_string(), "1.0")
+         self.assertEqual(get_anaconda_version_string(build_time_version=True), "1.0-1")
+ 
++    @patch("pyanaconda.core.util.execWithRedirect")
++    def test_restorecon(self, exec_mock):
++        """Test restorecon helper normal function"""
++        # default behavior
++        self.assertTrue(util.restorecon(["foo"], root="/root"))
++        exec_mock.assert_called_once_with("restorecon", ["-r", "foo"], root="/root")
++
++        # also skip
++        exec_mock.reset_mock()
++        self.assertTrue(util.restorecon(["bar"], root="/root", skip_nonexistent=True))
++        exec_mock.assert_called_once_with("restorecon", ["-ir", "bar"], root="/root")
++
++        # explicitly don't skip
++        exec_mock.reset_mock()
++        self.assertTrue(util.restorecon(["bar"], root="/root", skip_nonexistent=False))
++        exec_mock.assert_called_once_with("restorecon", ["-r", "bar"], root="/root")
++
++        # missing restorecon
++        exec_mock.reset_mock()
++        exec_mock.side_effect = FileNotFoundError
++        self.assertFalse(util.restorecon(["baz"], root="/root"))
++        exec_mock.assert_called_once_with("restorecon", ["-r", "baz"], root="/root")
++
+ 
+ class LazyObjectTestCase(unittest.TestCase):
+ 
+-- 
+2.19.1
+

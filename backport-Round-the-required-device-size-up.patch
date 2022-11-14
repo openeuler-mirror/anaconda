@@ -1,0 +1,63 @@
+From 232bdfa12c6f697c3ec774b07b34792fe5194ecd Mon Sep 17 00:00:00 2001
+From: Vendula Poncova <vponcova@redhat.com>
+Date: Wed, 18 May 2022 15:00:39 +0200
+Subject: [PATCH] Round the required device size up
+
+The required device size shouldn't be rounded down to zero,
+so always round it up to the nearest MiB.
+
+Reference:https://github.com/rhinstaller/anaconda/commit/edc59a5cbd625e87056f6a28095a4d327dc6ef3c
+Conflict:NA
+---
+ pyanaconda/modules/storage/devicetree/utils.py            | 5 ++---
+ .../nosetests/pyanaconda_tests/module_device_tree_test.py | 8 ++++++++
+ 2 files changed, 10 insertions(+), 3 deletions(-)
+
+diff --git a/pyanaconda/modules/storage/devicetree/utils.py b/pyanaconda/modules/storage/devicetree/utils.py
+index ddd6d6c..4970f72 100644
+--- a/pyanaconda/modules/storage/devicetree/utils.py
++++ b/pyanaconda/modules/storage/devicetree/utils.py
+@@ -19,11 +19,10 @@ import time
+ import requests
+ 
+ from blivet import udev
+-from blivet.size import Size
+ from blivet.errors import StorageError
+ from blivet.formats import device_formats
+ from blivet.formats.fs import FS
+-from bytesize.bytesize import ROUND_HALF_UP
++from bytesize.bytesize import MiB, ROUND_UP
+ 
+ from pykickstart.errors import KickstartError
+ 
+@@ -134,7 +133,7 @@ def get_required_device_size(required_space, format_class=None):
+         format_class = FS.biggest_overhead_FS()
+ 
+     device_size = format_class.get_required_size(required_space)
+-    return device_size.round_to_nearest(Size("1 MiB"), ROUND_HALF_UP)
++    return device_size.round_to_nearest(MiB, ROUND_UP)
+ 
+ 
+ def find_optical_media(devicetree):
+diff --git a/tests/nosetests/pyanaconda_tests/module_device_tree_test.py b/tests/nosetests/pyanaconda_tests/module_device_tree_test.py
+index 5e52843..a325dfd 100644
+--- a/tests/nosetests/pyanaconda_tests/module_device_tree_test.py
++++ b/tests/nosetests/pyanaconda_tests/module_device_tree_test.py
+@@ -418,6 +418,14 @@ class DeviceTreeInterfaceTestCase(unittest.TestCase):
+ 
+     def get_required_device_size_test(self):
+         """Test GetRequiredDeviceSize."""
++        self.assertEqual(self.interface.GetRequiredDeviceSize(0), 0)
++
++        required_size = self.interface.GetRequiredDeviceSize(Size("10 B").get_bytes())
++        self.assertEqual(Size("1 MiB").get_bytes(), required_size, Size(required_size))
++
++        required_size = self.interface.GetRequiredDeviceSize(Size("10 KiB").get_bytes())
++        self.assertEqual(Size("1 MiB").get_bytes(), required_size, Size(required_size))
++
+         required_size = self.interface.GetRequiredDeviceSize(Size("1 GiB").get_bytes())
+         self.assertEqual(Size("1280 MiB").get_bytes(), required_size, Size(required_size))
+ 
+-- 
+2.19.1
+
