@@ -4,18 +4,17 @@ Date: Wed, 1 Jul 2020 18:08:35 +0800
 Subject: [PATCH] disable ssh login checkbox
 
 ---
- pyanaconda/ui/gui/spokes/root_password.py | 8 ++++----
- 1 file changed, 4 insertions(+), 4 deletions(-)
+ pyanaconda/ui/gui/spokes/root_password.py | 7 ++++----
+ 1 file changed, 4 insertions(+), 3 deletions(-)
 
 diff --git a/pyanaconda/ui/gui/spokes/root_password.py b/pyanaconda/ui/gui/spokes/root_password.py
 index 1d19380..f2e389d 100644
 --- a/pyanaconda/ui/gui/spokes/root_password.py
 +++ b/pyanaconda/ui/gui/spokes/root_password.py
-@@ -79,7 +79,8 @@ class PasswordSpoke(FirstbootSpokeMixIn, NormalSpoke, GUISpokeInputCheckHandler)
-         self._password_label = self.builder.get_object("password_label")
+@@ -80,6 +80,8 @@ class PasswordSpoke(FirstbootSpokeMixIn, NormalSpoke, GUISpokeInputCheckHandler)
          self._enable_root_radio = self.builder.get_object("enable_root_radio")
          self._disable_root_radio = self.builder.get_object("disable_root_radio")
--        self._root_password_ssh_login_override = self.builder.get_object("root_password_ssh_login_override")
+         self._root_password_ssh_login_override = self.builder.get_object("root_password_ssh_login_override")
 +        self._root_password_ssh_login_override.set_visible(False)
 +        self._root_password_ssh_login_override.set_no_show_all(True)
          self._revealer = self.builder.get_object("password_revealer")
