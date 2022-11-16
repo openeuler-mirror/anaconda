@@ -1,0 +1,28 @@
+From 4de5376d5b1b88d1190476b8d179b677a08fe03c Mon Sep 17 00:00:00 2001
+From: sun_hai_10 <sunhai10@huawei.com>
+Date: Tue, 15 Nov 2022 15:46:38 +0800
+Subject: [PATCH] change 'gnome-kiosk' to use 'metacity'
+
+---
+ pyanaconda/display.py | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/pyanaconda/display.py b/pyanaconda/display.py
+index 880af9c..ddf24fb 100644
+--- a/pyanaconda/display.py
++++ b/pyanaconda/display.py
+@@ -192,9 +192,9 @@ def do_startup_x11_actions():
+     else:
+         xdg_data_dirs = datadir + '/window-manager:/usr/share'
+ 
+-    childproc = util.startProgram(["gnome-kiosk", "--display", ":1", "--sm-disable", "--x11"],
++    childproc = util.startProgram(["metacity", "--display", ":1", "--sm-disable"],
+                                   env_add={'XDG_DATA_DIRS': xdg_data_dirs})
+-    WatchProcesses.watch_process(childproc, "gnome-kiosk")
++    WatchProcesses.watch_process(childproc, "metacity")
+ 
+ 
+ def set_x_resolution(runres):
+-- 
+2.23.0
+
