@@ -1,7 +1,7 @@
 %define _empty_manifest_terminate_build 0
 Name:    anaconda
 Version: 36.16.5
-Release: 3
+Release: 4
 Summary: Graphical system installer
 License: GPLv2+ and MIT
 URL:     http://fedoraproject.org/wiki/Anaconda
@@ -15,7 +15,9 @@ Patch9001:    bugfix-GUI-nfs-unknown-error.patch
 Patch9002:    bugfix-set-up-LD_PRELOAD-for-the-Storage-and-Services-module.patch
 Patch9003:    bugfix-Solve-the-problem-that-the-circular-loading-progress-bar-does-not-rotate.patch
 Patch9004:    change-inst-repo-default-value.patch
+%if ! 0%{?openEuler}
 Patch9005:    disable-disk-encryption.patch
+%endif
 Patch9006:    disable-ssh-login-checkbox.patch
 Patch9007:    fix-hostname-info.patch
 Patch9008:    hide-help-button.patch
@@ -264,6 +266,12 @@ update-desktop-database &> /dev/null || :
 %{_prefix}/libexec/anaconda/dd_*
 
 %changelog
+* Mon Nov 21 2022 sunhai <sunhai10@huawei.com> - 36.16.5-4
+- Type:bugfix
+- ID:NA
+- SUG:NA
+- DESC:open disk encryption on openEuler
+
 * Tue Nov 15 2022 sunhai <sunhai10@huawei.com> - 36.16.5-3
 - ID:NA
 - SUG:NA
