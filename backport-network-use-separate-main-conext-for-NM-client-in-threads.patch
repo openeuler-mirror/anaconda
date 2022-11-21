@@ -1,0 +1,922 @@
+From 3972b5dadcadd355d2ff25eae601bc35c336c45a Mon Sep 17 00:00:00 2001
+From: Radek Vykydal <rvykydal@redhat.com>
+Date: Thu, 29 Sep 2022 12:38:55 +0200
+Subject: [PATCH] network: use separate main conext for NM client in threads
+
+Resolves: rhbz#1931389
+
+Create a special NM client with separate main context for calling NM
+client from installation tasks which run in separate threads.
+
+Based on a pull request by t.feng <t.feng94 at foxmail.com> who deserves
+the biggest credit, and upated with suggestions by poncovka <vponcova at
+redhat.com>
+
+The created client should be used only in a limited scope as documented
+in nm_client_in_thread docstring. If we want to extend it and address
+potential issues with client instance releasing and reusing we'd need to
+follow recommendations from Thomas Haller's kind reviews:
+
+<snip>
+
+first of all, initializing a NMClient instance takes relatively long,
+because it makes D-Bus calls and the round trip time adds up. Btw, if
+you'd pass
+instance_flags=NM.ClientInstanceFlags.NO_AUTO_FETCH_PERMISSIONS it can
+make it faster, see here. If it's too slow, then the solution would be
+to re-use the nmclient instance or use async initialization and do stuff
+in parallel. Both is more complicated however, so not necessary unless
+we find that it's a problem.
+
+What is maybe more a problem is that each GMainContext consumes at least
+one file descriptor. When you use the sync nm_client_new() method, then
+NMClient has an additional internal GMainContext, so possibly there are
+2 or more file descriptors involved. The way to "stop" NMClient is by
+unrefing it. However, with all async operations in glib, they cannot
+complete right away. That is because when NMClient gets unrefed, it will
+cancel all (internally) pending operations, but even when you cancel a
+glib operation, the callback still will be invoked with the cancellation
+error. And callbacks only get invoked by iterating/running the
+mainloop/maincontext. This means, if you have a short-running
+application (e.g. not a GUI) and a reasonable small number of NMClient
+instances, then you don't need to care. Otherwise, you unfortunately
+need to make sure that the GMainContext is still iterated just long
+enough, for all operations to be cancelled. That's slightly cumbersome,
+and you can use nm_client_get_context_busy_watcher() to find that out.
+
+Btw, what you also cannot do, is having a NMClient instance alive and
+just not iterating the GMainContext anymore. NMClient will subscribe to
+D-Bus events, and those come (because GDBus has a separate worker
+thread) and will be enqueued in the GMainContext. This applies to all
+applications that register DBus signals via GDBus: you must iterate the
+context enough, so that those events get eventually processed. I think
+this does not apply to you here, but it would apply, if you try to keep
+the nmclient instance alive and reuse later.
+
+</snip>
+
+Reference:https://github.com/rhinstaller/anaconda/commit/3972b5dadcadd355d2ff25eae601bc35c336c45a
+Conflict:NA
+---
+ pyanaconda/core/glib.py                      | 109 +++++++++++++++-
+ pyanaconda/modules/network/constants.py      |   1 +
+ pyanaconda/modules/network/initialization.py | 127 +++++++++++--------
+ pyanaconda/modules/network/installation.py   |  21 +--
+ pyanaconda/modules/network/network.py        |  29 ++---
+ pyanaconda/modules/network/nm_client.py      | 113 +++++++++++------
+ 6 files changed, 275 insertions(+), 125 deletions(-)
+
+diff --git a/pyanaconda/core/glib.py b/pyanaconda/core/glib.py
+index 03c598d..3292538 100644
+--- a/pyanaconda/core/glib.py
++++ b/pyanaconda/core/glib.py
+@@ -24,34 +24,42 @@
+ 
+ import gi
+ gi.require_version("GLib", "2.0")
++gi.require_version("Gio", "2.0")
+ 
+ from gi.repository.GLib import markup_escape_text, format_size_full, \
+                                timeout_add_seconds, timeout_add, idle_add, \
+                                io_add_watch, child_watch_add, \
+-                               source_remove, \
++                               source_remove, timeout_source_new, \
+                                spawn_close_pid, spawn_async_with_pipes, \
+                                MainLoop, MainContext, \
+                                GError, Variant, VariantType, Bytes, \
+                                IOCondition, IOChannel, SpawnFlags, \
+                                MAXUINT
++from gi.repository.Gio import Cancellable
++
++from pyanaconda.anaconda_loggers import get_module_logger
++log = get_module_logger(__name__)
++
+ 
+ __all__ = ["create_main_loop", "create_new_context",
+            "markup_escape_text", "format_size_full",
+            "timeout_add_seconds", "timeout_add", "idle_add",
+            "io_add_watch", "child_watch_add",
+-           "source_remove",
++           "source_remove", "timeout_source_new",
+            "spawn_close_pid", "spawn_async_with_pipes",
+            "GError", "Variant", "VariantType", "Bytes",
+            "IOCondition", "IOChannel", "SpawnFlags",
+-           "MAXUINT"]
++           "MAXUINT", "Cancellable"]
+ 
+ 
+-def create_main_loop():
++def create_main_loop(main_context=None):
+     """Create GLib main loop.
+ 
++    :param main_context: main context to be used for the loop
++    :type main_context: GLib.MainContext
+     :returns: GLib.MainLoop instance.
+     """
+-    return MainLoop()
++    return MainLoop(main_context)
+ 
+ 
+ def create_new_context():
+@@ -59,3 +67,94 @@ def create_new_context():
+ 
+     :returns: GLib.MainContext."""
+     return MainContext.new()
++
++
++class GLibCallResult():
++    """Result of GLib async finish callback."""
++    def __init__(self):
++        self.received_data = None
++        self.error_message = ""
++        self.timeout = False
++
++    @property
++    def succeeded(self):
++        """The async call has succeeded."""
++        return not self.failed
++
++    @property
++    def failed(self):
++        """The async call has failed."""
++        return bool(self.error_message) or self.timeout
++
++
++def sync_call_glib(context, async_call, async_call_finish, timeout, *call_args):
++    """Call GLib asynchronous method synchronously with timeout.
++
++    :param context: context for the new loop in which the method will be called
++    :type context: GMainContext
++    :param async_call: asynchronous GLib method to be called
++    :type async_call: GLib method
++    :param async_call_finish: finish method of the asynchronous call
++    :type async_call_finish: GLib method
++    :param timeout: timeout for the loop in seconds (0 == no timeout)
++    :type timeout: int
++
++    *call_args should hold all positional arguments preceding the cancellable argument
++    """
++
++    info = async_call.get_symbol()
++    result = GLibCallResult()
++
++    loop = create_main_loop(context)
++    callbacks = [loop.quit]
++
++    def _stop_loop():
++        log.debug("sync_call_glib[%s]: quit", info)
++        while callbacks:
++            callback = callbacks.pop()
++            callback()
++
++    def _cancellable_cb():
++        log.debug("sync_call_glib[%s]: cancelled", info)
++
++    cancellable = Cancellable()
++    cancellable_id = cancellable.connect(_cancellable_cb)
++    callbacks.append(lambda: cancellable.disconnect(cancellable_id))
++
++    def _timeout_cb(user_data):
++        log.debug("sync_call_glib[%s]: timeout", info)
++        result.timeout = True
++        cancellable.cancel()
++        return False
++
++    timeout_source = timeout_source_new(int(timeout * 1000))
++    timeout_source.set_callback(_timeout_cb)
++    timeout_source.attach(context)
++    callbacks.append(timeout_source.destroy)
++
++    def _finish_cb(source_object, async_result):
++        log.debug("sync_call_glib[%s]: call %s",
++                  info,
++                  async_call_finish.get_symbol())
++        try:
++            result.received_data = async_call_finish(async_result)
++        except Exception as e:  # pylint: disable=broad-except
++            result.error_message = str(e)
++        finally:
++            _stop_loop()
++
++    context.push_thread_default()
++
++    log.debug("sync_call_glib[%s]: call", info)
++    try:
++        async_call(
++            *call_args,
++            cancellable=cancellable,
++            callback=_finish_cb
++        )
++        loop.run()
++    finally:
++        _stop_loop()
++        context.pop_thread_default()
++
++    return result
+diff --git a/pyanaconda/modules/network/constants.py b/pyanaconda/modules/network/constants.py
+index 530a8e2..e2759af 100644
+--- a/pyanaconda/modules/network/constants.py
++++ b/pyanaconda/modules/network/constants.py
+@@ -25,6 +25,7 @@ from pyanaconda.core.constants import FIREWALL_DEFAULT, FIREWALL_DISABLED, \
+ 
+ NM_CONNECTION_UUID_LENGTH = 36
+ CONNECTION_ACTIVATION_TIMEOUT = 45
++CONNECTION_ADDING_TIMEOUT = 5
+ 
+ 
+ @unique
+diff --git a/pyanaconda/modules/network/initialization.py b/pyanaconda/modules/network/initialization.py
+index b27a469..43a4a19 100644
+--- a/pyanaconda/modules/network/initialization.py
++++ b/pyanaconda/modules/network/initialization.py
+@@ -23,7 +23,8 @@ from pyanaconda.modules.network.network_interface import NetworkInitializationTa
+ from pyanaconda.modules.network.nm_client import get_device_name_from_network_data, \
+     ensure_active_connection_for_device, update_connection_from_ksdata, \
+     add_connection_from_ksdata, bound_hwaddr_of_device, get_connections_available_for_iface, \
+-    update_connection_values, commit_changes_with_autoconnection_blocked, is_ibft_connection
++    update_connection_values, commit_changes_with_autoconnection_blocked, is_ibft_connection, \
++    nm_client_in_thread, activate_connection_sync
+ from pyanaconda.modules.network.ifcfg import get_ifcfg_file_of_device, find_ifcfg_uuid_of_device, \
+     get_master_slaves_from_ifcfgs
+ from pyanaconda.modules.network.device_configuration import supported_wired_device_types, \
+@@ -40,11 +41,9 @@ from gi.repository import NM
+ class ApplyKickstartTask(Task):
+     """Task for application of kickstart network configuration."""
+ 
+-    def __init__(self, nm_client, network_data, supported_devices, bootif, ifname_option_values):
++    def __init__(self, network_data, supported_devices, bootif, ifname_option_values):
+         """Create a new task.
+ 
+-        :param nm_client: NetworkManager client used as configuration backend
+-        :type nm_client: NM.Client
+         :param network_data: kickstart network data to be applied
+         :type: list(NetworkData)
+         :param supported_devices: list of names of supported network devices
+@@ -55,7 +54,6 @@ class ApplyKickstartTask(Task):
+         :type ifname_option_values: list(str)
+         """
+         super().__init__()
+-        self._nm_client = nm_client
+         self._network_data = network_data
+         self._supported_devices = supported_devices
+         self._bootif = bootif
+@@ -76,13 +74,17 @@ class ApplyKickstartTask(Task):
+         :returns: names of devices to which kickstart was applied
+         :rtype: list(str)
+         """
++        with nm_client_in_thread() as nm_client:
++            return self._run(nm_client)
++
++    def _run(self, nm_client):
+         applied_devices = []
+ 
+         if not self._network_data:
+             log.debug("%s: No kickstart data.", self.name)
+             return applied_devices
+ 
+-        if not self._nm_client:
++        if not nm_client:
+             log.debug("%s: No NetworkManager available.", self.name)
+             return applied_devices
+ 
+@@ -92,7 +94,7 @@ class ApplyKickstartTask(Task):
+                 log.info("%s: Wireless devices configuration is not supported.", self.name)
+                 continue
+ 
+-            device_name = get_device_name_from_network_data(self._nm_client,
++            device_name = get_device_name_from_network_data(nm_client,
+                                                             network_data,
+                                                             self._supported_devices,
+                                                             self._bootif)
+@@ -100,10 +102,10 @@ class ApplyKickstartTask(Task):
+                 log.warning("%s: --device %s not found", self.name, network_data.device)
+                 continue
+ 
+-            ifcfg_file = get_ifcfg_file_of_device(self._nm_client, device_name)
++            ifcfg_file = get_ifcfg_file_of_device(nm_client, device_name)
+             if ifcfg_file and ifcfg_file.is_from_kickstart:
+                 if network_data.activate:
+-                    if ensure_active_connection_for_device(self._nm_client, ifcfg_file.uuid,
++                    if ensure_active_connection_for_device(nm_client, ifcfg_file.uuid,
+                                                            device_name):
+                         applied_devices.append(device_name)
+                 continue
+@@ -114,31 +116,39 @@ class ApplyKickstartTask(Task):
+ 
+             connection = None
+             if ifcfg_file:
+-                connection = self._nm_client.get_connection_by_uuid(ifcfg_file.uuid)
++                connection = nm_client.get_connection_by_uuid(ifcfg_file.uuid)
+             if not connection:
+-                connection = self._find_initramfs_connection_of_iface(device_name)
++                connection = self._find_initramfs_connection_of_iface(nm_client, device_name)
+ 
+             if connection:
+                 # if the device was already configured in initramfs update the settings
+-                log.debug("%s: pre kickstart - updating connection %s of device %s",
++                log.debug("%s: updating connection %s of device %s",
+                           self.name, connection.get_uuid(), device_name)
+-                update_connection_from_ksdata(self._nm_client, connection, network_data,
+-                                              device_name=device_name)
++                update_connection_from_ksdata(
++                    nm_client,
++                    connection,
++                    network_data,
++                    device_name=device_name)
+                 if network_data.activate:
+-                    device = self._nm_client.get_device_by_iface(device_name)
+-                    self._nm_client.activate_connection_async(connection, device, None, None)
+-                    log.debug("%s: pre kickstart - activating connection %s with device %s",
+-                              self.name, connection.get_uuid(), device_name)
++                    device = nm_client.get_device_by_iface(device_name)
++                    nm_client.activate_connection_async(connection, device, None, None)
++                    log.debug("%s: pre kickstart - activating connection", self.name)
++                    log.debug("uuid is: %s", connection.get_uuid())
++                    log.debug("device_name is: %s", device_name)
+             else:
+-                log.debug("%s: pre kickstart - adding connection for %s", self.name, device_name)
+-                add_connection_from_ksdata(self._nm_client, network_data, device_name,
+-                                           activate=network_data.activate,
+-                                           ifname_option_values=self._ifname_option_values)
++                log.debug("%s: adding connection for %s", self.name, device_name)
++                add_connection_from_ksdata(
++                    nm_client,
++                    network_data,
++                    device_name,
++                    activate=network_data.activate,
++                    ifname_option_values=self._ifname_option_values
++                )
+ 
+         return applied_devices
+ 
+-    def _find_initramfs_connection_of_iface(self, iface):
+-        device = self._nm_client.get_device_by_iface(iface)
++    def _find_initramfs_connection_of_iface(self, nm_client, iface):
++        device = nm_client.get_device_by_iface(iface)
+         if device:
+             cons = device.get_available_connections()
+             for con in cons:
+@@ -150,14 +160,11 @@ class ApplyKickstartTask(Task):
+ class ConsolidateInitramfsConnectionsTask(Task):
+     """Task for consolidation of initramfs connections."""
+ 
+-    def __init__(self, nm_client):
++    def __init__(self):
+         """Create a new task.
+ 
+-        :param nm_client: NetworkManager client used as configuration backend
+-        :type nm_client: NM.Client
+         """
+         super().__init__()
+-        self._nm_client = nm_client
+ 
+     @property
+     def name(self):
+@@ -174,13 +181,17 @@ class ConsolidateInitramfsConnectionsTask(Task):
+         :returns: names of devices of which the connections have been consolidated
+         :rtype: list(str)
+         """
++        with nm_client_in_thread() as nm_client:
++            return self._run(nm_client)
++
++    def _run(self, nm_client):
+         consolidated_devices = []
+ 
+-        if not self._nm_client:
++        if not nm_client:
+             log.debug("%s: No NetworkManager available.", self.name)
+             return consolidated_devices
+ 
+-        for device in self._nm_client.get_devices():
++        for device in nm_client.get_devices():
+             cons = device.get_available_connections()
+             number_of_connections = len(cons)
+             iface = device.get_iface()
+@@ -200,7 +211,7 @@ class ConsolidateInitramfsConnectionsTask(Task):
+                           self.name, number_of_connections, iface)
+                 continue
+ 
+-            ifcfg_file = get_ifcfg_file_of_device(self._nm_client, iface)
++            ifcfg_file = get_ifcfg_file_of_device(nm_client, iface)
+             if not ifcfg_file:
+                 log.debug("%s: %d for %s - no ifcfg file found",
+                           self.name, number_of_connections, iface)
+@@ -222,7 +233,7 @@ class ConsolidateInitramfsConnectionsTask(Task):
+                       self.name, number_of_connections, iface)
+ 
+             ensure_active_connection_for_device(
+-                self._nm_client,
++                nm_client,
+                 con_uuid,
+                 iface,
+                 only_replace=True
+@@ -251,11 +262,9 @@ class ConsolidateInitramfsConnectionsTask(Task):
+ class SetRealOnbootValuesFromKickstartTask(Task):
+     """Task for setting of real ONBOOT values from kickstart."""
+ 
+-    def __init__(self, nm_client, network_data, supported_devices, bootif, ifname_option_values):
++    def __init__(self, network_data, supported_devices, bootif, ifname_option_values):
+         """Create a new task.
+ 
+-        :param nm_client: NetworkManager client used as configuration backend
+-        :type nm_client: NM.Client
+         :param network_data: kickstart network data to be applied
+         :type: list(NetworkData)
+         :param supported_devices: list of names of supported network devices
+@@ -266,7 +275,6 @@ class SetRealOnbootValuesFromKickstartTask(Task):
+         :type ifname_option_values: list(str)
+         """
+         super().__init__()
+-        self._nm_client = nm_client
+         self._network_data = network_data
+         self._supported_devices = supported_devices
+         self._bootif = bootif
+@@ -287,9 +295,13 @@ class SetRealOnbootValuesFromKickstartTask(Task):
+         :return: names of devices for which ONBOOT was updated
+         :rtype: list(str)
+         """
++        with nm_client_in_thread() as nm_client:
++            return self._run(nm_client)
++
++    def _run(self, nm_client):
+         updated_devices = []
+ 
+-        if not self._nm_client:
++        if not nm_client:
+             log.debug("%s: No NetworkManager available.", self.name)
+             return updated_devices
+ 
+@@ -298,7 +310,7 @@ class SetRealOnbootValuesFromKickstartTask(Task):
+             return updated_devices
+ 
+         for network_data in self._network_data:
+-            device_name = get_device_name_from_network_data(self._nm_client,
++            device_name = get_device_name_from_network_data(nm_client,
+                                                             network_data,
+                                                             self._supported_devices,
+                                                             self._bootif)
+@@ -318,7 +330,7 @@ class SetRealOnbootValuesFromKickstartTask(Task):
+ 
+             cons_to_update = []
+             for devname in devices_to_update:
+-                cons = get_connections_available_for_iface(self._nm_client, devname)
++                cons = get_connections_available_for_iface(nm_client, devname)
+                 n_cons = len(cons)
+                 con = None
+                 if n_cons == 1:
+@@ -326,8 +338,8 @@ class SetRealOnbootValuesFromKickstartTask(Task):
+                 else:
+                     log.debug("%s: %d connections found for %s", self.name, n_cons, devname)
+                     if n_cons > 1:
+-                        ifcfg_uuid = find_ifcfg_uuid_of_device(self._nm_client, devname) or ""
+-                        con = self._nm_client.get_connection_by_uuid(ifcfg_uuid)
++                        ifcfg_uuid = find_ifcfg_uuid_of_device(nm_client, devname) or ""
++                        con = nm_client.get_connection_by_uuid(ifcfg_uuid)
+                         if con:
+                             cons_to_update.append((devname, con))
+ 
+@@ -335,7 +347,7 @@ class SetRealOnbootValuesFromKickstartTask(Task):
+             if network_data.bondslaves or network_data.teamslaves or network_data.bridgeslaves:
+                 # Master can be identified by devname or uuid, try to find master uuid
+                 master_uuid = None
+-                device = self._nm_client.get_device_by_iface(master)
++                device = nm_client.get_device_by_iface(master)
+                 if device:
+                     cons = device.get_available_connections()
+                     n_cons = len(cons)
+@@ -344,9 +356,9 @@ class SetRealOnbootValuesFromKickstartTask(Task):
+                     else:
+                         log.debug("%s: %d connections found for %s", self.name, n_cons, master)
+ 
+-                for name, con_uuid in get_master_slaves_from_ifcfgs(self._nm_client,
++                for name, con_uuid in get_master_slaves_from_ifcfgs(nm_client,
+                                                                     master, uuid=master_uuid):
+-                    con = self._nm_client.get_connection_by_uuid(con_uuid)
++                    con = nm_client.get_connection_by_uuid(con_uuid)
+                     cons_to_update.append((name, con))
+ 
+             for devname, con in cons_to_update:
+@@ -356,7 +368,7 @@ class SetRealOnbootValuesFromKickstartTask(Task):
+                     con,
+                     [("connection", NM.SETTING_CONNECTION_AUTOCONNECT, network_data.onboot)]
+                 )
+-                commit_changes_with_autoconnection_blocked(con)
++                commit_changes_with_autoconnection_blocked(con, nm_client)
+                 updated_devices.append(devname)
+ 
+         return updated_devices
+@@ -365,18 +377,15 @@ class SetRealOnbootValuesFromKickstartTask(Task):
+ class DumpMissingIfcfgFilesTask(Task):
+     """Task for dumping of missing ifcfg files."""
+ 
+-    def __init__(self, nm_client, default_network_data, ifname_option_values):
++    def __init__(self, default_network_data, ifname_option_values):
+         """Create a new task.
+ 
+-        :param nm_client: NetworkManager client used as configuration backend
+-        :type nm_client: NM.Client
+         :param default_network_data: kickstart network data of default device configuration
+         :type default_network_data: NetworkData
+         :param ifname_option_values: list of ifname boot option values
+         :type ifname_option_values: list(str)
+         """
+         super().__init__()
+-        self._nm_client = nm_client
+         self._default_network_data = default_network_data
+         self._ifname_option_values = ifname_option_values
+ 
+@@ -404,7 +413,7 @@ class DumpMissingIfcfgFilesTask(Task):
+                 return con
+         return None
+ 
+-    def _update_connection(self, con, iface):
++    def _update_connection(self, nm_client, con, iface):
+         log.debug("%s: updating id and binding (interface-name) of connection %s for %s",
+                   self.name, con.get_uuid(), iface)
+         s_con = con.get_setting_connection()
+@@ -414,7 +423,7 @@ class DumpMissingIfcfgFilesTask(Task):
+         if s_wired:
+             # By default connections are bound to interface name
+             s_wired.set_property(NM.SETTING_WIRED_MAC_ADDRESS, None)
+-            bound_mac = bound_hwaddr_of_device(self._nm_client, iface, self._ifname_option_values)
++            bound_mac = bound_hwaddr_of_device(nm_client, iface, self._ifname_option_values)
+             if bound_mac:
+                 s_wired.set_property(NM.SETTING_WIRED_MAC_ADDRESS, bound_mac)
+                 log.debug("%s: iface %s bound to mac address %s by ifname boot option",
+@@ -427,19 +436,23 @@ class DumpMissingIfcfgFilesTask(Task):
+         :returns: names of devices for which ifcfg file was created
+         :rtype: list(str)
+         """
++        with nm_client_in_thread() as nm_client:
++            return self._run(nm_client)
++
++    def _run(self, nm_client):
+         new_ifcfgs = []
+ 
+-        if not self._nm_client:
++        if not nm_client:
+             log.debug("%s: No NetworkManager available.", self.name)
+             return new_ifcfgs
+ 
+         dumped_device_types = supported_wired_device_types + virtual_device_types
+-        for device in self._nm_client.get_devices():
++        for device in nm_client.get_devices():
+             if device.get_device_type() not in dumped_device_types:
+                 continue
+ 
+             iface = device.get_iface()
+-            if get_ifcfg_file_of_device(self._nm_client, iface):
++            if get_ifcfg_file_of_device(nm_client, iface):
+                 continue
+ 
+             cons = device.get_available_connections()
+@@ -479,7 +492,9 @@ class DumpMissingIfcfgFilesTask(Task):
+                     continue
+ 
+             if con:
+-                self._update_connection(con, iface)
++                self._update_connection(nm_client, con, iface)
++                # Update some values of connection generated in initramfs so it
++                # can be used as persistent configuration.
+                 if has_initramfs_con:
+                     update_connection_values(
+                         con,
+@@ -494,7 +509,7 @@ class DumpMissingIfcfgFilesTask(Task):
+                 if has_initramfs_con:
+                     network_data.onboot = True
+                 add_connection_from_ksdata(
+-                    self._nm_client,
++                    nm_client,
+                     network_data,
+                     iface,
+                     activate=False,
+diff --git a/pyanaconda/modules/network/installation.py b/pyanaconda/modules/network/installation.py
+index e923270..7ce57ee 100644
+--- a/pyanaconda/modules/network/installation.py
++++ b/pyanaconda/modules/network/installation.py
+@@ -23,7 +23,7 @@ from pyanaconda.modules.common.errors.installation import NetworkInstallationErr
+ from pyanaconda.modules.common.task import Task
+ from pyanaconda.anaconda_loggers import get_module_logger
+ from pyanaconda.modules.network.nm_client import update_connection_values, \
+-    commit_changes_with_autoconnection_blocked
++    commit_changes_with_autoconnection_blocked, nm_client_in_thread
+ from pyanaconda.modules.network.ifcfg import find_ifcfg_uuid_of_device
+ from pyanaconda.modules.network.utils import guard_by_system_configuration
+ 
+@@ -286,16 +286,13 @@ Name={}
+ class ConfigureActivationOnBootTask(Task):
+     """Task for configuration of automatic activation of devices on boot"""
+ 
+-    def __init__(self, nm_client, onboot_ifaces):
++    def __init__(self, onboot_ifaces):
+         """Create a new task.
+ 
+-        :param nm_client: NetworkManager client used as configuration backend
+-        :type nm_client: NM.Client
+         :param onboot_ifaces: interfaces that should be autoactivated on boot
+         :type onboot_ifaces: list(str)
+         """
+         super().__init__()
+-        self._nm_client = nm_client
+         self._onboot_ifaces = onboot_ifaces
+ 
+     @property
+@@ -304,18 +301,24 @@ class ConfigureActivationOnBootTask(Task):
+ 
+     @guard_by_system_configuration(return_value=None)
+     def run(self):
+-        if not self._nm_client:
++        with nm_client_in_thread() as nm_client:
++            return self._run(nm_client)
++
++    def _run(self, nm_client):
++        if not nm_client:
+             log.debug("%s: No NetworkManager available.", self.name)
+             return None
+ 
+         for iface in self._onboot_ifaces:
+-            con_uuid = find_ifcfg_uuid_of_device(self._nm_client, iface)
++            con_uuid = find_ifcfg_uuid_of_device(nm_client, iface)
+             if con_uuid:
+-                con = self._nm_client.get_connection_by_uuid(con_uuid)
++                con = nm_client.get_connection_by_uuid(con_uuid)
+                 update_connection_values(
+                     con,
+                     [("connection", NM.SETTING_CONNECTION_AUTOCONNECT, True)]
+                 )
+-                commit_changes_with_autoconnection_blocked(con)
++                commit_changes_with_autoconnection_blocked(con, nm_client)
++                log.debug("updated connection %s:\n%s", con.get_uuid(),
++                          con.to_dbus(NM.ConnectionSerializationFlags.ALL))
+             else:
+                 log.warning("Configure ONBOOT: can't find ifcfg for %s", iface)
+diff --git a/pyanaconda/modules/network/network.py b/pyanaconda/modules/network/network.py
+index 36c7f48..7dba851 100644
+--- a/pyanaconda/modules/network/network.py
++++ b/pyanaconda/modules/network/network.py
+@@ -34,7 +34,7 @@ from pyanaconda.modules.network.firewall import FirewallModule
+ from pyanaconda.modules.network.device_configuration import DeviceConfigurations, \
+     supported_device_types, supported_wired_device_types
+ from pyanaconda.modules.network.nm_client import devices_ignore_ipv6, get_connections_dump, \
+-    get_dracut_arguments_from_connection, is_ibft_connection
++    get_dracut_arguments_from_connection, is_ibft_connection, get_new_nm_client
+ from pyanaconda.modules.network.ifcfg import get_kickstart_network_data, \
+     get_ifcfg_file, get_ifcfg_files_content
+ from pyanaconda.modules.network.installation import NetworkInstallationTask, \
+@@ -74,17 +74,12 @@ class NetworkService(KickstartService):
+             )
+ 
+         self.connected_changed = Signal()
+-        self.nm_client = None
+         # TODO fallback solution - use Gio/GNetworkMonitor ?
+-        if SystemBus.check_connection():
+-            nm_client = NM.Client.new(None)
+-            if nm_client.get_nm_running():
+-                self.nm_client = nm_client
+-                self.nm_client.connect("notify::%s" % NM.CLIENT_STATE, self._nm_state_changed)
+-                initial_state = self.nm_client.get_state()
+-                self.set_connected(self._nm_state_connected(initial_state))
+-            else:
+-                log.debug("NetworkManager is not running.")
++        self.nm_client = get_new_nm_client()
++        if self.nm_client:
++            self.nm_client.connect("notify::%s" % NM.CLIENT_STATE, self._nm_state_changed)
++            initial_state = self.nm_client.get_state()
++            self.set_connected(self._nm_state_connected(initial_state))
+ 
+         self._original_network_data = []
+         self._device_configurations = None
+@@ -319,7 +314,6 @@ class NetworkService(KickstartService):
+         all_onboot_ifaces = list(set(onboot_ifaces + onboot_ifaces_by_policy))
+ 
+         task = ConfigureActivationOnBootTask(
+-            self.nm_client,
+             all_onboot_ifaces
+         )
+         task.succeeded_signal.connect(lambda: self.log_task_result(task))
+@@ -451,7 +445,7 @@ class NetworkService(KickstartService):
+ 
+         :returns: a task consolidating the connections
+         """
+-        task = ConsolidateInitramfsConnectionsTask(self.nm_client)
++        task = ConsolidateInitramfsConnectionsTask()
+         task.succeeded_signal.connect(lambda: self.log_task_result(task, check_result=True))
+         return task
+ 
+@@ -550,8 +544,7 @@ class NetworkService(KickstartService):
+         :returns: a task applying the kickstart
+         """
+         supported_devices = [dev_info.device_name for dev_info in self.get_supported_devices()]
+-        task = ApplyKickstartTask(self.nm_client,
+-                                  self._original_network_data,
++        task = ApplyKickstartTask(self._original_network_data,
+                                   supported_devices,
+                                   self.bootif,
+                                   self.ifname_option_values)
+@@ -571,8 +564,7 @@ class NetworkService(KickstartService):
+         :returns: a task setting the values
+         """
+         supported_devices = [dev_info.device_name for dev_info in self.get_supported_devices()]
+-        task = SetRealOnbootValuesFromKickstartTask(self.nm_client,
+-                                                    self._original_network_data,
++        task = SetRealOnbootValuesFromKickstartTask(self._original_network_data,
+                                                     supported_devices,
+                                                     self.bootif,
+                                                     self.ifname_option_values)
+@@ -600,8 +592,7 @@ class NetworkService(KickstartService):
+         """
+         data = self.get_kickstart_handler()
+         default_network_data = data.NetworkData(onboot=False, ipv6="auto")
+-        task = DumpMissingIfcfgFilesTask(self.nm_client,
+-                                         default_network_data,
++        task = DumpMissingIfcfgFilesTask(default_network_data,
+                                          self.ifname_option_values)
+         task.succeeded_signal.connect(lambda: self.log_task_result(task, check_result=True))
+         return task
+diff --git a/pyanaconda/modules/network/nm_client.py b/pyanaconda/modules/network/nm_client.py
+index 9e57db4..3128de5 100644
+--- a/pyanaconda/modules/network/nm_client.py
++++ b/pyanaconda/modules/network/nm_client.py
+@@ -21,20 +21,67 @@
+ import gi
+ gi.require_version("NM", "1.0")
+ from gi.repository import NM
++from contextlib import contextmanager
+ 
+ import socket
+-from queue import Queue, Empty
+ from pykickstart.constants import BIND_TO_MAC
++from pyanaconda.core.glib import create_new_context, GError, sync_call_glib
+ from pyanaconda.modules.network.constants import NM_CONNECTION_UUID_LENGTH, \
+-    CONNECTION_ACTIVATION_TIMEOUT
++    CONNECTION_ACTIVATION_TIMEOUT, CONNECTION_ADDING_TIMEOUT
+ from pyanaconda.modules.network.kickstart import default_ks_vlan_interface_name
+ from pyanaconda.modules.network.utils import is_s390, get_s390_settings, netmask2prefix, \
+     prefix2netmask
++from pyanaconda.core.dbus import SystemBus
+ 
+ from pyanaconda.anaconda_loggers import get_module_logger
+ log = get_module_logger(__name__)
+ 
+ 
++@contextmanager
++def nm_client_in_thread():
++    """Create NM Client with new GMainContext to be run in thread.
++
++    Expected to be used only in installer environment for a few
++    one-shot isolated network configuration tasks.
++    Destroying of the created NM Client instance and release of
++    related resources is not implemented.
++
++    For more information see NetworkManager example examples/python/gi/gmaincontext.py
++    """
++    mainctx = create_new_context()
++    mainctx.push_thread_default()
++
++    try:
++        yield get_new_nm_client()
++    finally:
++        mainctx.pop_thread_default()
++
++
++def get_new_nm_client():
++    """Get new instance of NMClient.
++
++    :returns: an instance of NetworkManager NMClient or None if system bus
++              is not available or NM is not running
++    :rtype: NM.NMClient
++    """
++    if not SystemBus.check_connection():
++        log.debug("get new NM Client failed: SystemBus connection check failed.")
++        return None
++
++    try:
++        nm_client = NM.Client.new(None)
++    except GError as e:
++        log.debug("get new NM Client constructor failed: %s", e)
++        return None
++
++    if not nm_client.get_nm_running():
++        log.debug("get new NM Client failed: NetworkManager is not running.")
++        return None
++
++    log.debug("get new NM Client succeeded.")
++    return nm_client
++
++
+ def get_iface_from_connection(nm_client, uuid):
+     """Get the name of device that would be used for the connection.
+ 
+@@ -586,7 +633,7 @@ def update_connection_from_ksdata(nm_client, connection, network_data, device_na
+ 
+     bind_connection(nm_client, connection, network_data.bindto, device_name)
+ 
+-    commit_changes_with_autoconnection_blocked(connection)
++    commit_changes_with_autoconnection_blocked(connection, nm_client)
+ 
+     log.debug("updated connection %s:\n%s", connection.get_uuid(),
+               connection.to_dbus(NM.ConnectionSerializationFlags.NO_SECRETS))
+@@ -872,8 +919,6 @@ def update_connection_values(connection, new_values):
+         else:
+             log.debug("setting '%s' not found while updating connection %s",
+                       setting_name, connection.get_uuid())
+-    log.debug("updated connection %s:\n%s", connection.get_uuid(),
+-              connection.to_dbus(NM.ConnectionSerializationFlags.ALL))
+ 
+ 
+ def devices_ignore_ipv6(nm_client, device_types):
+@@ -911,7 +956,7 @@ def get_connections_dump(nm_client):
+     return "\n".join(con_dumps)
+ 
+ 
+-def commit_changes_with_autoconnection_blocked(connection, save_to_disk=True):
++def commit_changes_with_autoconnection_blocked(connection, nm_client, save_to_disk=True):
+     """Implementation of NM CommitChanges() method with blocked autoconnection.
+ 
+     Update2() API is used to implement the functionality (called synchronously).
+@@ -926,27 +971,28 @@ def commit_changes_with_autoconnection_blocked(connection, save_to_disk=True):
+     :return: on success result of the Update2() call, None of failure
+     :rtype: GVariant of type "a{sv}" or None
+     """
+-    sync_queue = Queue()
+-
+-    def finish_callback(connection, result, sync_queue):
+-        ret = connection.update2_finish(result)
+-        sync_queue.put(ret)
+-
+     flags = NM.SettingsUpdate2Flags.BLOCK_AUTOCONNECT
+     if save_to_disk:
+         flags |= NM.SettingsUpdate2Flags.TO_DISK
+-
+     con2 = NM.SimpleConnection.new_clone(connection)
+-    connection.update2(
++
++    result = sync_call_glib(
++        nm_client.get_main_context(),
++        connection.update2,
++        connection.update2_finish,
++        CONNECTION_ADDING_TIMEOUT,
+         con2.to_dbus(NM.ConnectionSerializationFlags.ALL),
+         flags,
+-        None,
+-        None,
+-        finish_callback,
+-        sync_queue
++        None
+     )
+ 
+-    return sync_queue.get()
++    if result.failed:
++        log.error("comitting changes of connection %s failed: %s",
++                  connection.get_uuid(),
++                  result.error_message)
++        return None
++
++    return result.received_data
+ 
+ 
+ def activate_connection_sync(nm_client, connection, device):
+@@ -960,28 +1006,23 @@ def activate_connection_sync(nm_client, connection, device):
+                    None if not needed
+     :type device: NM.Device
+     """
+-    sync_queue = Queue()
+-
+-    def finish_callback(nm_client, result, sync_queue):
+-        ret = nm_client.activate_connection_finish(result)
+-        sync_queue.put(ret)
+-
+-    nm_client.activate_connection_async(
++    result = sync_call_glib(
++        nm_client.get_main_context(),
++        nm_client.activate_connection_async,
++        nm_client.activate_connection_finish,
++        CONNECTION_ACTIVATION_TIMEOUT,
+         connection,
+         device,
+-        None,
+-        None,
+-        finish_callback,
+-        sync_queue
++        None
+     )
+ 
+-    try:
+-        ret = sync_queue.get(timeout=CONNECTION_ACTIVATION_TIMEOUT)
+-    except Empty:
+-        log.error("Activation of a connection timed out.")
+-        ret = None
++    if result.failed:
++        log.error("Activation of a connection timed out, activate of connection %s failed: %s",
++                  connection.get_uuid(),
++                  result.error_message)
++        return None
+ 
+-    return ret
++    return result.received_data
+ 
+ 
+ def get_dracut_arguments_from_connection(nm_client, connection, iface, target_ip,
+-- 
+2.23.0
+

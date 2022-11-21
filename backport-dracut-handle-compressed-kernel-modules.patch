@@ -1,0 +1,47 @@
+From c4a388d3956088c96631b72f0631db2a380127b0 Mon Sep 17 00:00:00 2001
+From: Mikhail Novosyolov <m.novosyolov@rosalinux.ru>
+Date: Fri, 10 Jun 2022 22:03:43 +0300
+Subject: [PATCH] dracut: handle compressed kernel modules
+
+Compressed kernel modules could not be loaded.
+Now both compressed and not compressed ones will be loaded.
+
+$ uname -r
+5.10.74-generic-2rosa2021.1-x86_64
+$ ls -1v /lib/modules/$(uname -r)/kernel/drivers/scsi/device_handler/
+scsi_dh_alua.ko.zst
+scsi_dh_emc.ko.zst
+scsi_dh_hp_sw.ko.zst
+scsi_dh_rdac.ko.zst
+
+Replaces https://github.com/rhinstaller/anaconda/pull/3501
+Noted by slava86@
+Reference:https://github.com/rhinstaller/anaconda/commit/c4a388d3956088c96631b72f0631db2a380127b0
+Conflict:NA
+---
+ dracut/anaconda-modprobe.sh | 9 +++++----
+ 1 file changed, 5 insertions(+), 4 deletions(-)
+
+diff --git a/dracut/anaconda-modprobe.sh b/dracut/anaconda-modprobe.sh
+index 97ee53bcb1..3640b4d42f 100755
+--- a/dracut/anaconda-modprobe.sh
++++ b/dracut/anaconda-modprobe.sh
+@@ -14,11 +14,12 @@ MODULE_LIST="cramfs squashfs iscsi_tcp "
+ shopt -s nullglob
+ 
+ SCSI_MODULES=/lib/modules/$KERNEL/kernel/drivers/scsi/device_handler/
+-for m in $SCSI_MODULES/*.ko; do
++for m in "$SCSI_MODULES"/*.ko*; do
+     # Shell spew to work around not having basename
+-    # Trim the paths off the prefix, then the . suffix
+-    a="${m##*/}"
+-    MODULE_LIST+=" ${a%.*}"
++    m="${m##*/}"
++    # Handle *.ko, *.ko.zst, *.ko.gz, *.ko.xz etc.
++    IFS='.ko' read -r -a m <<< "$m"
++    MODULE_LIST+=" ${m[0]}"
+ done
+ 
+ shopt -u nullglob
+-- 
+2.23.0
