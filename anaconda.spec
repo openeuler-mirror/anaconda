@@ -4,7 +4,7 @@
 %endif
 Name:    anaconda
 Version: 33.19
-Release: 34
+Release: 35
 Summary: Graphical system installer
 License: GPLv2+ and MIT
 URL:     http://fedoraproject.org/wiki/Anaconda
@@ -30,7 +30,9 @@ Patch9014:    disable-ssh-login-checkbox.patch
 Patch9015:    bugfix-add-kdump-parameter-into-kernel-cmdline.patch
 Patch9016:    bugfix-fix-password-policy.patch
 Patch9017:    add-boot-args-for-smmu-and-video.patch
+%if ! 0%{?openEuler}
 Patch9018:    disable-disk-encryption.patch
+%endif
 Patch9019:    bugfix-set-up-LD_PRELOAD-for-the-Storage-and-Services-module.patch
 Patch9020:    bugfix-Propagate-a-lazy-proxy-of-the-storage-model.patch
 
@@ -336,6 +338,12 @@ update-desktop-database &> /dev/null || :
 %{_datadir}/gtk-doc
 
 %changelog
+* Mon Nov 21 2022 sunhai <sunhai10@huawei.com> - 33.19-35
+- Type:bugfix
+- ID:NA
+- SUG:NA
+- DESC:open disk encryption on openEuler
+
 * Tue Aug 23 2022 yueyuankun <yueyuankun@kylinos.cn> - 33.19-34
 - Type:bugfix
 - ID:NA
