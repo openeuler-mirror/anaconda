@@ -4,7 +4,7 @@
 %endif
 Name:    anaconda
 Version: 33.19
-Release: 35
+Release: 36
 Summary: Graphical system installer
 License: GPLv2+ and MIT
 URL:     http://fedoraproject.org/wiki/Anaconda
@@ -124,7 +124,11 @@ Patch9026:    support-use-sm3-crypt-user-password.patch
 
 Patch6077:    bugfix-Cancel-planned-manual-update-of-system-time-on-turni.patch
 Patch6078:    revert-Set-default-entry-to-the-BLS-id-instead-of-th.patch
-Patch6079:    bugfix-Solve-the-problem-that-the-circular-loading-progress-bar-does-not-rotate.patch
+
+Patch9027:    bugfix-Solve-the-problem-that-the-circular-loading-progress-bar-does-not-rotate.patch
+
+Patch6079:    backport-dracut-handle-compressed-kernel-modules.patch
+Patch6080:    backport-network-use-separate-main-conext-for-NM-client-in-threads.patch
 
 %define dbusver 1.2.3
 %define dnfver 3.6.0
@@ -338,6 +342,13 @@ update-desktop-database &> /dev/null || :
 %{_datadir}/gtk-doc
 
 %changelog
+* Mon Nov 21 2022 sunhai <sunhai10@huawei.com> - 33.19-36
+- Type:bugfix
+- ID:NA
+- SUG:NA
+- DESC:dracut handle compressed kernel modules
+       network use separate main conext for NM-client in threads
+
 * Mon Nov 21 2022 sunhai <sunhai10@huawei.com> - 33.19-35
 - Type:bugfix
 - ID:NA
