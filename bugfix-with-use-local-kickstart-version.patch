@@ -1,12 +1,26 @@
-From d8f6a8f3e50ea99ed0c9b37da0e3803be7678693 Mon Sep 17 00:00:00 2001
+From d361beead1ff91273aa0f13147b2b279172133aa Mon Sep 17 00:00:00 2001
 From: sun_hai_10 <sunhai10@huawei.com>
-Date: Fri, 11 Nov 2022 10:39:28 +0800
+Date: Thu, 24 Nov 2022 10:40:41 +0800
 Subject: [PATCH] with use local kickstart version
 
 ---
+ dracut/parse-kickstart               | 2 +-
  pyanaconda/core/kickstart/version.py | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ 2 files changed, 2 insertions(+), 2 deletions(-)
 
+diff --git a/dracut/parse-kickstart b/dracut/parse-kickstart
+index 56cacb8..e0fdd1f 100755
+--- a/dracut/parse-kickstart
++++ b/dracut/parse-kickstart
+@@ -41,7 +41,7 @@ from pykickstart.constants import *
+ from collections import OrderedDict
+ 
+ # Import the kickstart version.
+-from pykickstart.version import F36 as VERSION
++from pykickstart.version import DEVEL as VERSION
+ 
+ # Import all kickstart commands as version-less.
+ from pykickstart.commands.cdrom import FC3_Cdrom as Cdrom
 diff --git a/pyanaconda/core/kickstart/version.py b/pyanaconda/core/kickstart/version.py
 index 4170214..df743a6 100644
 --- a/pyanaconda/core/kickstart/version.py
