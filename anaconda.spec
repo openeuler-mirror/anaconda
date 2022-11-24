@@ -1,7 +1,7 @@
 %define _empty_manifest_terminate_build 0
 Name:    anaconda
 Version: 36.16.5
-Release: 5
+Release: 6
 Summary: Graphical system installer
 License: GPLv2+ and MIT
 URL:     http://fedoraproject.org/wiki/Anaconda
@@ -29,6 +29,7 @@ Patch9012:    Support-configuration-of-additional-boot-arguments.patch
 Patch9013:    support-use-sm3-crypt-user-password.patch
 Patch9014:    bugfix-with-use-local-kickstart-version.patch
 Patch9015:    bugfix-change-gnome-kiosk-to-use-metacity.patch
+Patch9016:    bugfix-add-log-and-background.patch
 
 %define dasbusver 1.3
 %define dbusver 1.2.3
@@ -150,7 +151,6 @@ runtime on NFS/HTTP/FTP servers or local disks.
 
 %prep
 %autosetup -n %{name}-%{version} -p1
-sed -i 's/import F36/import DEVEL/g' %{_builddir}/%{name}-%{version}/dracut/parse-kickstart
 
 %build
 # use actual build-time release number, not tarball creation time release number
@@ -268,6 +268,13 @@ update-desktop-database &> /dev/null || :
 %{_prefix}/libexec/anaconda/dd_*
 
 %changelog
+* Thu Nov 24 2022 sunhai <sunhai10@huawei.com> - 36.16.5-6
+- Type:bugfix
+- ID:NA
+- SUG:NA
+- DESC:add logo with install
+       the kickstart version change to patch
+
 * Wed Nov 23 2022 sunhai <sunhai10@huawei.com> - 36.16.5-5
 - Type:bugfix
 - ID:NA
