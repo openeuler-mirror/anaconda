@@ -1,0 +1,46 @@
+From 8b5428e400ac80d57ae6bc6b0ec792e17a62a04e Mon Sep 17 00:00:00 2001
+From: sun_hai_10 <sunhai10@huawei.com>
+Date: Thu, 24 Nov 2022 11:13:58 +0800
+Subject: [PATCH] add log and background
+
+---
+ data/anaconda-gtk.css | 11 ++++++++++-
+ 1 file changed, 10 insertions(+), 1 deletion(-)
+
+diff --git a/data/anaconda-gtk.css b/data/anaconda-gtk.css
+index 7de933d..7c6643a 100644
+--- a/data/anaconda-gtk.css
++++ b/data/anaconda-gtk.css
+@@ -98,12 +98,18 @@ infobar.error {
+ @define-color anaconda_bg_color #2f4265;
+ 
+ .logo-sidebar {
++    background-image: url('/usr/share/anaconda/pixmaps/sidebar-bg.png');
++    background-size: 100% 100%;
++    background-repeat: no-repeat;
+     background-color: @anaconda_bg_color;
+ }
+ 
+ /* This is a placeholder to be filled by a product-specific logo. */
+ .logo {
+-    background-image: none;
++    background-image: url('/usr/share/anaconda/pixmaps/sidebar-logo.png');
++    background-position: 50% 20px;
++    background-size: 90%;
++    background-repeat: no-repeat;
+     background-color: transparent;
+ }
+ 
+@@ -114,6 +120,9 @@ infobar.error {
+ }
+ 
+ AnacondaSpokeWindow #nav-box {
++    background-image: url('/usr/share/anaconda/pixmaps/topbar-bg.png');
++    background-size: 100% 100%;
++    background-repeat: no-repeat;
+     background-color: @anaconda_bg_color;
+     color: white;
+ }
+-- 
+2.23.0
+
