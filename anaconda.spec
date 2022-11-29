@@ -1,7 +1,7 @@
 %define _empty_manifest_terminate_build 0
 Name:    anaconda
 Version: 36.16.5
-Release: 6
+Release: 7
 Summary: Graphical system installer
 License: GPLv2+ and MIT
 URL:     http://fedoraproject.org/wiki/Anaconda
@@ -30,6 +30,8 @@ Patch9013:    support-use-sm3-crypt-user-password.patch
 Patch9014:    bugfix-with-use-local-kickstart-version.patch
 Patch9015:    bugfix-change-gnome-kiosk-to-use-metacity.patch
 Patch9016:    bugfix-add-log-and-background.patch
+Patch9017:    bugfix-add-SM3-with-tui.patch
+Patch9018:    bugfix-change-product-name-do-not-with-upper.patch
 
 %define dasbusver 1.3
 %define dbusver 1.2.3
@@ -268,6 +270,13 @@ update-desktop-database &> /dev/null || :
 %{_prefix}/libexec/anaconda/dd_*
 
 %changelog
+* Tue Nov 29 2022 sunhai <sunhai10@huawei.com> - 36.16.5-7
+- Type:bugfix
+- ID:NA
+- SUG:NA
+- DESC:change product name not with upper
+       add SM3 with tui
+
 * Thu Nov 24 2022 sunhai <sunhai10@huawei.com> - 36.16.5-6
 - Type:bugfix
 - ID:NA

@@ -1,0 +1,39 @@
+From 613035ac2716f99ce2ec536c4769d3dc6e6f90e5 Mon Sep 17 00:00:00 2001
+From: sun_hai_10 <sunha10@huawei.com>
+Date: Tue, 29 Nov 2022 15:44:45 +0800
+Subject: [PATCH] change product name do not with upper
+
+---
+ pyanaconda/product.py               | 4 ++--
+ pyanaconda/ui/gui/spokes/welcome.py | 2 +-
+ 2 files changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/pyanaconda/product.py b/pyanaconda/product.py
+index b5e97d7..7fe28cb 100644
+--- a/pyanaconda/product.py
++++ b/pyanaconda/product.py
+@@ -57,6 +57,6 @@ productVersion = trim_product_version_for_ui(productVersion)
+ 
+ def distributionText():
+     return _("%(productName)s %(productVersion)s INSTALLATION") % {
+-        "productName": productName.upper(),
+-        "productVersion": productVersion.upper()
++        "productName": productName,
++        "productVersion": productVersion
+     }
+diff --git a/pyanaconda/ui/gui/spokes/welcome.py b/pyanaconda/ui/gui/spokes/welcome.py
+index 773d5a8..3fc5ebf 100644
+--- a/pyanaconda/ui/gui/spokes/welcome.py
++++ b/pyanaconda/ui/gui/spokes/welcome.py
+@@ -271,7 +271,7 @@ class WelcomeLanguageSpoke(StandaloneSpoke, LangLocaleHandler):
+         welcomeLabel = self.builder.get_object("welcomeLabel")
+ 
+         welcomeLabel.set_text(_("WELCOME TO %(name)s %(version)s.") %
+-                {"name" : productName.upper(), "version" : productVersion})         # pylint: disable=no-member
++                {"name" : productName, "version" : productVersion})         # pylint: disable=no-member
+ 
+         # Retranslate the language (filtering) entry's placeholder text
+         languageEntry = self.builder.get_object("languageEntry")
+-- 
+2.23.0
+
