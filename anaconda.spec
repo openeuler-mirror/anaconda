@@ -1,7 +1,7 @@
 %define _empty_manifest_terminate_build 0
 Name:    anaconda
 Version: 33.19
-Release: 50
+Release: 51
 Summary: Graphical system installer
 License: GPLv2+ and MIT
 URL:     http://fedoraproject.org/wiki/Anaconda
@@ -132,10 +132,11 @@ Patch6085:    anaconda-33.19.sw.patch
 %endif
 %ifarch loongarch64
 Patch6086:    0001-add-loongarch-support-for-anaconda-33.19.patch
+Patch6087:    0001-add-BOOTLOONGARCH.EFI-for-anaconda.patch
 %endif
 
-Patch6087:    backport-Round-the-required-device-size-up.patch
-Patch6088:    backport-Run-restorecon-in-chroot-when-handling-home-dirs.patch
+Patch6088:    backport-Round-the-required-device-size-up.patch
+Patch6089:    backport-Run-restorecon-in-chroot-when-handling-home-dirs.patch
 
 %define dbusver 1.2.3
 %define dnfver 3.6.0
@@ -375,6 +376,11 @@ update-desktop-database &> /dev/null || :
 %{_prefix}/libexec/anaconda/dd_*
 
 %changelog
+* Thu Nov 10 2022 Wenlong Zhang <zhangwenlong@loongson.cn> - 33.19-51
+- ID:NA
+- SUG:NA
+- DESC: Increase firmware compatibility for loongarch
+
 * Sun Nov 13 2022 sunhai <sunhai10@huawei.com> - 33.19-50
 - Type:bugfix
 - CVE:NA
