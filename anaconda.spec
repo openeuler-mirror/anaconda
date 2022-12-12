@@ -1,7 +1,7 @@
 %define _empty_manifest_terminate_build 0
 Name:    anaconda
 Version: 36.16.5
-Release: 7
+Release: 8
 Summary: Graphical system installer
 License: GPLv2+ and MIT
 URL:     http://fedoraproject.org/wiki/Anaconda
@@ -32,6 +32,9 @@ Patch9015:    bugfix-change-gnome-kiosk-to-use-metacity.patch
 Patch9016:    bugfix-add-log-and-background.patch
 Patch9017:    bugfix-add-SM3-with-tui.patch
 Patch9018:    bugfix-change-product-name-do-not-with-upper.patch
+%ifarch loongarch64
+Patch9019:    0001-add-loongarch-support-for-anaconda.patch
+%endif
 
 %define dasbusver 1.3
 %define dbusver 1.2.3
@@ -270,6 +273,11 @@ update-desktop-database &> /dev/null || :
 %{_prefix}/libexec/anaconda/dd_*
 
 %changelog
+* Mon Dec 12 2022 Wenlong Zhang <zhangwenlong@loongson.cn> - 36.16.5-8
+- ID:NA
+- SUG:NA
+- DESC: add loongarch support for anaconda
+
 * Tue Nov 29 2022 sunhai <sunhai10@huawei.com> - 36.16.5-7
 - Type:bugfix
 - ID:NA
