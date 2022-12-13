@@ -1,0 +1,31 @@
+From fd2b43a5599375277cbcdd9c62e8afdd7b2677ac Mon Sep 17 00:00:00 2001
+From: yaoguangzhong <yaoguangzhong@xfusion.com>
+Date: Tue, 13 Dec 2022 15:20:30 +0800
+Subject: [PATCH] bugfix: translate the prompt information of hostname into
+ Chinese
+
+---
+ po/zh_CN.po | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/po/zh_CN.po b/po/zh_CN.po
+index df9e015..92b9084 100644
+--- a/po/zh_CN.po
++++ b/po/zh_CN.po
+@@ -2366,10 +2366,10 @@ msgstr "本地主机名绝不能以句号\".\"结尾。"
+ msgid ""
+ "Host names can only contain the characters 'a-z', 'A-Z', '0-9', '-', or '.', "
+ "parts between periods must contain something being 63 or fewer "
+-"characters and cannot start or end with '-'."
++"characters and cannot start or end with '.' and '-'."
+ msgstr ""
+-"主机名只能包含 'a-z', 'A-Z', '0-9', '-'（英文减号）, 或者 '.'（英文点号），其"
+-"中两个点号中不能为空，必须少于64个字符且不能以'-'开头或结尾。"
++"主机名只能包含字符'a-z', 'A-Z', '0-9', '-'（英文减号）, 或者 '.'（英文点号），"
++"句点之间的部分必须包含63个或更少的字符，并且不能以“.”和“-”开头或结尾。"
+ 
+ #: pyanaconda/network.py:465
+ msgid "Status not available"
+-- 
+2.27.0
+
