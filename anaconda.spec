@@ -4,7 +4,7 @@
 %endif
 Name:    anaconda
 Version: 33.19
-Release: 36
+Release: 37
 Summary: Graphical system installer
 License: GPLv2+ and MIT
 URL:     http://fedoraproject.org/wiki/Anaconda
@@ -129,6 +129,8 @@ Patch9027:    bugfix-Solve-the-problem-that-the-circular-loading-progress-bar-do
 
 Patch6079:    backport-dracut-handle-compressed-kernel-modules.patch
 Patch6080:    backport-network-use-separate-main-conext-for-NM-client-in-threads.patch
+
+Patch9028:    bugfix-translate-the-prompt-information-of-hostname-.patch
 
 %define dbusver 1.2.3
 %define dnfver 3.6.0
@@ -342,6 +344,12 @@ update-desktop-database &> /dev/null || :
 %{_datadir}/gtk-doc
 
 %changelog
+* Tue Dec 13 2022 yaoguangzhong <yaoguangzhong@xfusion.com> - 33.19-37
+- Type:bugfix
+- ID:NA
+- SUG:NA
+- DESC:translate the prompt information of hostname into Chinese
+
 * Mon Nov 21 2022 sunhai <sunhai10@huawei.com> - 33.19-36
 - Type:bugfix
 - ID:NA
