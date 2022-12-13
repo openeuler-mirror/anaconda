@@ -4,7 +4,7 @@
 %endif
 Name:    anaconda
 Version: 33.19
-Release: 37
+Release: 38
 Summary: Graphical system installer
 License: GPLv2+ and MIT
 URL:     http://fedoraproject.org/wiki/Anaconda
@@ -131,6 +131,7 @@ Patch6079:    backport-dracut-handle-compressed-kernel-modules.patch
 Patch6080:    backport-network-use-separate-main-conext-for-NM-client-in-threads.patch
 
 Patch9028:    bugfix-translate-the-prompt-information-of-hostname-.patch
+Patch9029:    bugfix-translate-the-tips-about-expected-capacity-into-Chin.patch
 
 %define dbusver 1.2.3
 %define dnfver 3.6.0
@@ -344,6 +345,12 @@ update-desktop-database &> /dev/null || :
 %{_datadir}/gtk-doc
 
 %changelog
+* Wed Dec 14 2022 yaoguangzhong <yaoguangzhong@xfusion.com> - 33.19-38
+- Type:bugfix
+- ID:NA
+- SUG:NA
+- DESC:translate the tips about expected capacity into Chinese
+
 * Tue Dec 13 2022 yaoguangzhong <yaoguangzhong@xfusion.com> - 33.19-37
 - Type:bugfix
 - ID:NA
