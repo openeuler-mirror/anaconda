@@ -1,7 +1,7 @@
 %define _empty_manifest_terminate_build 0
 Name:    anaconda
 Version: 36.16.5
-Release: 8
+Release: 9
 Summary: Graphical system installer
 License: GPLv2+ and MIT
 URL:     http://fedoraproject.org/wiki/Anaconda
@@ -32,6 +32,7 @@ Patch9015:    bugfix-change-gnome-kiosk-to-use-metacity.patch
 Patch9016:    bugfix-add-log-and-background.patch
 Patch9017:    bugfix-add-SM3-with-tui.patch
 Patch9018:    bugfix-change-product-name-do-not-with-upper.patch
+Patch9019:    bugfix-adapt-active-connection-without-interface-name.patch
 
 %define dasbusver 1.3
 %define dbusver 1.2.3
@@ -270,6 +271,12 @@ update-desktop-database &> /dev/null || :
 %{_prefix}/libexec/anaconda/dd_*
 
 %changelog
+* Wed Dec 14 2022 sunhai <sunhai10@huawei.com> - 36.16.5-9
+- Type:bugfix
+- ID:NA
+- SUG:NA
+- DESC:adapt active connection without interface name
+
 * Sat Dec 10 2022 sunhai <sunhai10@huawei.com> - 36.16.5-8
 - Type:bugfix
 - ID:NA
