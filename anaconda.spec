@@ -1,7 +1,7 @@
 %define _empty_manifest_terminate_build 0
 Name:    anaconda
 Version: 36.16.5
-Release: 9
+Release: 10
 Summary: Graphical system installer
 License: GPLv2+ and MIT
 URL:     http://fedoraproject.org/wiki/Anaconda
@@ -271,6 +271,12 @@ update-desktop-database &> /dev/null || :
 %{_prefix}/libexec/anaconda/dd_*
 
 %changelog
+* Thu Dec 15 2022 sunhai <sunhai10@huawei.com> - 36.16.5-10
+- Type:bugfix
+- ID:NA
+- SUG:NA
+- DESC:fix conf of storage
+
 * Wed Dec 14 2022 sunhai <sunhai10@huawei.com> - 36.16.5-9
 - Type:bugfix
 - ID:NA
