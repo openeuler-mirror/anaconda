@@ -1,7 +1,7 @@
 %define _empty_manifest_terminate_build 0
 Name:    anaconda
 Version: 36.16.5
-Release: 10
+Release: 11
 Summary: Graphical system installer
 License: GPLv2+ and MIT
 URL:     http://fedoraproject.org/wiki/Anaconda
@@ -271,6 +271,14 @@ update-desktop-database &> /dev/null || :
 %{_prefix}/libexec/anaconda/dd_*
 
 %changelog
+* Tue Dec 20 2022 Qingqing Li <liqingqing3@huawei.com> - 36.16.5-11
+- Type:feature
+- ID:NA
+- SUG:NA
+- DESC:cgroup files is a additional enhanced cgroup feature, which will
+       limit cgroup opened files, add cgroup_disable=files to
+       default cmdline to disable this feature to keep cgroup's default behavior.
+
 * Thu Dec 15 2022 sunhai <sunhai10@huawei.com> - 36.16.5-10
 - Type:bugfix
 - ID:NA
