@@ -1,0 +1,26 @@
+From ade550fb89b10cf218ce96541e1c540a2a8a7ea1 Mon Sep 17 00:00:00 2001
+From: sun_hai_10 <sunha10@huawei.com>
+Date: Wed, 14 Dec 2022 11:04:41 +0800
+Subject: [PATCH] adapt active connection without interface-name
+
+---
+ pyanaconda/modules/network/initialization.py | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/pyanaconda/modules/network/initialization.py b/pyanaconda/modules/network/initialization.py
+index c7f0ba4..85a1da7 100644
+--- a/pyanaconda/modules/network/initialization.py
++++ b/pyanaconda/modules/network/initialization.py
+@@ -135,6 +135,9 @@ class ApplyKickstartTask(Task):
+     def _find_initramfs_connection_of_iface(self, iface):
+         device = self._nm_client.get_device_by_iface(iface)
+         if device:
++            active_connection = device.get_active_connection()
++            if active_connection:
++                return active_connection.get_connection()
+             cons = device.get_available_connections()
+             for con in cons:
+                 if con.get_interface_name() == iface and con.get_id() == iface:
+-- 
+2.23.0
+
