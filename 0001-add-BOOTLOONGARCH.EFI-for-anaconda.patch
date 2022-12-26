@@ -1,0 +1,27 @@
+From 68f419af3298ddce903b2942eae815820f2f7cc8 Mon Sep 17 00:00:00 2001
+From: Wenlong Zhang <zhangwenlong@loongson.cn>
+Date: Thu, 10 Nov 2022 06:23:58 +0000
+Subject: [PATCH] add BOOTLOONGARCH.EFI for anaconda
+
+---
+ pyanaconda/modules/storage/bootloader/efi.py | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/pyanaconda/modules/storage/bootloader/efi.py b/pyanaconda/modules/storage/bootloader/efi.py
+index 826e6bd..167a21c 100644
+--- a/pyanaconda/modules/storage/bootloader/efi.py
++++ b/pyanaconda/modules/storage/bootloader/efi.py
+@@ -187,6 +187,10 @@ class LOONGARCHEFIGRUB(EFIGRUB):
+         if rc:
+             raise BootLoaderError("Failed to set new efi boot target. This is most "
+                                   "likely a kernel or firmware bug.")
++        rc = util.execInSysroot("cp", ["-a", "/boot/efi/EFI/openEuler/" + self._efi_binary, "/boot/efi/EFI/BOOT/" + "BOOTLOONGARCH.EFI"])
++        if rc:
++            raise BootLoaderError("Failed to set new efi boot target for new BIOS. This is most "
++                                  "likely a kernel or firmware bug.")
+ 
+     def add_efi_boot_target(self):
+         if self.stage1_device.type == "partition":  # pylint: disable=no-member
+-- 
+2.33.0
+
