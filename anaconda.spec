@@ -1,7 +1,7 @@
 %define _empty_manifest_terminate_build 0
 Name:    anaconda
 Version: 36.16.5
-Release: 12
+Release: 13
 Summary: Graphical system installer
 License: GPLv2+ and MIT
 URL:     http://fedoraproject.org/wiki/Anaconda
@@ -10,6 +10,13 @@ Source1: openeuler.conf
 Source2: euleros.conf
 Source3: hce.conf
 Source4: disable-disk-encryption.patch
+
+%ifarch sw_64
+Patch6001:    anaconda-33.19.sw.patch
+%endif
+%ifarch loongarch64
+Patch6002:    0001-add-loongarch-support-for-anaconda.patch
+%endif
 
 Patch9000:    add-passwd-policy.patch
 Patch9001:    bugfix-GUI-nfs-unknown-error.patch
@@ -33,13 +40,6 @@ Patch9016:    bugfix-add-log-and-background.patch
 Patch9017:    bugfix-add-SM3-with-tui.patch
 Patch9018:    bugfix-change-product-name-do-not-with-upper.patch
 Patch9019:    bugfix-adapt-active-connection-without-interface-name.patch
-
-%ifarch sw_64
-Patch6001:    anaconda-33.19.sw.patch
-%endif
-%ifarch loongarch64
-Patch6002:    0001-add-loongarch-support-for-anaconda.patch
-%endif
 
 %define dasbusver 1.3
 %define dbusver 1.2.3
@@ -278,6 +278,12 @@ update-desktop-database &> /dev/null || :
 %{_prefix}/libexec/anaconda/dd_*
 
 %changelog
+* Tue Dec 27 2022 Chenxi Mao <chenxi.mao@suse.com> - 36.16.5-13
+- Type:bugfix
+- ID:NA
+- SUG:NA
+- DESC: Change patch sequence.
+
 * Mon Dec 26 2022 fengtao <fengtao40@huawei.com> - 36.16.5-12
 - Type:feature
 - ID:NA
