@@ -1,0 +1,55 @@
+From a51887f5a1d5473784ad5494e39ddc6f55324a2e Mon Sep 17 00:00:00 2001
+From: yaoguangzhong <yaoguangzhong@xfusion.com>
+Date: Tue, 13 Dec 2022 17:10:53 +0800
+Subject: [PATCH] translate the tips about expected capacity into Chinese
+
+---
+ po/zh_CN.po | 25 +++++++++++++++++++++++++
+ 1 file changed, 25 insertions(+)
+
+diff --git a/po/zh_CN.po b/po/zh_CN.po
+index 92b9084..a208c70 100644
+--- a/po/zh_CN.po
++++ b/po/zh_CN.po
+@@ -268,6 +268,25 @@ msgid ""
+ "disk below."
+ msgstr "请为 %(container_type)s 起个名字然后从下方至少选择一个磁盘。"
+ 
++#: pyanaconda/ui/gui/spokes/lib/custom_storage_helpers.py:53
++msgid ""
++"Specify the Desired Capacity in whole or decimal numbers, with an appropriate unit.\n\n"
++"Spaces separating digit groups are not allowed. Units consist of a decimal or binary "
++"prefix, and optionally the letter B. Letter case does not matter for units. The default "
++"unit used when units are left out is MiB.\n\n"
++"Examples of valid input:\n"
++"'100 GiB' = 100 gibibytes\n"
++"'512m' = 512 megabytes\n"
++"'123456789' = 123 terabytes and a bit less than a half\n"
++msgstr ""
++"以整数或十进制数字指定所需容量，并使用适当的单位。\n\n"
++"不允许使用空格分隔数字组。 单位由十进制或二进制前缀和可选的字母 B 组成。"
++"字母大小写与单位无关。默认省略单位时使用的单位是 MiB。\n\n"
++"有效输入示例:\n"
++"'100 GiB'=100 GB\n"
++"'512 MiB'=512 MB\n"
++"'123456789 MiB' = 123 TB 不到一半\n"
++
+ #: pyanaconda/ui/gui/spokes/lib/custom_storage_helpers.py:57
+ #: pyanaconda/ui/gui/spokes/lib/custom_storage_helpers.py:60
+ msgid "Volume Group"
+@@ -978,6 +997,12 @@ msgid ""
+ msgstr ""
+ "检查存储配置时出现警告。<a href=\"\">点击查看详情</a>或再次按完成按钮继续。"
+ 
++#: pyanaconda/ui/gui/spokes/custom_storage.py:1574
++msgid ""
++"Invalid input. Specify the Desired Capacity in whole or decimal numbers, "
++"with an appropriate unit."
++msgstr "输入无效。以整数或小数形式指定所需容量，并使用适当的单位。"
++
+ #: pyanaconda/ui/gui/spokes/blivet_gui.py:318
+ #: pyanaconda/ui/gui/spokes/custom_storage.py:1770
+ msgid ""
+-- 
+2.27.0
+
