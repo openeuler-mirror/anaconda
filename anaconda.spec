@@ -1,7 +1,7 @@
 %define _empty_manifest_terminate_build 0
 Name:    anaconda
 Version: 33.19
-Release: 51
+Release: 52
 Summary: Graphical system installer
 License: GPLv2+ and MIT
 URL:     http://fedoraproject.org/wiki/Anaconda
@@ -27,7 +27,9 @@ Patch9012:    modify-default-timezone.patch
 Patch9013:    modify-network-hostname-dot-illegal.patch
 Patch9014:    disable-ssh-login-checkbox.patch
 Patch9016:    bugfix-fix-password-policy.patch
+%if ! 0%{?openEuler}
 Patch9018:    disable-disk-encryption.patch
+%endif
 Patch9019:    bugfix-set-up-LD_PRELOAD-for-the-Storage-and-Services-module.patch
 Patch9020:    bugfix-Propagate-a-lazy-proxy-of-the-storage-model.patch
 
@@ -137,6 +139,11 @@ Patch6087:    0001-add-BOOTLOONGARCH.EFI-for-anaconda.patch
 
 Patch6088:    backport-Round-the-required-device-size-up.patch
 Patch6089:    backport-Run-restorecon-in-chroot-when-handling-home-dirs.patch
+Patch6090:    backport-dracut-handle-compressed-kernel-modules.patch
+Patch6091:    backport-network-use-separate-main-conext-for-NM-client-in-threads.patch
+
+Patch9031:    bugfix-translate-the-prompt-information-of-hostname-.patch
+Patch9032:    bugfix-translate-the-tips-about-expected-capacity-into-Chin.patch
 
 %define dbusver 1.2.3
 %define dnfver 3.6.0
@@ -215,9 +222,7 @@ Obsoletes: booty <= 0.107-1
 # that doesn't work with btrfs subvolumes correctly...
 Conflicts: grubby < 8.40-10
 
-%ifarch %{ix86} x86_64
 Requires: usermode
-%endif
 
 %description core
 The anaconda-core package contains the program which was used to install your
@@ -376,6 +381,12 @@ update-desktop-database &> /dev/null || :
 %{_prefix}/libexec/anaconda/dd_*
 
 %changelog
+* Tue Jan 03 2023 sunhai <sunhai10@huawei.com> - 33.19-52
+- Type:bugfix
+- CVE:NA
+- SUG:NA
+- DESC:sync patches
+
 * Thu Nov 10 2022 Wenlong Zhang <zhangwenlong@loongson.cn> - 33.19-51
 - ID:NA
 - SUG:NA
