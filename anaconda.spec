@@ -1,7 +1,7 @@
 %define _empty_manifest_terminate_build 0
 Name:    anaconda
 Version: 33.19
-Release: 52
+Release: 53
 Summary: Graphical system installer
 License: GPLv2+ and MIT
 URL:     http://fedoraproject.org/wiki/Anaconda
@@ -56,7 +56,7 @@ Patch6017:    ntp-servers-improve-008-Use-the-structure-for-time-sources-in-TUI.
 Patch6018:    ntp-servers-improve-009-Use-the-structure-for-time-sources-in-GUI.patch
 Patch6019:    ntp-servers-improve-010-Add-support-for-the-timesource-kickstart-command.patch
 
-Patch9024:    Change-length-limit-of-hostname-from-255-to-64.patch
+Patch9024:    backport-Use-Linux-HOST_NAME_MAX-hostname-length-limit.patch
 Patch9025:    Change-topbar-background-size.patch
 
 Patch6020:    bugfix-Schedule-timed-actions-with-the-right-selector-18516.patch
@@ -144,6 +144,9 @@ Patch6091:    backport-network-use-separate-main-conext-for-NM-client-in-threads
 
 Patch9031:    bugfix-translate-the-prompt-information-of-hostname-.patch
 Patch9032:    bugfix-translate-the-tips-about-expected-capacity-into-Chin.patch
+
+Patch6092:    backport-Fix-the-mock-function-for-DBus-get_proxy.patch
+Patch9033:    bugfix-ignore-blivet_gui-in-create_rpm_test.patch
 
 %define dbusver 1.2.3
 %define dnfver 3.6.0
@@ -381,6 +384,12 @@ update-desktop-database &> /dev/null || :
 %{_prefix}/libexec/anaconda/dd_*
 
 %changelog
+* Thu Jan 05 2023 sunhai <sunhai10@huawei.com> - 33.19-53
+- Type:bugfix
+- CVE:NA
+- SUG:NA
+- DESC:fix tests with password timezone and hostname
+
 * Tue Jan 03 2023 sunhai <sunhai10@huawei.com> - 33.19-52
 - Type:bugfix
 - CVE:NA

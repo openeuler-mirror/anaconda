@@ -7,7 +7,8 @@ Subject: [PATCH] modify default timezone
  pyanaconda/modules/timezone/installation.py | 4 ++--
  pyanaconda/modules/timezone/timezone.py     | 2 +-
  pyanaconda/ui/gui/spokes/datetime_spoke.py  | 2 +-
- 3 files changed, 4 insertions(+), 4 deletions(-)
+ tests/nosetests/pyanaconda_tests/module_timezone_test.py | 10 +++++-----
+ 4 files changed, 9 insertions(+), 9 deletions(-)
 
 diff --git a/pyanaconda/modules/timezone/installation.py b/pyanaconda/modules/timezone/installation.py
 index 6383df1..9c6ae40 100644
@@ -50,6 +51,51 @@ index 00b1bd9..f01d245 100644
  
  SPLIT_NUMBER_SUFFIX_RE = re.compile(r'([^0-9]*)([-+])([0-9]+)')
  
+diff --git a/tests/nosetests/pyanaconda_tests/module_timezone_test.py b/tests/nosetests/pyanaconda_tests/module_timezone_test.py
+index dab857e..ca47f12 100644
+--- a/tests/nosetests/pyanaconda_tests/module_timezone_test.py
++++ b/tests/nosetests/pyanaconda_tests/module_timezone_test.py
+@@ -116,7 +116,7 @@ class TimezoneInterfaceTestCase(unittest.TestCase):
+         ks_in = None
+         ks_out = """
+         # System timezone
+-        timezone America/New_York
++        timezone Asia/Shanghai
+         """
+         self._test_kickstart(ks_in, ks_out)
+ 
+@@ -242,7 +242,7 @@ class TimezoneInterfaceTestCase(unittest.TestCase):
+ 
+         # ConfigureTimezoneTask
+         obj = task_objs[0]
+-        self.assertEqual(obj.implementation._timezone, "America/New_York")
++        self.assertEqual(obj.implementation._timezone, "Asia/Shanghai")
+         self.assertEqual(obj.implementation._is_utc, False)
+         # ConfigureNTPTask
+         obj = task_objs[1]
+@@ -358,19 +358,19 @@ class TimezoneTasksTestCase(unittest.TestCase):
+                                    input_isutc=True,
+                                    make_adjtime=True,
+                                    make_zoneinfo=True,
+-                                   expected_symlink="../usr/share/zoneinfo/America/New_York",
++                                   expected_symlink="../usr/share/zoneinfo/Asia/Shanghai",
+                                    expected_adjtime_last_line="UTC")
+         self._test_timezone_inputs(input_zone="BahBlah",
+                                    input_isutc=True,
+                                    make_adjtime=True,
+                                    make_zoneinfo=True,
+-                                   expected_symlink="../usr/share/zoneinfo/America/New_York",
++                                   expected_symlink="../usr/share/zoneinfo/Asia/Shanghai",
+                                    expected_adjtime_last_line="UTC")
+         self._test_timezone_inputs(input_zone=None,
+                                    input_isutc=True,
+                                    make_adjtime=True,
+                                    make_zoneinfo=True,
+-                                   expected_symlink="../usr/share/zoneinfo/America/New_York",
++                                   expected_symlink="../usr/share/zoneinfo/Asia/Shanghai",
+                                    expected_adjtime_last_line="UTC")
+ 
+     @patch('pyanaconda.modules.timezone.installation.arch.is_s390', return_value=True)
 -- 
 2.23.0
 

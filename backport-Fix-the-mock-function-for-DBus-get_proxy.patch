@@ -1,0 +1,26 @@
+From 99418d24d4be625a04b5c9bf66a903394628552f Mon Sep 17 00:00:00 2001
+From: Vendula Poncova <vponcova@redhat.com>
+Date: Wed, 17 Jun 2020 12:33:33 +0200
+Subject: [PATCH] Fix the mock function for DBus.get_proxy
+
+The function should be able to accept other arguments.
+
+Conflict:NA
+Reference:https://github.com/rhinstaller/anaconda/commit/99418d24d4be625a04b5c9bf66a903394628552f
+---
+ tests/nosetests/pyanaconda_tests/__init__.py | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/tests/nosetests/pyanaconda_tests/__init__.py b/tests/nosetests/pyanaconda_tests/__init__.py
+index 0767d57da8f..4d844d51052 100644
+--- a/tests/nosetests/pyanaconda_tests/__init__.py
++++ b/tests/nosetests/pyanaconda_tests/__init__.py
+@@ -280,7 +280,7 @@ def patch_dbus_get_proxy_with_cache(func):
+     """
+     proxies = defaultdict(Mock)
+ 
+-    def mock_get(service_name, object_path):
++    def mock_get(service_name, object_path, *args, **kwargs):
+         return proxies[(service_name, object_path)]
+ 
+     return patch('pyanaconda.core.dbus.DBus.get_proxy', side_effect=mock_get)(func)

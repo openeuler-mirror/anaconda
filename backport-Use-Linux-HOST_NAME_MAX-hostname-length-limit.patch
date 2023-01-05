@@ -1,0 +1,44 @@
+From 078ef68ff8cc35c4535af43017dd0a7c4d6e63d5 Mon Sep 17 00:00:00 2001
+From: xiaqirong <xiaqirong1@huawei.com>
+Date: Thu, 10 Dec 2020 22:51:38 +0800
+Subject: [PATCH] Use Linux HOST_NAME_MAX hostname length limit
+
+Conflict:NA
+Reference:https://github.com/rhinstaller/anaconda/commit/078ef68ff8cc35c4535af43017dd0a7c4d6e63d5
+---
+ pyanaconda/network.py                            | 4 ++--
+ tests/nosetests/pyanaconda_tests/network_test.py | 6 +++---
+ 2 files changed, 5 insertions(+), 5 deletions(-)
+
+diff --git a/pyanaconda/network.py b/pyanaconda/network.py
+index d3ecf391cf0..23021cfb43a 100644
+--- a/pyanaconda/network.py
++++ b/pyanaconda/network.py
+@@ -109,8 +109,8 @@ def is_valid_hostname(hostname, local=False):
+     if not hostname:
+         return (False, _("Host name cannot be None or an empty string."))
+ 
+-    if len(hostname) > 255:
+-        return (False, _("Host name must be 255 or fewer characters in length."))
++    if len(hostname) > 64:
++        return (False, _("Host name must be 64 or fewer characters in length."))
+ 
+     if local and hostname[-1] == ".":
+         return (False, _("Local host name must not end with period '.'."))
+diff --git a/tests/nosetests/pyanaconda_tests/network_test.py b/tests/nosetests/pyanaconda_tests/network_test.py
+index 161e883ff5b..7cfd78ec678 100644
+--- a/tests/nosetests/pyanaconda_tests/network_test.py
++++ b/tests/nosetests/pyanaconda_tests/network_test.py
+@@ -32,9 +32,9 @@ def is_valid_hostname_test(self):
+         self.assertTrue(network.is_valid_hostname("h"*63)[0])
+         self.assertFalse(network.is_valid_hostname("h"*64)[0])
+ 
+-        # length < 256
+-        self.assertTrue(network.is_valid_hostname("section." * 31+"section")[0])
+-        self.assertFalse(network.is_valid_hostname("section." * 31+"sectionx")[0])
++        # length < 65
++        self.assertTrue(network.is_valid_hostname("section." * 7+"sectionx")[0])
++        self.assertFalse(network.is_valid_hostname("section." * 7+"sectionxx")[0])
+ 
+         self.assertFalse(network.is_valid_hostname(
+             "section.must.be..nonempty.")[0])
