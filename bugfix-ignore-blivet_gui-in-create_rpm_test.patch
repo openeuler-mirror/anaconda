@@ -1,0 +1,25 @@
+From 98d8f4f8277e0a83da866fa114d6e86c8035101d Mon Sep 17 00:00:00 2001
+From: zhangqiumiao <zhangqiumiao1@huawei.com>
+Date: Wed, 18 May 2022 14:42:07 +0800
+Subject: [PATCH 4/4] ignore blivet_gui in create_rpm_test
+
+---
+ tests/rpm_tests/create_rpm_test.py | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/tests/rpm_tests/create_rpm_test.py b/tests/rpm_tests/create_rpm_test.py
+index f252de1..5be193f 100644
+--- a/tests/rpm_tests/create_rpm_test.py
++++ b/tests/rpm_tests/create_rpm_test.py
+@@ -24,7 +24,7 @@ from tests.rpm_tests import RPMTestCase
+ 
+ 
+ # list of source files which should be ignored in tests
+-IGNORED_SOURCE_FILES = []
++IGNORED_SOURCE_FILES = ['pyanaconda/ui/gui/spokes/blivet_gui.py']
+ 
+ 
+ class InstallRPMTestCase(RPMTestCase):
+-- 
+2.27.0
+
