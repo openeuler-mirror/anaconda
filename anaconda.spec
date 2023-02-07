@@ -1,7 +1,7 @@
 %define _empty_manifest_terminate_build 0
 Name:    anaconda
 Version: 33.19
-Release: 53
+Release: 54
 Summary: Graphical system installer
 License: GPLv2+ and MIT
 URL:     http://fedoraproject.org/wiki/Anaconda
@@ -147,6 +147,8 @@ Patch9032:    bugfix-translate-the-tips-about-expected-capacity-into-Chin.patch
 
 Patch6092:    backport-Fix-the-mock-function-for-DBus-get_proxy.patch
 Patch9033:    bugfix-ignore-blivet_gui-in-create_rpm_test.patch
+
+Patch6093:    backport-Ignore-SIGINT-in-D-Bus-launcher-and-x11-too.patch
 
 %define dbusver 1.2.3
 %define dnfver 3.6.0
@@ -384,6 +386,12 @@ update-desktop-database &> /dev/null || :
 %{_prefix}/libexec/anaconda/dd_*
 
 %changelog
+* Tue Feb 07 2023 sunhai <sunhai10@huawei.com> - 33.19-54
+- Type:bugfix
+- CVE:NA
+- SUG:NA
+- DESC:Ignore SIGINT-in with DBus launcher and x11 too
+
 * Thu Jan 05 2023 sunhai <sunhai10@huawei.com> - 33.19-53
 - Type:bugfix
 - CVE:NA
