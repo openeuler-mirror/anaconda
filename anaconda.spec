@@ -1,7 +1,7 @@
 %define _empty_manifest_terminate_build 0
 Name:    anaconda
 Version: 36.16.5
-Release: 13
+Release: 14
 Summary: Graphical system installer
 License: GPLv2+ and MIT
 URL:     http://fedoraproject.org/wiki/Anaconda
@@ -23,9 +23,7 @@ Patch9001:    bugfix-GUI-nfs-unknown-error.patch
 Patch9002:    bugfix-set-up-LD_PRELOAD-for-the-Storage-and-Services-module.patch
 Patch9003:    bugfix-Solve-the-problem-that-the-circular-loading-progress-bar-does-not-rotate.patch
 Patch9004:    change-inst-repo-default-value.patch
-%if ! 0%{?openEuler}
 Patch9005:    disable-disk-encryption.patch
-%endif
 Patch9006:    disable-ssh-login-checkbox.patch
 Patch9007:    fix-hostname-info.patch
 Patch9008:    hide-help-button.patch
@@ -40,6 +38,8 @@ Patch9016:    bugfix-add-log-and-background.patch
 Patch9017:    bugfix-add-SM3-with-tui.patch
 Patch9018:    bugfix-change-product-name-do-not-with-upper.patch
 Patch9019:    bugfix-adapt-active-connection-without-interface-name.patch
+
+Patch9020:    bugfix-password-tooltip-text-adapt-language.patch
 
 %define dasbusver 1.3
 %define dbusver 1.2.3
@@ -278,6 +278,13 @@ update-desktop-database &> /dev/null || :
 %{_prefix}/libexec/anaconda/dd_*
 
 %changelog
+* Fri Feb 24 2023 sunhai <sunhai10@huawei.com> - 36.16.5-14
+- Type:bugfix
+- ID:NA
+- SUG:NA
+- DESC: backport password tooltip text adapt language
+        close disk encryption
+
 * Tue Dec 27 2022 Chenxi Mao <chenxi.mao@suse.com> - 36.16.5-13
 - Type:bugfix
 - ID:NA
