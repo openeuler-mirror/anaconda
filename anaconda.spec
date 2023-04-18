@@ -1,7 +1,7 @@
 %define _empty_manifest_terminate_build 0
 Name:    anaconda
 Version: 36.16.5
-Release: 14
+Release: 15
 Summary: Graphical system installer
 License: GPLv2+ and MIT
 URL:     http://fedoraproject.org/wiki/Anaconda
@@ -164,7 +164,11 @@ runtime on NFS/HTTP/FTP servers or local disks.
 
 %build
 # use actual build-time release number, not tarball creation time release number
+%if "%toolchain" == "clang"
+%configure ANACONDA_RELEASE=%{release} CC=clang
+%else
 %configure ANACONDA_RELEASE=%{release}
+%endif
 %make_build
 
 %install
@@ -278,6 +282,12 @@ update-desktop-database &> /dev/null || :
 %{_prefix}/libexec/anaconda/dd_*
 
 %changelog
+* Tue May 16 2023 Chenxi Mao <chenxi.mao@suse.com> - 36.16.5-15
+- Type:bugfix
+- ID:NA
+- SUG:NA
+- DESC: Support build with clang.
+
 * Fri Feb 24 2023 sunhai <sunhai10@huawei.com> - 36.16.5-14
 - Type:bugfix
 - ID:NA
