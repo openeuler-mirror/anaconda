@@ -1,7 +1,7 @@
 %define _empty_manifest_terminate_build 0
 Name:    anaconda
 Version: 36.16.5
-Release: 14
+Release: 15
 Summary: Graphical system installer
 License: GPLv2+ and MIT
 URL:     http://fedoraproject.org/wiki/Anaconda
@@ -278,6 +278,12 @@ update-desktop-database &> /dev/null || :
 %{_prefix}/libexec/anaconda/dd_*
 
 %changelog
+* Sat Jun 03 2023 sunhai <sunhai10@huawei.com> - 36.16.5-15
+- Type:bugfix
+- ID:NA
+- SUG:NA
+- DESC: fix gui hostname warn info
+
 * Fri Feb 24 2023 sunhai <sunhai10@huawei.com> - 36.16.5-14
 - Type:bugfix
 - ID:NA

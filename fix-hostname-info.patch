@@ -4,19 +4,20 @@ Date: Thu, 18 Jun 2020 17:13:47 +0800
 Subject: [PATCH] fix hostname info
 
 ---
- po/zh_CN.po                | 5 +++--
+ po/zh_CN.po                | 6 +++---
  pyanaconda/core/regexes.py | 2 +-
- pyanaconda/network.py      | 3 ++-
- 3 files changed, 6 insertions(+), 4 deletions(-)
+ pyanaconda/network.py      | 4 ++--
+ 3 files changed, 6 insertions(+), 6 deletions(-)
 
 diff --git a/po/zh_CN.po b/po/zh_CN.po
-index e31f0b2..c02ce1e 100644
+index 18b0925..c2216e6 100644
 --- a/po/zh_CN.po
 +++ b/po/zh_CN.po
-@@ -4090,10 +4090,11 @@ msgstr "本地主机名不能以英文句号“.”结尾。"
+@@ -4089,11 +4089,11 @@ msgstr "本地主机名不能以英文句号“.”结尾。"
+ #: pyanaconda/network.py:119
  msgid ""
  "Host names can only contain the characters 'a-z', 'A-Z', '0-9', '-', or '.', "
- "parts between periods must contain something and cannot start or end with "
+-"parts between periods must contain something and cannot start or end with "
 -"'-'."
 +"parts between periods must contain something being 63 or fewer "
 +"characters and cannot start or end with '.' and '-'."
@@ -41,13 +42,14 @@ index cc00702..388d1ff 100644
  # URL Hostname
  # This matches any hostname, IPv4 literal or properly encased IPv6 literal
 diff --git a/pyanaconda/network.py b/pyanaconda/network.py
-index 38fe957..c52cf1d 100644
+index 38fe957..8f04d63 100644
 --- a/pyanaconda/network.py
 +++ b/pyanaconda/network.py
-@@ -115,7 +115,8 @@ def is_valid_hostname(hostname, local=False):
+@@ -114,8 +114,8 @@ def is_valid_hostname(hostname, local=False):
+     if not re.match('^' + HOSTNAME_PATTERN_WITHOUT_ANCHORS + '$', hostname):
          return (False, _("Host names can only contain the characters 'a-z', "
                           "'A-Z', '0-9', '-', or '.', parts between periods "
-                          "must contain something and cannot start or end with "
+-                         "must contain something and cannot start or end with "
 -                         "'-'."))
 +                         "must contain something being 63 or fewer "
 +                         "characters and cannot start or end with '.' and '-'."))
