@@ -1,0 +1,104 @@
+From d5d6b1498db9f9e3378c11421caa523556c04752 Mon Sep 17 00:00:00 2001
+From: sun_hai_10 <sunhai10@huawei.com>
+Date: Tue, 28 Mar 2023 14:22:39 +0800
+Subject: [PATCH] revert Unify GRUB configuration file location across all platforms
+Reference:https://github.com/rhinstaller/anaconda/commit/15c3b2044367d375db6739e8b8f419ef3e17cae7
+---
+ pyanaconda/modules/storage/bootloader/efi.py  | 38 +------------------
+ .../modules/storage/bootloader/utils.py       |  8 +++-
+ 2 files changed, 9 insertions(+), 37 deletions(-)
+
+diff --git a/pyanaconda/modules/storage/bootloader/efi.py b/pyanaconda/modules/storage/bootloader/efi.py
+index 1b47e24..6135699 100644
+--- a/pyanaconda/modules/storage/bootloader/efi.py
++++ b/pyanaconda/modules/storage/bootloader/efi.py
+@@ -35,11 +35,7 @@ class EFIBase(object):
+     """A base class for EFI-based boot loaders."""
+ 
+     @property
+-    def efi_config_dir(self):
+-        return "/boot/" + self._efi_config_dir
+-
+-    @property
+-    def _efi_config_dir(self):
++    def _config_dir(self):
+         return "efi/EFI/{}".format(conf.bootloader.efi_dir)
+ 
+     def efibootmgr(self, *args, **kwargs):
+@@ -62,7 +58,7 @@ class EFIBase(object):
+ 
+     @property
+     def efi_dir_as_efifs_dir(self):
+-        ret = self._efi_config_dir.replace('efi/', '')
++        ret = self._config_dir.replace('efi/', '')
+         return "\\" + ret.replace('/', '\\')
+ 
+     def _add_single_efi_boot_target(self, partition):
+@@ -164,36 +160,6 @@ class EFIGRUB(EFIBase, GRUB2):
+             return self._packages32 + self._packages_common
+         return self._packages64 + self._packages_common
+ 
+-    @property
+-    def efi_config_file(self):
+-        """ Full path to EFI configuration file. """
+-        return "%s/%s" % (self.efi_config_dir, self._config_file)
+-
+-    def write_config(self):
+-        config_path = "%s%s" % (conf.target.system_root, self.efi_config_file)
+-
+-        with open(config_path, "w") as fd:
+-            grub_dir = self.config_dir
+-            if self.stage2_device.format.type != "btrfs":
+-                fs_uuid = self.stage2_device.format.uuid
+-            else:
+-                fs_uuid = self.stage2_device.format.vol_uuid
+-
+-            if fs_uuid is None:
+-                raise BootLoaderError("Could not get stage2 filesystem UUID")
+-
+-            grub_dir = util.execWithCapture("grub2-mkrelpath", [grub_dir],
+-                                            root=conf.target.system_root)
+-            if not grub_dir:
+-                raise BootLoaderError("Could not get GRUB directory path")
+-
+-            fd.write("search --no-floppy --fs-uuid --set=dev %s\n" % fs_uuid)
+-            fd.write("set prefix=($dev)%s\n" % grub_dir)
+-            fd.write("export $prefix\n")
+-            fd.write("configfile $prefix/grub.cfg\n")
+-
+-        super().write_config()
+-
+ 
+ class Aarch64EFIGRUB(EFIGRUB):
+     _serial_consoles = ["ttyAMA", "ttyS"]
+diff --git a/pyanaconda/modules/storage/bootloader/utils.py b/pyanaconda/modules/storage/bootloader/utils.py
+index 27fc2a0..84e45b6 100644
+--- a/pyanaconda/modules/storage/bootloader/utils.py
++++ b/pyanaconda/modules/storage/bootloader/utils.py
+@@ -19,6 +19,7 @@ import os
+ from glob import glob
+ 
+ from pyanaconda.modules.common.errors.installation import BootloaderInstallationError
++from pyanaconda.modules.storage.bootloader.efi import EFIBase
+ from pyanaconda.modules.storage.bootloader.image import LinuxBootLoaderImage
+ from pyanaconda.core.configuration.anaconda import conf
+ from pyanaconda.core.util import execWithRedirect
+@@ -244,9 +245,14 @@ def create_bls_entries(sysroot, storage, kernel_versions):
+     # Update the bootloader configuration to make sure that the BLS
+     # entries will have the correct kernel cmdline and not the value
+     # taken from /proc/cmdline, that is used to boot the live image.
++    if isinstance(storage.bootloader, EFIBase):
++        grub_cfg_path = "/etc/grub2-efi.cfg"
++    else:
++        grub_cfg_path = "/etc/grub2.cfg"
++
+     rc = execWithRedirect(
+         "grub2-mkconfig",
+-        ["-o", "/etc/grub2.cfg"],
++        ["-o", grub_cfg_path],
+         root=sysroot
+     )
+ 
+-- 
+2.23.0
+

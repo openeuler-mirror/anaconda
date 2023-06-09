@@ -1,0 +1,109 @@
+From 1742188518c9af7e3cd060a26f3a3b1e4cb61e91 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Miro=20Hron=C4=8Dok?= <miro@hroncok.cz>
+Date: Fri, 3 Feb 2023 21:46:15 +0100
+Subject: [PATCH] Sort RPM versions via rpm.labelCompare() and not via
+ packaging.version.LegacyVersion()
+
+Packaging 22+ removed the long-deprecated packaging.version.LegacyVersion class.
+The packaging.version library is intended to parse Python (PEP 440) versions,
+not arbitrary versions and definitively not RPM versions.
+
+Even if LegacyVersion was still available, it may produce incorrect results
+if the version contains ~, ^ or other characters with special meaning in RPM.
+
+This assumes the Python rpm module is always available.
+If that assumption is wrong
+the logic from rpm.labelCompare() needs to be reimplemented instead.
+
+Reference:https://github.com/rhinstaller/anaconda/commit/1742188518c9af7e3cd060a26f3a3b1e4cb61e91
+Conflict:NA
+---
+ pyanaconda/core/payload.py                  |  5 +++++
+ pyanaconda/modules/payloads/base/utils.py   | 13 ++-----------
+ pyanaconda/modules/storage/checker/utils.py |  4 ++--
+ 3 files changed, 9 insertions(+), 13 deletions(-)
+
+diff --git a/pyanaconda/core/payload.py b/pyanaconda/core/payload.py
+index 17277b7..7817150 100644
+--- a/pyanaconda/core/payload.py
++++ b/pyanaconda/core/payload.py
+@@ -15,11 +15,16 @@
+ # License and may only be used or replicated with the express permission of
+ # Red Hat, Inc.
+ #
++from functools import cmp_to_key
+ from urllib.parse import quote, unquote
+ 
++import rpm
++
+ from pyanaconda.core.i18n import _
+ from pyanaconda.core.regexes import URL_PARSE
+ 
++rpm_version_key = cmp_to_key(rpm.labelCompare)
++
+ 
+ def parse_nfs_url(nfs_url):
+     """Parse NFS URL into components.
+diff --git a/pyanaconda/modules/payloads/base/utils.py b/pyanaconda/modules/payloads/base/utils.py
+index 738ae66..5f19b57 100644
+--- a/pyanaconda/modules/payloads/base/utils.py
++++ b/pyanaconda/modules/payloads/base/utils.py
+@@ -17,13 +17,11 @@
+ # License and may only be used or replicated with the express permission of
+ # Red Hat, Inc.
+ #
+-import functools
+ import os
+ import stat
+ 
+-from packaging.version import LegacyVersion as parse_version
+-
+ from pyanaconda.anaconda_loggers import get_module_logger
++from pyanaconda.core.payload import rpm_version_key
+ log = get_module_logger(__name__)
+ 
+ 
+@@ -70,11 +68,4 @@ def get_dir_size(directory):
+ 
+ def sort_kernel_version_list(kernel_version_list):
+     """Sort the given kernel version list."""
+-    kernel_version_list.sort(key=functools.cmp_to_key(_compare_versions))
+-
+-
+-def _compare_versions(v1, v2):
+-    """Compare two version number strings."""
+-    first_version = parse_version(v1)
+-    second_version = parse_version(v2)
+-    return (first_version > second_version) - (first_version < second_version)
++    kernel_version_list.sort(key=rpm_version_key)
+diff --git a/pyanaconda/modules/storage/checker/utils.py b/pyanaconda/modules/storage/checker/utils.py
+index 180c351..9ccd398 100644
+--- a/pyanaconda/modules/storage/checker/utils.py
++++ b/pyanaconda/modules/storage/checker/utils.py
+@@ -20,7 +20,6 @@ gi.require_version("BlockDev", "2.0")
+ from gi.repository import BlockDev as blockdev
+ 
+ from collections import defaultdict
+-from packaging.version import LegacyVersion as parse_version
+ 
+ from blivet import arch, util
+ from blivet.devicefactory import get_device_type
+@@ -34,6 +33,7 @@ from pyanaconda.core.constants import productName, STORAGE_REFORMAT_BLOCKLIST, \
+     STORAGE_LUKS2_MIN_RAM, STORAGE_ROOT_DEVICE_TYPES, STORAGE_REQ_PARTITION_SIZES, \
+     STORAGE_MUST_NOT_BE_ON_ROOT
+ from pyanaconda.core.i18n import _
++from pyanaconda.core.payload import rpm_version_key
+ from pyanaconda.core.storage import DEVICE_TEXT_MAP
+ from pyanaconda.modules.storage.platform import platform
+ 
+@@ -259,7 +259,7 @@ def _check_opal_firmware_kernel_version(detected_version, required_version):
+     """
+     try:
+         if detected_version and required_version:
+-            return parse_version(detected_version) >= parse_version(required_version)
++            return rpm_version_key(detected_version) >= rpm_version_key(required_version)
+     except Exception as e:  # pylint: disable=broad-except
+         log.warning("Couldn't check the firmware kernel version: %s", str(e))
+ 
+-- 
+2.23.0

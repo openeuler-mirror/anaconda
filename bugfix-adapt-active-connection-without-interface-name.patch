@@ -11,9 +11,9 @@ diff --git a/pyanaconda/modules/network/initialization.py b/pyanaconda/modules/n
 index c7f0ba4..85a1da7 100644
 --- a/pyanaconda/modules/network/initialization.py
 +++ b/pyanaconda/modules/network/initialization.py
-@@ -135,6 +135,9 @@ class ApplyKickstartTask(Task):
-     def _find_initramfs_connection_of_iface(self, iface):
-         device = self._nm_client.get_device_by_iface(iface)
+@@ -136,6 +136,9 @@ class ApplyKickstartTask(Task):
+     def _find_initramfs_connection_of_iface(self, nm_client, iface):
+         device = nm_client.get_device_by_iface(iface)
          if device:
 +            active_connection = device.get_active_connection()
 +            if active_connection:

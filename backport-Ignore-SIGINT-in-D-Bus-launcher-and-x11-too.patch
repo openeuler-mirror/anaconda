@@ -1,0 +1,76 @@
+From d8060d01a01e3d5b187ae4388f10b0d0c2c0c4f3 Mon Sep 17 00:00:00 2001
+From: iasunsea <iasunsea@sina.com>
+Date: Tue, 6 Dec 2022 18:24:50 +0800
+Subject: [PATCH] Ignore SIGINT in D-Bus launcher and x11 too
+
+When we do install, especially use TUI to install, we some time have take
+a mistake to put "CTRL+C", then there will be stop with traceback. And we
+know the main process have shielded SIGINT, so we to shield subprocesses also.
+
+Conflict:NA
+Reference:https://github.com/rhinstaller/anaconda/commit/d8060d01a01e3d5b187ae4388f10b0d0c2c0c4f3
+---
+ pyanaconda/core/startup/dbus_launcher.py | 6 ++++++
+ pyanaconda/display.py                    | 8 +++++++-
+ 2 files changed, 13 insertions(+), 1 deletion(-)
+
+diff --git a/pyanaconda/core/startup/dbus_launcher.py b/pyanaconda/core/startup/dbus_launcher.py
+index 2881c28..a866df0 100644
+--- a/pyanaconda/core/startup/dbus_launcher.py
++++ b/pyanaconda/core/startup/dbus_launcher.py
+@@ -24,6 +24,7 @@
+ # Author(s):  Jiri Konecny <jkonecny@redhat.com>
+ #
+ import os
++import signal
+ from subprocess import TimeoutExpired
+ 
+ from pyanaconda.core.configuration.anaconda import conf
+@@ -109,6 +110,10 @@ class AnacondaDBusLauncher(object):
+             "--syslog",
+             "--config-file={}".format(ANACONDA_BUS_CONF_FILE)
+         ]
++        
++        def dbus_preexec():
++            # to set dbus subprocess SIGINT handler
++            signal.signal(signal.SIGINT, signal.SIG_IGN)
+ 
+         self._log_file = open('/tmp/dbus.log', 'a')
+         self._dbus_daemon_process = startProgram(
+@@ -117,6 +122,7 @@ class AnacondaDBusLauncher(object):
+             env_add={"LANG": DEFAULT_LANG},
+             env_prune=["LANGUAGE", "LC_ALL", "LC_MESSAGES"],
+             reset_lang=False,
++            preexec_fn=dbus_preexec
+         )
+ 
+         if self._dbus_daemon_process.poll() is not None:
+diff --git a/pyanaconda/display.py b/pyanaconda/display.py
+index ddf24fb..ed163e7 100644
+--- a/pyanaconda/display.py
++++ b/pyanaconda/display.py
+@@ -24,6 +24,7 @@ import subprocess
+ import time
+ import textwrap
+ import pkgutil
++import signal
+ 
+ from pyanaconda.core.configuration.anaconda import conf
+ from pyanaconda.core.process_watchers import WatchProcesses
+@@ -192,8 +193,13 @@ def do_startup_x11_actions():
+     else:
+         xdg_data_dirs = datadir + '/window-manager:/usr/share'
+ 
++    def x11_preexec():
++        # to set GUI subprocess SIGINT handler
++        signal.signal(signal.SIGINT, signal.SIG_IGN)
++
+     childproc = util.startProgram(["metacity", "--display", ":1", "--sm-disable"],
+-                                  env_add={'XDG_DATA_DIRS': xdg_data_dirs})
++                                  env_add={'XDG_DATA_DIRS': xdg_data_dirs},
++                                  preexec_fn=x11_preexec)
+     WatchProcesses.watch_process(childproc, "metacity")
+ 
+ 
+-- 
+2.23.0
