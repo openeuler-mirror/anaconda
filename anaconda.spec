@@ -1,7 +1,7 @@
 %define _empty_manifest_terminate_build 0
 Name:    anaconda
 Version: 36.16.5
-Release: 15
+Release: 16
 Summary: Graphical system installer
 License: GPLv2+ and MIT
 URL:     http://fedoraproject.org/wiki/Anaconda
@@ -37,6 +37,12 @@ Patch9015:    bugfix-change-gnome-kiosk-to-use-metacity.patch
 Patch9016:    bugfix-add-log-and-background.patch
 Patch9017:    bugfix-add-SM3-with-tui.patch
 Patch9018:    bugfix-change-product-name-do-not-with-upper.patch
+
+Patch6003:    backport-dracut-handle-compressed-kernel-modules.patch
+Patch6004:    backport-Ignore-SIGINT-in-D-Bus-launcher-and-x11-too.patch
+Patch6005:    backport-network-use-separate-main-conext-for-NM-client-in-threads.patch
+Patch6006:    backport-Sort-RPM-versions-via-rpm.labelCompare-and-not-via-p.patch
+
 Patch9019:    bugfix-adapt-active-connection-without-interface-name.patch
 
 Patch9020:    bugfix-password-tooltip-text-adapt-language.patch
@@ -278,6 +284,15 @@ update-desktop-database &> /dev/null || :
 %{_prefix}/libexec/anaconda/dd_*
 
 %changelog
+* Fri Jun 09 2023 sunhai <sunhai10@huawei.com> - 36.16.5-16
+- Type:bugfix
+- ID:NA
+- SUG:NA
+- DESC: Ignore SIGINT in D Bus launcher and x11 too
+        network use separate main conext for NM client in threads
+        dracut handle compressed kernel modules
+        Sort RPM versions via rpm.labelCompare
+
 * Sat Jun 03 2023 sunhai <sunhai10@huawei.com> - 36.16.5-15
 - Type:bugfix
 - ID:NA
