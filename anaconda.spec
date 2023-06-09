@@ -1,7 +1,7 @@
 %define _empty_manifest_terminate_build 0
 Name:    anaconda
 Version: 36.16.5
-Release: 16
+Release: 17
 Summary: Graphical system installer
 License: GPLv2+ and MIT
 URL:     http://fedoraproject.org/wiki/Anaconda
@@ -46,6 +46,8 @@ Patch6006:    backport-Sort-RPM-versions-via-rpm.labelCompare-and-not-via-p.patc
 Patch9019:    bugfix-adapt-active-connection-without-interface-name.patch
 
 Patch9020:    bugfix-password-tooltip-text-adapt-language.patch
+
+Patch9021:    bugfix-revert-Unify-GRUB-configuration-file-location-across-all-platforms.patch
 
 %define dasbusver 1.3
 %define dbusver 1.2.3
@@ -284,6 +286,12 @@ update-desktop-database &> /dev/null || :
 %{_prefix}/libexec/anaconda/dd_*
 
 %changelog
+* Fri Jun 09 2023 sunhai <sunhai10@huawei.com> - 36.16.5-17
+- Type:bugfix
+- ID:NA
+- SUG:NA
+- DESC: set grub configuration file is as original
+
 * Fri Jun 09 2023 sunhai <sunhai10@huawei.com> - 36.16.5-16
 - Type:bugfix
 - ID:NA
