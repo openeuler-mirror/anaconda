@@ -1,0 +1,16 @@
+diff -u -r anaconda-36.16.5/configure anaconda-36.16.5/configure
+--- anaconda-36.16.5/configure	2022-04-12 08:37:20.392510423 +0800
++++ anaconda-36.16.5/configure	2023-07-14 11:23:34.000000000 +0800
+@@ -15536,8 +15536,11 @@
+ SHUT_UP_GCC="-Wno-unused-result"
+ 
+ # Add remaining compiler flags we want to use
+-CFLAGS="$CFLAGS -Wall -Werror $SHUT_UP_GCC -fanalyzer"
++CFLAGS="$CFLAGS -Wall -Werror $SHUT_UP_GCC"
+ 
++if [[ "$CC" != "clang" ]]; then
++	 CFLAGS="$CFLAGS -fanalyzer"
++fi
+ 
+ # Perform arch related tests
+ 
